@@ -34,7 +34,7 @@ export default function QueuePage() {
 
   const handleReady = async (t: QueueTicket) => {
     await setQueueStatus(t.id, 'READY')
-    callQueueNumber(t.queue_number)
+    callQueueNumber(t.queue_number, settings.queue_call_text)
     reload()
   }
 

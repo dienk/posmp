@@ -85,6 +85,7 @@ export function seedDatabase(db: Database): void {
     ['module_marketplace', '1'],
     ['module_queue', '1'],
     ['points_per_amount', '1000'], // 1 poin per Rp1.000
+    ['queue_call_text', 'Nomor antrian {no}, silakan diambil.'],
   ]
   for (const [key, value] of settings) {
     db.run('INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?)', [key, value])

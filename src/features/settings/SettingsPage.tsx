@@ -4,6 +4,7 @@ import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { getOutlet, saveSettings } from './settingsRepository'
 import { defaultTax } from '../taxes/taxesRepository'
+import { callQueueNumber, DEFAULT_QUEUE_CALL_TEXT } from '../../lib/tts'
 
 const MODULES: { key: string; label: string; desc: string }[] = [
   { key: 'module_table_layout', label: 'Tata Letak Meja', desc: 'Denah meja & status (F&B)' },
@@ -36,6 +37,7 @@ export default function SettingsPage() {
   const activeTax = useMemo(() => defaultTax(), [])
   const [taxEnabled, setTaxEnabled] = useState(settings.tax_enabled === '1')
   const [pointsPer, setPointsPer] = useState(getNumberSetting(settings, 'points_per_amount', 1000))
+  const [callText, setCallText] = useState(settings.queue_call_text ?? DEFAULT_QUEUE_CALL_TEXT)
   const [modules, setModules] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, settings[m.key] === '1'])),
   )
@@ -53,6 +55,7 @@ export default function SettingsPage() {
       const next: Record<string, string> = {
         tax_enabled: taxEnabled ? '1' : '0',
         points_per_amount: String(Math.max(0, Math.round(pointsPer))),
+        queue_call_text: callText.trim() || DEFAULT_QUEUE_CALL_TEXT,
         ...Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, modules[m.key] ? '1' : '0'])),
       }
       await saveSettings(next, outletId, { name, address, phone })
@@ -144,6 +147,36 @@ export default function SettingsPage() {
               />
             </label>
           </div>
+        </section>
+
+        {/* Antrean */}
+        <section className="rounded-card bg-white p-5 shadow-card">
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Antrean</h2>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-ink-soft">
+              Kalimat Panggilan Suara
+            </span>
+            <div className="flex gap-2">
+              <input
+                className={inputCls}
+                value={callText}
+                onChange={(e) => setCallText(e.target.value)}
+                placeholder={DEFAULT_QUEUE_CALL_TEXT}
+              />
+              <button
+                type="button"
+                onClick={() => callQueueNumber('A-01', callText)}
+                className="shrink-0 rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
+                title="Dengarkan contoh panggilan untuk nomor A-01"
+              >
+                🔊 Coba
+              </button>
+            </div>
+          </label>
+          <p className="mt-2 text-xs text-ink-soft">
+            Gunakan <code className="rounded bg-background px-1">{'{no}'}</code> sebagai tempat nomor
+            antrean (dieja per karakter). Contoh: “Nomor antrian {'{no}'}, silakan diambil.”
+          </p>
         </section>
 
         {/* Modularitas */}

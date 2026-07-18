@@ -84,6 +84,7 @@ src/
 | **M29** ✅ | **Data Master Satuan & Pajak**: **Satuan** (CRUD satuan produk + status aktif; dipakai sebagai pilihan di form Produk), **Pajak** (CRUD jenis pajak: nama, tarif %, default, aktif). Tarif pajak **default aktif** disinkronkan ke `app_settings.tax_rate` sehingga otomatis dipakai kasir & struk; Setelan › Pengaturan menampilkan tarif read-only + tautan "Kelola Pajak". Tabel `units` (24) & `taxes` (25) via migrasi otomatis. |
 | **M30** ✅ | **Gambar produk** di Master Produk: unggah foto (otomatis diperkecil ke lebar 320px & disimpan sebagai data URL di `products.image_path`), pratinjau + ganti/hapus di form; thumbnail tampil di tabel produk dan **kartu produk kasir** (menggantikan inisial). |
 | **M31** ✅ | **Perbaikan Monitor TV**: monitor antrean (tab terpisah) kini tersegar **real-time lintas-tab**. Sebelumnya salinan sql.js in-memory-nya basi sehingga antrean baru tak muncul. Perbaikan: aksi antrean (`issueQueue`/`setQueueStatus`) kini `publish('queue:update')`, dan monitor **memuat ulang snapshot DB dari IndexedDB** (`reloadDatabase`) pada tiap event realtime + polling cadangan sebelum menampilkan. |
+| **M32** ✅ | **Kalimat panggilan antrean dapat diatur** (Setelan › Pengaturan › Antrean): teks TTS panggilan "Tandai Siap" kini dari `app_settings.queue_call_text` dengan placeholder `{no}` (nomor antrean, dieja per karakter) + tombol "🔊 Coba" untuk pratinjau suara. Bawaan: "Nomor antrian {no}, silakan diambil." |
 
 ### Sinkronisasi real-time (local-first)
 
