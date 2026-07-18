@@ -25,6 +25,14 @@ export function useCart() {
     )
   }, [])
 
+  const setNotes = useCallback((productId: number, notes: string) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.product.id === productId ? { ...it, notes: notes || undefined } : it,
+      ),
+    )
+  }, [])
+
   const removeProduct = useCallback((productId: number) => {
     setItems((prev) => prev.filter((it) => it.product.id !== productId))
   }, [])
@@ -36,5 +44,5 @@ export function useCart() {
     [items],
   )
 
-  return { items, addProduct, setQuantity, removeProduct, clear, subtotal }
+  return { items, addProduct, setQuantity, setNotes, removeProduct, clear, subtotal }
 }

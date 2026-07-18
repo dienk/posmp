@@ -75,6 +75,8 @@ export interface SaveOrderInput {
   downPaymentReceived?: number
   /** Split Bill: menautkan nota anak ke transaksi induk. */
   parentTransactionId?: number
+  /** Catatan khusus tingkat transaksi (mis. permintaan pelanggan). */
+  note?: string
 }
 
 export interface SaveOrderResult {
@@ -114,8 +116,8 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
          (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
           voucher_id, member_id, parent_transaction_id, subtotal_amount, discount_amount,
           tax_amount, points_earned, total_amount, status, is_preorder, preorder_deadline,
-          down_payment_received)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          down_payment_received, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.outletId,
         invoiceNumber,
@@ -135,6 +137,7 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
         input.isPreorder ? 1 : 0,
         input.preorderDeadline ?? null,
         input.downPaymentReceived ?? 0,
+        input.note?.trim() || null,
       ],
     )
     const transactionId = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id

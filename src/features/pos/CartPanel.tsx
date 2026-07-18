@@ -35,6 +35,9 @@ interface Props {
   onCustomerNameChange: (name: string) => void
   onFacilityChange: (facility: FacilityType) => void
   onQuantityChange: (productId: number, quantity: number) => void
+  onNotesChange: (productId: number, notes: string) => void
+  orderNote: string
+  onOrderNoteChange: (note: string) => void
   onRemove: (productId: number) => void
   onSaveDraft: () => void
   onPay: () => void
@@ -154,6 +157,13 @@ export default function CartPanel(props: Props) {
                     {formatRupiah(it.product.price * it.quantity)}
                   </span>
                 </div>
+                <input
+                  value={it.notes ?? ''}
+                  onChange={(e) => props.onNotesChange(it.product.id, e.target.value)}
+                  placeholder="✎ Catatan khusus (mis. tanpa sambal, level pedas)"
+                  className="mt-2 w-full rounded-lg border border-dashed border-black/15 bg-background/50
+                             px-2.5 py-1.5 text-xs outline-none focus:border-brand-strong focus:bg-white"
+                />
               </li>
             ))}
           </ul>
@@ -237,6 +247,21 @@ export default function CartPanel(props: Props) {
             </label>
           </div>
         )}
+      </div>
+
+      {/* Catatan khusus transaksi */}
+      <div className="px-4 pt-3">
+        <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-ink-soft">
+          Catatan Transaksi
+        </label>
+        <textarea
+          rows={2}
+          value={props.orderNote}
+          onChange={(e) => props.onOrderNoteChange(e.target.value)}
+          placeholder="Catatan khusus untuk seluruh pesanan (mis. bungkus terpisah, minta struk)"
+          className="w-full resize-none rounded-lg border border-black/10 px-3 py-2 text-sm
+                     outline-none focus:border-brand-strong"
+        />
       </div>
 
       {/* Ringkasan & aksi */}

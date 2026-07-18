@@ -133,6 +133,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     points_earned INTEGER DEFAULT 0,
     total_amount REAL NOT NULL,
     status TEXT NOT NULL DEFAULT 'DRAFT', -- 'DRAFT','PREPARING','READY','COMPLETED','REFUNDED'
+    note TEXT, -- catatan khusus transaksi (mis. permintaan pelanggan)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(outlet_id) REFERENCES outlets(id),
     FOREIGN KEY(member_id) REFERENCES members(id),

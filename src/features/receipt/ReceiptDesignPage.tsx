@@ -91,9 +91,9 @@ export default function ReceiptDesignPage() {
     points_earned: 55,
     status: 'COMPLETED',
     items: [
-      { product_id: 1, name: 'Nasi Goreng Spesial', quantity: 1, unit_price: 25000, subtotal: 25000 },
-      { product_id: 2, name: 'Es Teh Manis', quantity: 2, unit_price: 5000, subtotal: 10000 },
-      { product_id: 3, name: 'Ayam Penyet', quantity: 1, unit_price: 30000, subtotal: 30000 },
+      { product_id: 1, name: 'Nasi Goreng Spesial', quantity: 1, unit_price: 25000, subtotal: 25000, notes: null },
+      { product_id: 2, name: 'Es Teh Manis', quantity: 2, unit_price: 5000, subtotal: 10000, notes: null },
+      { product_id: 3, name: 'Ayam Penyet', quantity: 1, unit_price: 30000, subtotal: 30000, notes: null },
     ],
     payments: [
       { payment_method: 'CASH', amount_paid: 55000, tendered_amount: 100000, change_amount: 45000, qris_reference_number: null },

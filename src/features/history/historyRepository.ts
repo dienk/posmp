@@ -12,6 +12,7 @@ export interface TxSummary {
   member_id: number | null
   member_name: string | null
   status: string
+  note: string | null
 }
 
 export interface TxItem {
@@ -20,13 +21,14 @@ export interface TxItem {
   quantity: number
   unit_price: number
   subtotal: number
+  notes: string | null
 }
 
 export function listTransactions(outletId: number, limit = 40): TxSummary[] {
   return query<TxSummary>(
     `SELECT t.id, t.invoice_number, t.transaction_date, t.order_source, t.facility_type,
             t.table_number, t.total_amount, t.points_earned, t.member_id, t.status,
-            m.name AS member_name
+            t.note, m.name AS member_name
      FROM transactions t
      LEFT JOIN members m ON m.id = t.member_id
      WHERE t.outlet_id = ? AND t.status IN ('COMPLETED','REFUNDED')
@@ -98,7 +100,7 @@ export function transactionPayments(transactionId: number): TxPayment[] {
 
 export function transactionItems(transactionId: number): TxItem[] {
   return query<TxItem>(
-    `SELECT d.product_id, p.name, d.quantity, d.unit_price, d.subtotal
+    `SELECT d.product_id, p.name, d.quantity, d.unit_price, d.subtotal, d.notes
      FROM transaction_details d
      JOIN products p ON p.id = d.product_id
      WHERE d.transaction_id = ?

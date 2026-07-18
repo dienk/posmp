@@ -78,6 +78,7 @@ src/
 | **M23** ✅ | **ID Card member dengan template desainable** (Setelan › Desain Kartu): editor kartu (judul, warna gradien/preset, logo, barcode, tampil tier/masa berlaku/poin) + pratinjau langsung; tombol **Kartu ID** di detail member untuk lihat, **cetak**, & **unduh PNG** kartu. |
 | **M24** ✅ | **Data Master Outlet & Kasir**: **Outlet** (CRUD cabang: nama, alamat, telepon, aktif/nonaktif; hapus dijaga bila masih ada kasir/transaksi/stok/meja), **Kasir** (CRUD titik/mesin kasir per outlet: nama, kode, lokasi, status; filter per outlet). Tabel `cashiers` (ke-23) dibuat via migrasi otomatis untuk database lama. |
 | **M25** ✅ | **Master Meja** (Data Master): CRUD meja lintas outlet (nomor/nama, area INDOOR/OUTDOOR/VIP, **kapasitas standar** & **kapasitas maksimum**) + filter per outlet. Kolom `max_capacity` ditambahkan ke `dining_tables` via migrasi otomatis (default = kapasitas saat ini). |
+| **M26** ✅ | **Catatan khusus pesanan**: catatan **per item** (mis. "tanpa sambal, level pedas") tampil di KDS (dapur) & detail Riwayat, dan catatan **per transaksi** (mis. "bungkus terpisah") tersimpan di header transaksi & tampil di detail Riwayat. Kolom `transactions.note` via migrasi otomatis; item memakai `transaction_details.notes` yang sudah ada. |
 
 ### Sinkronisasi real-time (local-first)
 

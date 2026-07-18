@@ -138,6 +138,13 @@ function migrateSchema(db: Database): boolean {
     db.run('UPDATE dining_tables SET max_capacity = capacity WHERE max_capacity IS NULL OR max_capacity < capacity')
     changed = true
   }
+
+  // Kolom catatan khusus pada header transaksi.
+  const txCols = columnsOf('transactions')
+  if (!txCols.has('note')) {
+    db.run('ALTER TABLE transactions ADD COLUMN note TEXT')
+    changed = true
+  }
   return changed
 }
 

@@ -30,6 +30,7 @@ export default function PosPage() {
   const [keyword, setKeyword] = useState('')
   const [products, setProducts] = useState<Product[]>([])
   const [customerName, setCustomerName] = useState('')
+  const [orderNote, setOrderNote] = useState('')
   const [facilityType, setFacilityType] = useState<FacilityType>('DINE_IN')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -116,6 +117,7 @@ export default function PosPage() {
         memberId: member?.id,
         pointsPerAmount,
         payments,
+        note: orderNote,
       })
       showToast(
         status === 'DRAFT'
@@ -137,6 +139,7 @@ export default function PosPage() {
     setMember(null)
     setMemberQuery('')
     setCustomerName('')
+    setOrderNote('')
     setIsPreorder(false)
     setPreorderDeadline('')
     setDpAmount(0)
@@ -166,6 +169,7 @@ export default function PosPage() {
         preorderDeadline: preorderDeadline || null,
         downPaymentReceived: dp,
         payments: dp > 0 ? [{ method: 'CASH', amountPaid: dp, tenderedAmount: dp }] : [],
+        note: orderNote,
       })
       showToast(`Pre-Order tersimpan · ${result.invoiceNumber} · DP ${formatRupiah(dp)}`)
       resetOrder()
@@ -319,6 +323,9 @@ export default function PosPage() {
           onCustomerNameChange={setCustomerName}
           onFacilityChange={setFacilityType}
           onQuantityChange={cart.setQuantity}
+          onNotesChange={cart.setNotes}
+          orderNote={orderNote}
+          onOrderNoteChange={setOrderNote}
           onRemove={cart.removeProduct}
           onSaveDraft={() => finishOrder('DRAFT')}
           onPay={handlePay}
