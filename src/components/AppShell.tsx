@@ -23,6 +23,7 @@ const NAV: NavItem[] = [
   { to: '/vouchers', label: 'Voucher', icon: '🎟️' },
   { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' },
   { to: '/reports', label: 'Laporan', icon: '📊' },
+  { to: '/settings', label: 'Setelan', icon: '⚙️' },
 ]
 
 export default function AppShell() {
