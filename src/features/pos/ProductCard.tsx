@@ -26,8 +26,16 @@ export default function ProductCard({ product, onSelect }: Props) {
                  transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed
                  disabled:opacity-50 disabled:hover:translate-y-0"
     >
-      <div className="flex aspect-[4/3] items-center justify-center bg-surface/60">
-        <span className="text-3xl font-bold text-white/90">{initials(product.name)}</span>
+      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-surface/60">
+        {product.image_path ? (
+          <img
+            src={product.image_path}
+            alt={product.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span className="text-3xl font-bold text-white/90">{initials(product.name)}</span>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <p className="line-clamp-2 text-sm font-semibold text-ink">{product.name}</p>

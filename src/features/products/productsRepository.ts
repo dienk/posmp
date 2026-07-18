@@ -91,6 +91,7 @@ export interface ProductInput {
   minStock: number
   description: string | null
   isActive: number
+  imagePath: string | null
 }
 
 /** Buat produk baru + baris stok awal (0) pada outlet aktif, satu transaksi SQL. */
@@ -101,8 +102,8 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
   try {
     db.run(
       `INSERT INTO products
-         (category_id, name, sku, barcode, price, cost_price, unit, min_stock, description, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (category_id, name, sku, barcode, price, cost_price, unit, min_stock, description, is_active, image_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.categoryId,
         input.name.trim(),
@@ -114,6 +115,7 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
         input.minStock,
         input.description?.trim() || null,
         input.isActive,
+        input.imagePath || null,
       ],
     )
     id = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
@@ -134,7 +136,7 @@ export async function updateProduct(id: number, input: ProductInput): Promise<vo
   await execute(
     `UPDATE products
      SET category_id = ?, name = ?, sku = ?, barcode = ?, price = ?, cost_price = ?,
-         unit = ?, min_stock = ?, description = ?, is_active = ?
+         unit = ?, min_stock = ?, description = ?, is_active = ?, image_path = ?
      WHERE id = ?`,
     [
       input.categoryId,
@@ -147,6 +149,7 @@ export async function updateProduct(id: number, input: ProductInput): Promise<vo
       input.minStock,
       input.description?.trim() || null,
       input.isActive,
+      input.imagePath || null,
       id,
     ],
   )

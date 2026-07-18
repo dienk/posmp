@@ -14,6 +14,7 @@ import {
   type ProductInput,
 } from './productsRepository'
 import { listActiveUnitNames } from '../units/unitsRepository'
+import { fileToScaledDataUrl } from '../receipt/receiptConfig'
 
 const EMPTY: ProductInput = {
   categoryId: null,
@@ -26,6 +27,7 @@ const EMPTY: ProductInput = {
   minStock: 0,
   description: '',
   isActive: 1,
+  imagePath: null,
 }
 
 
@@ -81,6 +83,7 @@ export default function ProductsPage() {
       minStock: p.min_stock ?? 0,
       description: p.description ?? '',
       isActive: p.is_active ?? 1,
+      imagePath: p.image_path ?? null,
     })
     setEditingId(p.id)
   }
@@ -103,6 +106,18 @@ export default function ProductsPage() {
       showToast('Produk tersimpan.')
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Gagal menyimpan')
+    }
+  }
+
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // izinkan pilih file sama lagi
+    if (!file) return
+    try {
+      const dataUrl = await fileToScaledDataUrl(file, 320)
+      setForm((f) => ({ ...f, imagePath: dataUrl }))
+    } catch {
+      showToast('Gagal memuat gambar.')
     }
   }
 
@@ -164,15 +179,26 @@ export default function ProductsPage() {
                 return (
                   <tr key={p.id} className="border-b border-black/5 hover:bg-background">
                     <td className="px-4 py-3">
-                      <p className="flex items-center gap-2 font-semibold text-ink">
-                        {p.name}
-                        {p.is_active !== 1 && (
-                          <span className="rounded-full bg-ink-soft/15 px-2 py-0.5 text-[10px] font-semibold text-ink-soft">
-                            Nonaktif
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-xs text-ink-soft">{p.unit ?? 'pcs'}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-background">
+                          {p.image_path ? (
+                            <img src={p.image_path} alt={p.name} className="h-full w-full object-cover" />
+                          ) : (
+                            <span className="text-base text-ink-soft">🍽️</span>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="flex items-center gap-2 font-semibold text-ink">
+                            {p.name}
+                            {p.is_active !== 1 && (
+                              <span className="rounded-full bg-ink-soft/15 px-2 py-0.5 text-[10px] font-semibold text-ink-soft">
+                                Nonaktif
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-xs text-ink-soft">{p.unit ?? 'pcs'}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-ink-soft">
                       <p>{p.barcode ?? '—'}</p>
@@ -226,6 +252,37 @@ export default function ProductsPage() {
                 {editingId === 'new' ? 'Produk Baru' : 'Edit Produk'}
               </h2>
               <div className="space-y-3">
+                <div>
+                  <span className="mb-1 block text-xs font-medium text-ink-soft">Gambar produk</span>
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg border border-black/10 bg-background">
+                      {form.imagePath ? (
+                        <img
+                          src={form.imagePath}
+                          alt="Pratinjau produk"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl text-ink-soft">🖼️</span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="cursor-pointer rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-soft">
+                        {form.imagePath ? 'Ganti gambar' : 'Unggah gambar'}
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
+                      </label>
+                      {form.imagePath && (
+                        <button
+                          type="button"
+                          onClick={() => setForm((f) => ({ ...f, imagePath: null }))}
+                          className="text-xs font-semibold text-status-occupied hover:opacity-70"
+                        >
+                          Hapus gambar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <label className="block">
                   <span className="mb-1 block text-xs font-medium text-ink-soft">Nama produk</span>
                   <input
