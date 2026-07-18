@@ -30,6 +30,17 @@ interface NavGroupDef {
 
 type NavEntry = { kind: 'link'; item: NavItem } | { kind: 'group'; group: NavGroupDef }
 
+// Grup "Data Master" (Produk & Contact).
+const DATA_MASTER_GROUP: NavGroupDef = {
+  label: 'Data Master',
+  icon: '🗂️',
+  perm: 'datamaster',
+  children: [
+    { to: '/products', label: 'Produk', short: 'Produk', icon: '📦' },
+    { to: '/contacts', label: 'Contact', short: 'Contact', icon: '📇' },
+  ],
+}
+
 // Grup "Transaksi" (Riwayat & Pre-Order).
 const TRANSAKSI_GROUP: NavGroupDef = {
   label: 'Transaksi',
@@ -56,6 +67,7 @@ const SETTINGS_GROUP: NavGroupDef = {
 
 const SIDEBAR: NavEntry[] = [
   { kind: 'link', item: { to: '/', label: 'Kasir', icon: '🧾', perm: 'kasir' } },
+  { kind: 'group', group: DATA_MASTER_GROUP },
   { kind: 'group', group: TRANSAKSI_GROUP },
   { kind: 'link', item: { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout', perm: 'tables' } },
   { kind: 'link', item: { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds', perm: 'kds' } },

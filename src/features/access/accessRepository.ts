@@ -16,6 +16,7 @@ export interface Persona {
 /** Daftar izin akses (dipetakan ke bagian menu sidebar). */
 export const PERMISSIONS: { key: string; label: string }[] = [
   { key: 'kasir', label: 'Kasir (POS)' },
+  { key: 'datamaster', label: 'Data Master (Produk, Contact)' },
   { key: 'transaksi', label: 'Transaksi (Riwayat, Pre-Order)' },
   { key: 'tables', label: 'Meja' },
   { key: 'kds', label: 'Dapur (KDS)' },
