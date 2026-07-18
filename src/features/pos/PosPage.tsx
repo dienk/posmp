@@ -43,10 +43,13 @@ export default function PosPage() {
   const [voucherMessage, setVoucherMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [member, setMember] = useState<Member | null>(null)
   const [memberQuery, setMemberQuery] = useState('')
+  const [customers, setCustomers] = useState<Member[]>([])
   const [showPayment, setShowPayment] = useState(false)
   const [showSplit, setShowSplit] = useState(false)
   const [showMerge, setShowMerge] = useState(false)
   const mergeBillEnabled = isModuleEnabled(settings, 'module_merge_bill')
+  const showVoucher = isModuleEnabled(settings, 'pos_show_voucher')
+  const showPreorder = isModuleEnabled(settings, 'pos_show_preorder')
   const [isPreorder, setIsPreorder] = useState(false)
   const [preorderDeadline, setPreorderDeadline] = useState('')
   const [dpAmount, setDpAmount] = useState(0)
@@ -61,7 +64,14 @@ export default function PosPage() {
 
   useEffect(() => {
     setCategories(fetchCategories())
+    setCustomers(listMembers())
   }, [])
+
+  const handleSelectCustomer = (c: { id: number; name: string }) => {
+    setCustomerName(c.name)
+    const m = customers.find((x) => x.id === c.id)
+    if (m) setMember(m)
+  }
 
   useEffect(() => {
     setProducts(fetchProducts(outletId, activeCategory, keyword))
@@ -152,6 +162,7 @@ export default function PosPage() {
         pointsPerAmount,
         payments,
         note: orderNote,
+        invoiceNumber,
       })
       showToast(
         status === 'DRAFT'
@@ -204,6 +215,7 @@ export default function PosPage() {
         downPaymentReceived: dp,
         payments: dp > 0 ? [{ method: 'CASH', amountPaid: dp, tenderedAmount: dp }] : [],
         note: orderNote,
+        invoiceNumber,
       })
       showToast(`Pre-Order tersimpan · ${result.invoiceNumber} · DP ${formatRupiah(dp)}`)
       resetOrder()
@@ -215,7 +227,7 @@ export default function PosPage() {
   }
 
   const handlePay = () => {
-    if (isPreorder) createPreorder()
+    if (showPreorder && isPreorder) createPreorder()
     else setShowPayment(true)
   }
 
@@ -361,11 +373,16 @@ export default function PosPage() {
         <CartPanel
           items={cart.items}
           invoiceNumber={invoiceNumber}
+          onInvoiceChange={setInvoiceNumber}
           customerName={customerName}
+          customers={customers.map((m) => ({ id: m.id, name: m.name, phone: m.phone }))}
+          onSelectCustomer={handleSelectCustomer}
           facilityType={facilityType}
           taxEnabled={taxEnabled}
           taxRate={taxRate}
           saving={saving}
+          showVoucher={showVoucher}
+          showPreorder={showPreorder}
           voucherCode={voucherCode}
           discount={discount}
           voucherMessage={voucherMessage}

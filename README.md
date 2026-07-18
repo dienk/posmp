@@ -85,6 +85,7 @@ src/
 | **M30** ✅ | **Gambar produk** di Master Produk: unggah foto (otomatis diperkecil ke lebar 320px & disimpan sebagai data URL di `products.image_path`), pratinjau + ganti/hapus di form; thumbnail tampil di tabel produk dan **kartu produk kasir** (menggantikan inisial). |
 | **M31** ✅ | **Perbaikan Monitor TV**: monitor antrean (tab terpisah) kini tersegar **real-time lintas-tab**. Sebelumnya salinan sql.js in-memory-nya basi sehingga antrean baru tak muncul. Perbaikan: aksi antrean (`issueQueue`/`setQueueStatus`) kini `publish('queue:update')`, dan monitor **memuat ulang snapshot DB dari IndexedDB** (`reloadDatabase`) pada tiap event realtime + polling cadangan sebelum menampilkan. |
 | **M32** ✅ | **Kalimat panggilan antrean dapat diatur** (Setelan › Pengaturan › Antrean): teks TTS panggilan "Tandai Siap" kini dari `app_settings.queue_call_text` dengan placeholder `{no}` (nomor antrean, dieja per karakter) + tombol "🔊 Coba" untuk pratinjau suara. Bawaan: "Nomor antrian {no}, silakan diambil." |
+| **M33** ✅ | **Peningkatan layar Kasir**: info **Total Item** (badge + ringkasan), **pemilih pelanggan** dari master (📇 dropdown cari nama/HP → set nama + member/loyalti), **nomor invoice bisa diedit** (dipakai saat simpan via `saveOrder.invoiceNumber`), **catatan item & catatan transaksi kini tersembunyi default** dengan tombol "＋" untuk menampilkan. Dua toggle baru di Setelan › Fitur Kasir (bawaan **nonaktif**): **Kode Voucher** & **Pre-Order** — kolom terkait di kasir hanya muncul saat diaktifkan. |
 
 ### Sinkronisasi real-time (local-first)
 

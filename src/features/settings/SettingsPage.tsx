@@ -21,6 +21,16 @@ const POS_FEATURES: { key: string; label: string; desc: string }[] = [
     label: 'Merge Bill',
     desc: 'Gabungkan beberapa bill tersimpan (Draft) menjadi satu tagihan',
   },
+  {
+    key: 'pos_show_voucher',
+    label: 'Kode Voucher',
+    desc: 'Tampilkan kolom kode voucher di layar kasir',
+  },
+  {
+    key: 'pos_show_preorder',
+    label: 'Pre-Order (pesan di muka)',
+    desc: 'Tampilkan opsi pre-order & uang muka di layar kasir',
+  },
 ]
 
 const ALL_TOGGLES = [...MODULES, ...POS_FEATURES]

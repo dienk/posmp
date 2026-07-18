@@ -78,6 +78,8 @@ export interface SaveOrderInput {
   parentTransactionId?: number
   /** Catatan khusus tingkat transaksi (mis. permintaan pelanggan). */
   note?: string
+  /** Nomor invoice yang disetel manual dari kasir; kosong = dibuat otomatis. */
+  invoiceNumber?: string
 }
 
 export interface SaveOrderResult {
@@ -101,7 +103,8 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
   const taxable = subtotal - discount
   const tax = input.taxEnabled ? Math.round(taxable * input.taxRate) : 0
   const total = taxable + tax
-  const invoiceNumber = generateInvoiceNumber()
+  // Nomor invoice bisa disetel dari kasir (bisa diedit); jika kosong, dibuat otomatis.
+  const invoiceNumber = input.invoiceNumber?.trim() || generateInvoiceNumber()
   const orderSource = input.orderSource ?? 'POS_OFFLINE'
   const sendToKitchen = input.sendToKitchen ?? true
   // Poin hanya dihitung saat transaksi lunas & ada member terpasang.
