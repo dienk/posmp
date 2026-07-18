@@ -2,16 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Palet default (tema "Klasik"). Nilai channel "R G B" agar opacity berfungsi.
+/* Palet default (tema "Merah Putih"). Nilai channel "R G B" agar opacity berfungsi.
    Tema lain menimpa variabel ini pada :root saat dipilih. */
 :root {
-  --c-brand: 207 198 217;
-  --c-brand-soft: 228 222 236;
-  --c-brand-strong: 180 167 199;
-  --c-background: 242 224 212;
-  --c-surface: 242 198 161;
-  --c-ink: 113 120 136;
-  --c-ink-soft: 217 171 160;
+  --c-brand: 254 202 202;
+  --c-brand-soft: 254 226 226;
+  --c-brand-strong: 220 38 38;
+  --c-background: 249 250 251;
+  --c-surface: 254 215 215;
+  --c-ink: 51 65 85;
+  --c-ink-soft: 148 163 184;
   /* Status semantik (tetap lintas-tema) */
   --c-empty: 76 175 80;
   --c-occupied: 229 57 53;

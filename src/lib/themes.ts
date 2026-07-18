@@ -39,16 +39,16 @@ function t(
 
 export const THEMES: Theme[] = [
   {
-    id: 'klasik',
-    name: 'Klasik',
-    desc: 'Krem & lavender (bawaan)',
-    vars: t('207 198 217', '228 222 236', '180 167 199', '242 224 212', '242 198 161', '113 120 136', '217 171 160'),
-  },
-  {
     id: 'merahputih',
     name: 'Merah Putih',
-    desc: 'Putih bersih beraksen merah',
+    desc: 'Putih bersih beraksen merah (bawaan)',
     vars: t('254 202 202', '254 226 226', '220 38 38', '249 250 251', '254 215 215', '51 65 85', '148 163 184'),
+  },
+  {
+    id: 'klasik',
+    name: 'Klasik',
+    desc: 'Krem & lavender',
+    vars: t('207 198 217', '228 222 236', '180 167 199', '242 224 212', '242 198 161', '113 120 136', '217 171 160'),
   },
   {
     id: 'laut',
@@ -76,12 +76,15 @@ export const THEMES: Theme[] = [
   },
 ]
 
-export const DEFAULT_THEME_ID = 'klasik'
+export const DEFAULT_THEME_ID = 'merahputih'
 
-/** Terapkan tema ke :root. Tema tak dikenal jatuh ke bawaan. */
+/** Terapkan tema ke :root. Tema tak dikenal jatuh ke bawaan (Merah Putih). */
 export function applyTheme(id: string | undefined): void {
   if (typeof document === 'undefined') return
-  const theme = THEMES.find((x) => x.id === id) ?? THEMES[0]
+  const theme =
+    THEMES.find((x) => x.id === id) ??
+    THEMES.find((x) => x.id === DEFAULT_THEME_ID) ??
+    THEMES[0]
   const root = document.documentElement
   for (const [k, v] of Object.entries(theme.vars)) root.style.setProperty(k, v)
 }

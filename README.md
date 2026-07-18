@@ -72,7 +72,7 @@ src/
 | **M17** ✅ | **Logo aplikasi**: brand POS Merah Putih terpasang di badge sidebar, favicon tab, dan layar loading (`public/logo-mark.png` + `public/logo-full.png`). |
 | **M18** ✅ | **Logo di semua permukaan**: header **Monitor TV** & **Self-Order**, serta **logo default struk** (path relatif di-absolutkan agar tetap tercetak; bisa diganti/hapus via Desain Struk). |
 | **M19** ✅ | **Persona & Peran/Hak Akses** (di Setelan): kelola pengguna (persona) + peran dengan izin per-menu (disimpan JSON di `app_settings`). Persona aktif memfilter menu sidebar sesuai hak akses; **Setelan selalu tampil** agar tak terkunci. |
-| **M20** ✅ | **Tema** (di Setelan): 6 pilihan tema (Klasik/bawaan + Merah Putih, Laut, Hutan, Senja, Anggur) via CSS variables; berlaku seketika seluruh aplikasi & tersimpan. Warna status (hijau/merah/kuning) tetap semantik. |
+| **M20** ✅ | **Tema** (di Setelan): 6 pilihan tema (**Merah Putih/bawaan** + Klasik, Laut, Hutan, Senja, Anggur) via CSS variables; berlaku seketika seluruh aplikasi & tersimpan. Warna status (hijau/merah/kuning) tetap semantik. |
 | **M21** ✅ | **Data Master**: grup menu baru berisi **Produk** (CRUD katalog + kategori, dgn stok awal), **Kategori Produk** (CRUD kategori: nama, warna, jumlah produk), dan **Contact** (tab **Pelanggan**/member, **Pemasok**/supplier, **Karyawan**/persona, **Penjual**/baru di `app_settings`). |
 
 ### Sinkronisasi real-time (local-first)
