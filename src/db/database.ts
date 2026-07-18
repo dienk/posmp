@@ -162,6 +162,43 @@ function migrateSchema(db: Database): boolean {
       changed = true
     }
   }
+
+  const tableExists = (name: string): boolean =>
+    db.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='${name}'`).length > 0
+
+  // Master Satuan (Data Master) — dibuat + diisi default untuk database lama.
+  if (!tableExists('units')) {
+    db.run(`CREATE TABLE IF NOT EXISTS units (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      description TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1
+    )`)
+    for (const u of ['pcs', 'porsi', 'gelas', 'botol', 'box', 'pack', 'kg', 'gram', 'liter']) {
+      db.run('INSERT INTO units (name, is_active) VALUES (?, 1)', [u])
+    }
+    changed = true
+  }
+
+  // Master Pajak (Data Master) — dibuat + diisi dari tarif pajak setelan saat ini.
+  if (!tableExists('taxes')) {
+    db.run(`CREATE TABLE IF NOT EXISTS taxes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      rate REAL NOT NULL DEFAULT 0,
+      description TEXT,
+      is_default INTEGER NOT NULL DEFAULT 0,
+      is_active INTEGER NOT NULL DEFAULT 1
+    )`)
+    const rateRow = db.exec(`SELECT setting_value FROM app_settings WHERE setting_key = 'tax_rate'`)
+    const rate = rateRow[0] ? Number(rateRow[0].values[0][0]) * 100 : 10
+    db.run('INSERT INTO taxes (name, rate, description, is_default, is_active) VALUES (?, ?, ?, 1, 1)', [
+      'PPN',
+      Number.isFinite(rate) ? rate : 10,
+      'Pajak Pertambahan Nilai',
+    ])
+    changed = true
+  }
   return changed
 }
 

@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { getOutlet, saveSettings } from './settingsRepository'
+import { defaultTax } from '../taxes/taxesRepository'
 
 const MODULES: { key: string; label: string; desc: string }[] = [
   { key: 'module_table_layout', label: 'Tata Letak Meja', desc: 'Denah meja & status (F&B)' },
@@ -30,7 +32,8 @@ export default function SettingsPage() {
   const [name, setName] = useState(outlet?.name ?? '')
   const [address, setAddress] = useState(outlet?.address ?? '')
   const [phone, setPhone] = useState(outlet?.phone ?? '')
-  const [taxPct, setTaxPct] = useState(getNumberSetting(settings, 'tax_rate', 0.1) * 100)
+  const taxRatePct = getNumberSetting(settings, 'tax_rate', 0.1) * 100
+  const activeTax = useMemo(() => defaultTax(), [])
   const [taxEnabled, setTaxEnabled] = useState(settings.tax_enabled === '1')
   const [pointsPer, setPointsPer] = useState(getNumberSetting(settings, 'points_per_amount', 1000))
   const [modules, setModules] = useState<Record<string, boolean>>(() =>
@@ -48,7 +51,6 @@ export default function SettingsPage() {
     setSaving(true)
     try {
       const next: Record<string, string> = {
-        tax_rate: String(Math.max(0, taxPct) / 100),
         tax_enabled: taxEnabled ? '1' : '0',
         points_per_amount: String(Math.max(0, Math.round(pointsPer))),
         ...Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, modules[m.key] ? '1' : '0'])),
@@ -115,15 +117,21 @@ export default function SettingsPage() {
               />
               <span className="text-sm text-ink">Pajak aktif</span>
             </label>
-            <label className="block">
+            <div className="block">
               <span className="mb-1 block text-xs font-medium text-ink-soft">Tarif Pajak (%)</span>
-              <input
-                type="number"
-                className={inputCls}
-                value={taxPct}
-                onChange={(e) => setTaxPct(Number(e.target.value))}
-              />
-            </label>
+              <div className="flex items-center gap-2 rounded-lg border border-black/10 bg-background px-3 py-2 text-sm">
+                <span className="font-semibold text-ink">{taxRatePct}%</span>
+                <span className="text-xs text-ink-soft">
+                  {activeTax ? `· ${activeTax.name}` : ''}
+                </span>
+                <Link
+                  to="/taxes"
+                  className="ml-auto text-xs font-semibold text-status-occupied hover:underline"
+                >
+                  Kelola Pajak →
+                </Link>
+              </div>
+            </div>
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-ink-soft">
                 Rp per 1 poin

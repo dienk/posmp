@@ -1,5 +1,5 @@
 -- ============================================================================
--- POSMerahPutih v1.5 — Skema Database SQLite (23 tabel)
+-- POSMerahPutih v1.5 — Skema Database SQLite (25 tabel)
 -- Local-first: dieksekusi saat inisialisasi database di browser (sql.js).
 -- ============================================================================
 
@@ -319,4 +319,22 @@ CREATE TABLE IF NOT EXISTS cashiers (
     location TEXT,
     is_active INTEGER NOT NULL DEFAULT 1,
     FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+);
+
+-- 24. Tabel Satuan Produk (Unit of Measure)
+CREATE TABLE IF NOT EXISTS units (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- 25. Tabel Pajak (Tax Rates)
+CREATE TABLE IF NOT EXISTS taxes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    rate REAL NOT NULL DEFAULT 0,        -- persen, mis. 10 = 10%
+    description TEXT,
+    is_default INTEGER NOT NULL DEFAULT 0,
+    is_active INTEGER NOT NULL DEFAULT 1
 );

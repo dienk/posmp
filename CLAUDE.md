@@ -47,7 +47,7 @@ di akhir, lalu `publish('...')` event realtime yang relevan.
 ```
 src/
   db/
-    schema.sql          # 23 tabel (sumber kebenaran skema)
+    schema.sql          # 25 tabel (sumber kebenaran skema)
     database.ts         # init sql.js + IndexedDB persist + query/execute
     seed.ts             # data awal (outlet, kategori, produk, meja, app_settings)
   lib/

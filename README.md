@@ -9,7 +9,7 @@ native (Tauri / Capacitor).
 
 ## Fitur pada foundation ini (Milestone 1)
 
-- ⚙️ Inisialisasi database SQLite lokal dengan **23 tabel** (lihat `src/db/schema.sql`),
+- ⚙️ Inisialisasi database SQLite lokal dengan **25 tabel** (lihat `src/db/schema.sql`),
   dipersist otomatis ke **IndexedDB** — data bertahan walau browser ditutup.
 - 🧩 Modularitas fitur lewat tabel `app_settings` (KDS, Table Layout, Self-Order,
   Marketplace, Queue bisa dinyalakan/dimatikan).
@@ -37,7 +37,7 @@ npm run preview
 
 ```
 src/
-  db/            # schema.sql (23 tabel), database.ts (sql.js + IndexedDB), seed.ts
+  db/            # schema.sql (25 tabel), database.ts (sql.js + IndexedDB), seed.ts
   features/
     pos/         # Layar kasir: PosPage, ProductCard, CartPanel, useCart, posRepository
     tables/      # (roadmap) Interactive Table Layout
@@ -81,6 +81,7 @@ src/
 | **M26** ✅ | **Catatan khusus pesanan**: catatan **per item** (mis. "tanpa sambal, level pedas") tampil di KDS (dapur) & detail Riwayat, dan catatan **per transaksi** (mis. "bungkus terpisah") tersimpan di header transaksi & tampil di detail Riwayat. Kolom `transactions.note` via migrasi otomatis; item memakai `transaction_details.notes` yang sudah ada. |
 | **M27** ✅ | **Merge Bill / Gabung Tagihan** (opsional, Setelan › Fitur Kasir, **bawaan nonaktif**): gabungkan ≥2 bill tersimpan (Draft) menjadi satu — item dipindah ke bill target (id terkecil), total & pajak dihitung ulang, catatan digabung, meja bill lain dikosongkan, header lama dihapus (satu transaksi SQL). Tombol "Gabung Bill" muncul di layar kasir saat diaktifkan. |
 | **M28** ✅ | **Mode Scan Barcode di kasir** (tombol "Scan": input jadi kolom barcode, scan/ketik + Enter → produk otomatis masuk keranjang via `barcode`/`sku` persis, tangani stok habis & tidak ditemukan), **snackbar konfirmasi tiap item** yang ditambahkan (scan maupun ketuk kartu), dan **master produk lebih detail**: kolom baru `barcode`, `cost_price` (modal/HPP), `unit` (satuan), `min_stock`, `description`, `is_active` — via migrasi otomatis; tabel & form produk diperluas, produk nonaktif disembunyikan dari kasir. |
+| **M29** ✅ | **Data Master Satuan & Pajak**: **Satuan** (CRUD satuan produk + status aktif; dipakai sebagai pilihan di form Produk), **Pajak** (CRUD jenis pajak: nama, tarif %, default, aktif). Tarif pajak **default aktif** disinkronkan ke `app_settings.tax_rate` sehingga otomatis dipakai kasir & struk; Setelan › Pengaturan menampilkan tarif read-only + tautan "Kelola Pajak". Tabel `units` (24) & `taxes` (25) via migrasi otomatis. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -100,6 +101,8 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/master-tables` | Data Master › Master Meja (kapasitas standar & maksimum) |
 | `#/products` | Data Master › Produk (katalog) |
 | `#/categories` | Data Master › Kategori Produk |
+| `#/units` | Data Master › Satuan (satuan produk) |
+| `#/taxes` | Data Master › Pajak (jenis & tarif pajak) |
 | `#/contacts` | Data Master › Contact (pelanggan/pemasok/karyawan/penjual) |
 | `#/tables` | Tata Letak Meja |
 | `#/kds` | Kitchen Display System (dapur) |

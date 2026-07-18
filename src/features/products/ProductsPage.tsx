@@ -13,6 +13,7 @@ import {
   updateProduct,
   type ProductInput,
 } from './productsRepository'
+import { listActiveUnitNames } from '../units/unitsRepository'
 
 const EMPTY: ProductInput = {
   categoryId: null,
@@ -27,7 +28,6 @@ const EMPTY: ProductInput = {
   isActive: 1,
 }
 
-const UNITS = ['pcs', 'porsi', 'gelas', 'botol', 'box', 'pack', 'kg', 'gram', 'liter']
 
 export default function ProductsPage() {
   const { settings } = useSettings()
@@ -35,6 +35,7 @@ export default function ProductsPage() {
 
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [units, setUnits] = useState<string[]>([])
   const [keyword, setKeyword] = useState('')
   const [editingId, setEditingId] = useState<number | 'new' | null>(null)
   const [form, setForm] = useState<ProductInput>(EMPTY)
@@ -44,6 +45,7 @@ export default function ProductsPage() {
   const reload = () => {
     setProducts(listProducts(outletId))
     setCategories(listCategories())
+    setUnits(listActiveUnitNames())
   }
   useEffect(reload, [outletId])
 
@@ -301,7 +303,7 @@ export default function ProductsPage() {
                       onChange={(e) => setForm({ ...form, unit: e.target.value })}
                     />
                     <datalist id="unit-options">
-                      {UNITS.map((u) => (
+                      {units.map((u) => (
                         <option key={u} value={u} />
                       ))}
                     </datalist>

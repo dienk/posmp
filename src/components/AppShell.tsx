@@ -41,6 +41,8 @@ const DATA_MASTER_GROUP: NavGroupDef = {
     { to: '/master-tables', label: 'Master Meja', short: 'Meja', icon: '🍽️' },
     { to: '/products', label: 'Produk', short: 'Produk', icon: '📦' },
     { to: '/categories', label: 'Kategori Produk', short: 'Kategori', icon: '🏷️' },
+    { to: '/units', label: 'Satuan', short: 'Satuan', icon: '📏' },
+    { to: '/taxes', label: 'Pajak', short: 'Pajak', icon: '🧮' },
     { to: '/contacts', label: 'Contact', short: 'Contact', icon: '📇' },
   ],
 }

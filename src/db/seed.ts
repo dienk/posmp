@@ -62,6 +62,18 @@ export function seedDatabase(db: Database): void {
     )
   }
 
+  // Master satuan produk.
+  for (const u of ['pcs', 'porsi', 'gelas', 'botol', 'box', 'pack', 'kg', 'gram', 'liter']) {
+    db.run('INSERT INTO units (name, is_active) VALUES (?, 1)', [u])
+  }
+
+  // Master pajak (PPN 10% sebagai default aktif, selaras tax_rate 0.10).
+  db.run(
+    `INSERT INTO taxes (name, rate, description, is_default, is_active) VALUES
+       ('PPN', 10, 'Pajak Pertambahan Nilai', 1, 1),
+       ('Tanpa Pajak', 0, 'Transaksi bebas pajak', 0, 1)`,
+  )
+
   const settings: Array<[string, string]> = [
     ['tax_rate', '0.10'],
     ['tax_enabled', '1'],
