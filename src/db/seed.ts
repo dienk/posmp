@@ -28,25 +28,24 @@ export function seedDatabase(db: Database): void {
     db.run('INSERT INTO categories (name, color_code) VALUES (?, ?)', [name, color])
   }
 
-  // [nama, sku, harga, category_id, stok]
-  const products: Array<[string, string, number, number, number]> = [
-    ['Nasi Goreng Spesial', 'MKN-001', 25000, 1, 50],
-    ['Mie Goreng', 'MKN-002', 20000, 1, 40],
-    ['Ayam Penyet', 'MKN-003', 30000, 1, 35],
-    ['Tahu Walik', 'SNK-001', 15000, 3, 60],
-    ['Pisang Goreng', 'SNK-002', 12000, 3, 45],
-    ['Es Teh Manis', 'MNM-001', 5000, 2, 100],
-    ['Kopi Susu', 'MNM-002', 15000, 2, 80],
-    ['Es Jeruk', 'MNM-003', 10000, 2, 70],
-    ['Air Mineral', 'MNM-004', 5000, 2, 120],
+  // [nama, sku, barcode, harga, modal, satuan, category_id, stok]
+  const products: Array<[string, string, string, number, number, string, number, number]> = [
+    ['Nasi Goreng Spesial', 'MKN-001', '8991234000011', 25000, 15000, 'porsi', 1, 50],
+    ['Mie Goreng', 'MKN-002', '8991234000028', 20000, 12000, 'porsi', 1, 40],
+    ['Ayam Penyet', 'MKN-003', '8991234000035', 30000, 18000, 'porsi', 1, 35],
+    ['Tahu Walik', 'SNK-001', '8991234000042', 15000, 8000, 'porsi', 3, 60],
+    ['Pisang Goreng', 'SNK-002', '8991234000059', 12000, 6000, 'porsi', 3, 45],
+    ['Es Teh Manis', 'MNM-001', '8991234000066', 5000, 2000, 'gelas', 2, 100],
+    ['Kopi Susu', 'MNM-002', '8991234000073', 15000, 7000, 'gelas', 2, 80],
+    ['Es Jeruk', 'MNM-003', '8991234000080', 10000, 4000, 'gelas', 2, 70],
+    ['Air Mineral', 'MNM-004', '8991234000097', 5000, 3000, 'botol', 2, 120],
   ]
-  for (const [name, sku, price, categoryId, stock] of products) {
-    db.run('INSERT INTO products (category_id, name, sku, price) VALUES (?, ?, ?, ?)', [
-      categoryId,
-      name,
-      sku,
-      price,
-    ])
+  for (const [name, sku, barcode, price, cost, unit, categoryId, stock] of products) {
+    db.run(
+      `INSERT INTO products (category_id, name, sku, barcode, price, cost_price, unit, min_stock, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 10, 1)`,
+      [categoryId, name, sku, barcode, price, cost, unit],
+    )
     db.run(
       `INSERT INTO outlet_stocks (outlet_id, product_id, stock)
        VALUES (1, last_insert_rowid(), ?)`,

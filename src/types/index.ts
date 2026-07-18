@@ -29,7 +29,13 @@ export interface Product {
   category_id: number | null
   name: string
   sku: string | null
+  barcode: string | null
   price: number
+  cost_price: number
+  unit: string | null
+  min_stock: number
+  description: string | null
+  is_active: number
   image_path: string | null
   category_name?: string | null
   stock?: number

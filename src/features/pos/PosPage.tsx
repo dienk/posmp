@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { formatRupiah, generateInvoiceNumber } from '../../lib/format'
 import { getNumberSetting, isModuleEnabled } from '../../lib/settings'
@@ -8,6 +8,7 @@ import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
 import { fetchCategories, fetchProducts, saveOrder, type PaymentInput } from './posRepository'
+import { findByBarcode } from '../products/productsRepository'
 import { validateVoucher, validateTenderVoucher } from '../vouchers/voucherRepository'
 import { listMembers, type Member } from '../members/membersRepository'
 import PaymentModal from './PaymentModal'
@@ -49,6 +50,8 @@ export default function PosPage() {
   const [isPreorder, setIsPreorder] = useState(false)
   const [preorderDeadline, setPreorderDeadline] = useState('')
   const [dpAmount, setDpAmount] = useState(0)
+  const [scanMode, setScanMode] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const pointsPerAmount = getNumberSetting(settings, 'points_per_amount', 0)
 
@@ -70,6 +73,34 @@ export default function PosPage() {
   }
 
   const refreshProducts = () => setProducts(fetchProducts(outletId, activeCategory, keyword))
+
+  // Tambah item ke keranjang + snackbar konfirmasi per item.
+  const handleAddProduct = (product: Product) => {
+    cart.addProduct(product)
+    showToast(`✓ ${product.name} ditambahkan · ${formatRupiah(product.price)}`)
+  }
+
+  // Fokuskan input saat mode scan diaktifkan (siap terima barcode scanner).
+  useEffect(() => {
+    if (scanMode) searchRef.current?.focus()
+  }, [scanMode])
+
+  // Enter di kolom cari: pada mode scan, cari produk berdasarkan barcode/SKU persis.
+  const handleSearchEnter = () => {
+    if (!scanMode) return
+    const code = keyword.trim()
+    if (!code) return
+    const product = findByBarcode(code, outletId)
+    if (!product) {
+      showToast(`Barcode "${code}" tidak ditemukan.`)
+    } else if ((product.stock ?? 0) <= 0) {
+      showToast(`${product.name} stok habis.`)
+    } else {
+      handleAddProduct(product)
+    }
+    setKeyword('')
+    searchRef.current?.focus()
+  }
 
   const clearVoucher = () => {
     setVoucherCode('')
@@ -241,16 +272,35 @@ export default function PosPage() {
           </button>
           <div className="relative flex-1">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
-              🔍
+              {scanMode ? '🔦' : '🔍'}
             </span>
             <input
+              ref={searchRef}
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Cari nama produk atau SKU…"
-              className="w-full rounded-xl border border-black/10 bg-white py-2 pl-9 pr-3 text-sm
-                         outline-none focus:border-brand-strong"
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchEnter()}
+              placeholder={
+                scanMode ? 'Scan barcode produk lalu Enter…' : 'Cari nama produk atau SKU…'
+              }
+              className={
+                'w-full rounded-xl border bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong ' +
+                (scanMode ? 'border-status-occupied ring-1 ring-status-occupied/30' : 'border-black/10')
+              }
             />
           </div>
+          <button
+            onClick={() => setScanMode((v) => !v)}
+            title="Mode scan barcode: tambahkan produk dengan memindai barcode"
+            className={
+              'flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition ' +
+              (scanMode
+                ? 'bg-status-occupied text-white shadow'
+                : 'border border-black/10 bg-white text-ink hover:bg-brand-soft')
+            }
+          >
+            <span className="text-base leading-none">▮▮▮</span>
+            <span className="hidden sm:inline">{scanMode ? 'Scan: ON' : 'Scan'}</span>
+          </button>
           <div className="flex items-center gap-2 text-sm font-medium text-ink">
             {mergeBillEnabled && (
               <button
@@ -299,7 +349,7 @@ export default function PosPage() {
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {products.map((p) => (
-                <ProductCard key={p.id} product={p} onSelect={cart.addProduct} />
+                <ProductCard key={p.id} product={p} onSelect={handleAddProduct} />
               ))}
             </div>
           )}

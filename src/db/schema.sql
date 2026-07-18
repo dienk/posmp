@@ -27,7 +27,13 @@ CREATE TABLE IF NOT EXISTS products (
     category_id INTEGER,
     name TEXT NOT NULL,
     sku TEXT UNIQUE,
+    barcode TEXT,                     -- barcode untuk mode scan kasir
     price REAL NOT NULL,
+    cost_price REAL DEFAULT 0,        -- harga modal / HPP
+    unit TEXT DEFAULT 'pcs',          -- satuan jual (pcs, box, kg, dll)
+    min_stock INTEGER DEFAULT 0,      -- stok minimum (titik pemesanan ulang)
+    description TEXT,                 -- deskripsi produk
+    is_active INTEGER NOT NULL DEFAULT 1,
     image_path TEXT,
     FOREIGN KEY(category_id) REFERENCES categories(id)
 );

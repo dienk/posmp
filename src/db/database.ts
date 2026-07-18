@@ -145,6 +145,23 @@ function migrateSchema(db: Database): boolean {
     db.run('ALTER TABLE transactions ADD COLUMN note TEXT')
     changed = true
   }
+
+  // Kolom detail tambahan pada master produk.
+  const productCols = columnsOf('products')
+  const productAdds: [string, string][] = [
+    ['barcode', 'TEXT'],
+    ['cost_price', 'REAL DEFAULT 0'],
+    ['unit', "TEXT DEFAULT 'pcs'"],
+    ['min_stock', 'INTEGER DEFAULT 0'],
+    ['description', 'TEXT'],
+    ['is_active', 'INTEGER NOT NULL DEFAULT 1'],
+  ]
+  for (const [name, def] of productAdds) {
+    if (!productCols.has(name)) {
+      db.run(`ALTER TABLE products ADD COLUMN ${name} ${def}`)
+      changed = true
+    }
+  }
   return changed
 }
 

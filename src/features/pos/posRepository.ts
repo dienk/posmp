@@ -37,13 +37,14 @@ export function fetchProducts(outletId: number, categoryId?: number, keyword?: s
   }
   const whereSql = where.length ? `AND ${where.join(' AND ')}` : ''
   return query<Product>(
-    `SELECT p.id, p.category_id, p.name, p.sku, p.price, p.image_path,
+    `SELECT p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path,
             c.name AS category_name,
             COALESCE(os.stock, 0) AS stock
      FROM products p
      LEFT JOIN categories c ON c.id = p.category_id
      LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
-     WHERE 1=1 ${whereSql}
+     WHERE p.is_active = 1 ${whereSql}
      ORDER BY p.name`,
     params,
   )

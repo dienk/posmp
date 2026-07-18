@@ -14,7 +14,20 @@ import {
   type ProductInput,
 } from './productsRepository'
 
-const EMPTY: ProductInput = { categoryId: null, name: '', sku: '', price: 0 }
+const EMPTY: ProductInput = {
+  categoryId: null,
+  name: '',
+  sku: '',
+  barcode: '',
+  price: 0,
+  costPrice: 0,
+  unit: 'pcs',
+  minStock: 0,
+  description: '',
+  isActive: 1,
+}
+
+const UNITS = ['pcs', 'porsi', 'gelas', 'botol', 'box', 'pack', 'kg', 'gram', 'liter']
 
 export default function ProductsPage() {
   const { settings } = useSettings()
@@ -43,7 +56,10 @@ export default function ProductsPage() {
     const k = keyword.trim().toLowerCase()
     if (!k) return products
     return products.filter(
-      (p) => p.name.toLowerCase().includes(k) || (p.sku ?? '').toLowerCase().includes(k),
+      (p) =>
+        p.name.toLowerCase().includes(k) ||
+        (p.sku ?? '').toLowerCase().includes(k) ||
+        (p.barcode ?? '').toLowerCase().includes(k),
     )
   }, [products, keyword])
 
@@ -52,7 +68,18 @@ export default function ProductsPage() {
     setEditingId('new')
   }
   const startEdit = (p: Product) => {
-    setForm({ categoryId: p.category_id, name: p.name, sku: p.sku, price: p.price })
+    setForm({
+      categoryId: p.category_id,
+      name: p.name,
+      sku: p.sku ?? '',
+      barcode: p.barcode ?? '',
+      price: p.price,
+      costPrice: p.cost_price ?? 0,
+      unit: p.unit ?? 'pcs',
+      minStock: p.min_stock ?? 0,
+      description: p.description ?? '',
+      isActive: p.is_active ?? 1,
+    })
     setEditingId(p.id)
   }
   const cancel = () => {
@@ -121,43 +148,66 @@ export default function ProductsPage() {
             <thead>
               <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
                 <th className="px-4 py-3">Nama</th>
+                <th className="px-4 py-3">Barcode / SKU</th>
                 <th className="px-4 py-3">Kategori</th>
+                <th className="px-4 py-3 text-right">Modal</th>
                 <th className="px-4 py-3 text-right">Harga</th>
                 <th className="px-4 py-3 text-right">Stok</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p) => (
-                <tr key={p.id} className="border-b border-black/5 hover:bg-background">
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-ink">{p.name}</p>
-                    <p className="text-xs text-ink-soft">{p.sku ?? '—'}</p>
-                  </td>
-                  <td className="px-4 py-3 text-ink-soft">{p.category_name ?? '—'}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-ink">
-                    {formatRupiah(p.price)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-ink-soft">{p.stock}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => startEdit(p)}
-                      className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => remove(p.id)}
-                      className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                    >
-                      Hapus
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((p) => {
+                const lowStock = (p.stock ?? 0) <= (p.min_stock ?? 0)
+                return (
+                  <tr key={p.id} className="border-b border-black/5 hover:bg-background">
+                    <td className="px-4 py-3">
+                      <p className="flex items-center gap-2 font-semibold text-ink">
+                        {p.name}
+                        {p.is_active !== 1 && (
+                          <span className="rounded-full bg-ink-soft/15 px-2 py-0.5 text-[10px] font-semibold text-ink-soft">
+                            Nonaktif
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-ink-soft">{p.unit ?? 'pcs'}</p>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-ink-soft">
+                      <p>{p.barcode ?? '—'}</p>
+                      <p>{p.sku ?? '—'}</p>
+                    </td>
+                    <td className="px-4 py-3 text-ink-soft">{p.category_name ?? '—'}</td>
+                    <td className="px-4 py-3 text-right text-ink-soft">
+                      {formatRupiah(p.cost_price ?? 0)}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold text-ink">
+                      {formatRupiah(p.price)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={lowStock ? 'font-semibold text-status-occupied' : 'text-ink-soft'}>
+                        {p.stock}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => startEdit(p)}
+                        className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => remove(p.id)}
+                        className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
+                      >
+                        Hapus
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-ink-soft">
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-ink-soft">
                     Tidak ada produk.
                   </td>
                 </tr>
@@ -174,18 +224,35 @@ export default function ProductsPage() {
                 {editingId === 'new' ? 'Produk Baru' : 'Edit Produk'}
               </h2>
               <div className="space-y-3">
-                <input
-                  className={inputCls}
-                  placeholder="Nama produk"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-                <input
-                  className={inputCls}
-                  placeholder="SKU (opsional)"
-                  value={form.sku ?? ''}
-                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                />
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-ink-soft">Nama produk</span>
+                  <input
+                    className={inputCls}
+                    placeholder="Nama produk"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">SKU</span>
+                    <input
+                      className={inputCls}
+                      placeholder="mis. MKN-001"
+                      value={form.sku ?? ''}
+                      onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">Barcode</span>
+                    <input
+                      className={inputCls}
+                      placeholder="Scan / ketik barcode"
+                      value={form.barcode ?? ''}
+                      onChange={(e) => setForm({ ...form, barcode: e.target.value })}
+                    />
+                  </label>
+                </div>
                 <label className="block">
                   <span className="mb-1 block text-xs font-medium text-ink-soft">Kategori</span>
                   <select
@@ -203,14 +270,70 @@ export default function ProductsPage() {
                     ))}
                   </select>
                 </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">Harga jual (Rp)</span>
+                    <input
+                      type="number"
+                      className={inputCls}
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">Harga modal (Rp)</span>
+                    <input
+                      type="number"
+                      className={inputCls}
+                      value={form.costPrice}
+                      onChange={(e) => setForm({ ...form, costPrice: Number(e.target.value) })}
+                    />
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">Satuan</span>
+                    <input
+                      className={inputCls}
+                      list="unit-options"
+                      placeholder="pcs"
+                      value={form.unit ?? ''}
+                      onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                    />
+                    <datalist id="unit-options">
+                      {UNITS.map((u) => (
+                        <option key={u} value={u} />
+                      ))}
+                    </datalist>
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">Stok minimum</span>
+                    <input
+                      type="number"
+                      className={inputCls}
+                      value={form.minStock}
+                      onChange={(e) => setForm({ ...form, minStock: Number(e.target.value) })}
+                    />
+                  </label>
+                </div>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Harga (Rp)</span>
-                  <input
-                    type="number"
-                    className={inputCls}
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                  <span className="mb-1 block text-xs font-medium text-ink-soft">Deskripsi</span>
+                  <textarea
+                    rows={2}
+                    className={inputCls + ' resize-none'}
+                    placeholder="Deskripsi produk (opsional)"
+                    value={form.description ?? ''}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
                   />
+                </label>
+                <label className="flex items-center gap-2 text-sm text-ink">
+                  <input
+                    type="checkbox"
+                    checked={form.isActive === 1}
+                    onChange={(e) => setForm({ ...form, isActive: e.target.checked ? 1 : 0 })}
+                    className="h-4 w-4 accent-status-occupied"
+                  />
+                  Produk aktif (tampil di kasir)
                 </label>
                 <div className="flex gap-2">
                   <button

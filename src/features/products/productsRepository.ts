@@ -42,9 +42,12 @@ export async function deleteCategory(id: number): Promise<void> {
   await persist()
 }
 
+const PRODUCT_COLS = `p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path`
+
 export function listProducts(outletId: number): Product[] {
   return query<Product>(
-    `SELECT p.id, p.category_id, p.name, p.sku, p.price, p.image_path,
+    `SELECT ${PRODUCT_COLS},
             c.name AS category_name,
             COALESCE(os.stock, 0) AS stock
      FROM products p
@@ -55,11 +58,39 @@ export function listProducts(outletId: number): Product[] {
   )
 }
 
+/**
+ * Cari satu produk aktif berdasarkan barcode (atau SKU) persis — untuk mode
+ * scan di kasir. Mengembalikan produk + stok pada outlet aktif, atau null.
+ */
+export function findByBarcode(code: string, outletId: number): Product | null {
+  const c = code.trim()
+  if (!c) return null
+  return (
+    query<Product>(
+      `SELECT ${PRODUCT_COLS},
+              c.name AS category_name,
+              COALESCE(os.stock, 0) AS stock
+       FROM products p
+       LEFT JOIN categories c ON c.id = p.category_id
+       LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
+       WHERE p.is_active = 1 AND (p.barcode = ? OR p.sku = ?)
+       LIMIT 1`,
+      [outletId, c, c],
+    )[0] ?? null
+  )
+}
+
 export interface ProductInput {
   categoryId: number | null
   name: string
   sku: string | null
+  barcode: string | null
   price: number
+  costPrice: number
+  unit: string | null
+  minStock: number
+  description: string | null
+  isActive: number
 }
 
 /** Buat produk baru + baris stok awal (0) pada outlet aktif, satu transaksi SQL. */
@@ -68,12 +99,23 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
   let id = 0
   db.run('BEGIN')
   try {
-    db.run('INSERT INTO products (category_id, name, sku, price) VALUES (?, ?, ?, ?)', [
-      input.categoryId,
-      input.name.trim(),
-      input.sku?.trim() || null,
-      input.price,
-    ])
+    db.run(
+      `INSERT INTO products
+         (category_id, name, sku, barcode, price, cost_price, unit, min_stock, description, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        input.categoryId,
+        input.name.trim(),
+        input.sku?.trim() || null,
+        input.barcode?.trim() || null,
+        input.price,
+        input.costPrice,
+        input.unit?.trim() || 'pcs',
+        input.minStock,
+        input.description?.trim() || null,
+        input.isActive,
+      ],
+    )
     id = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
     db.run('INSERT INTO outlet_stocks (outlet_id, product_id, stock) VALUES (?, ?, 0)', [
       outletId,
@@ -89,13 +131,25 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
 }
 
 export async function updateProduct(id: number, input: ProductInput): Promise<void> {
-  await execute('UPDATE products SET category_id = ?, name = ?, sku = ?, price = ? WHERE id = ?', [
-    input.categoryId,
-    input.name.trim(),
-    input.sku?.trim() || null,
-    input.price,
-    id,
-  ])
+  await execute(
+    `UPDATE products
+     SET category_id = ?, name = ?, sku = ?, barcode = ?, price = ?, cost_price = ?,
+         unit = ?, min_stock = ?, description = ?, is_active = ?
+     WHERE id = ?`,
+    [
+      input.categoryId,
+      input.name.trim(),
+      input.sku?.trim() || null,
+      input.barcode?.trim() || null,
+      input.price,
+      input.costPrice,
+      input.unit?.trim() || 'pcs',
+      input.minStock,
+      input.description?.trim() || null,
+      input.isActive,
+      id,
+    ],
+  )
 }
 
 /** Hapus produk. Menolak bila sudah dipakai transaksi/penerimaan stok. */
