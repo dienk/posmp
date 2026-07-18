@@ -3,6 +3,22 @@ import { generateInvoiceNumber } from '../../lib/format'
 import { publish } from '../../lib/realtime'
 import type { CartItem, Category, FacilityType, Product } from '../../types'
 
+export type PaymentMethod =
+  | 'CASH'
+  | 'DEBIT_CARD'
+  | 'CREDIT_CARD'
+  | 'QRIS'
+  | 'VOUCHER'
+
+export interface PaymentInput {
+  method: PaymentMethod
+  amountPaid: number // nilai yang diakui sebagai pembayaran (maks. sisa tagihan)
+  tenderedAmount: number // uang fisik/nominal diserahkan
+  changeAmount?: number
+  qrisReference?: string
+  voucherId?: number
+}
+
 export function fetchCategories(): Category[] {
   return query<Category>('SELECT id, name, color_code FROM categories ORDER BY id')
 }
@@ -49,6 +65,8 @@ export interface SaveOrderInput {
   memberId?: number
   /** Rp per 1 poin (mis. 1000 = 1 poin per Rp1.000). 0/undefined = tanpa poin. */
   pointsPerAmount?: number
+  /** Rincian pembayaran berganda; dicatat ke transaction_payments (status COMPLETED). */
+  payments?: PaymentInput[]
   /** Terbitkan tiket ke KDS (fire to kitchen). Default true untuk pesanan F&B. */
   sendToKitchen?: boolean
 }
@@ -149,6 +167,25 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
     // Catat pemakaian voucher.
     if (input.voucherId) {
       db.run('UPDATE vouchers SET used_count = used_count + 1 WHERE id = ?', [input.voucherId])
+    }
+
+    // Rincian pembayaran berganda (Cash/Debit/Credit/QRIS/Voucher-as-tender).
+    for (const p of input.payments ?? []) {
+      db.run(
+        `INSERT INTO transaction_payments
+           (transaction_id, payment_method, amount_paid, tendered_amount, change_amount,
+            voucher_id, qris_reference_number)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          transactionId,
+          p.method,
+          p.amountPaid,
+          p.tenderedAmount,
+          p.changeAmount ?? 0,
+          p.voucherId ?? null,
+          p.qrisReference ?? null,
+        ],
+      )
     }
 
     // Akumulasi poin loyalitas member + audit di point_logs.

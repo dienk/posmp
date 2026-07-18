@@ -8,9 +8,19 @@ import {
   listTransactions,
   processRefund,
   transactionItems,
+  transactionPayments,
   type TxItem,
+  type TxPayment,
   type TxSummary,
 } from './historyRepository'
+
+const METHOD_LABEL: Record<string, string> = {
+  CASH: 'Tunai',
+  QRIS: 'QRIS',
+  DEBIT_CARD: 'Debit',
+  CREDIT_CARD: 'Kredit',
+  VOUCHER: 'Voucher',
+}
 
 const SOURCE_LABEL: Record<string, string> = {
   POS_OFFLINE: 'Kasir',
@@ -27,6 +37,7 @@ export default function HistoryPage() {
   const [txs, setTxs] = useState<TxSummary[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [items, setItems] = useState<TxItem[]>([])
+  const [payments, setPayments] = useState<TxPayment[]>([])
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -37,6 +48,7 @@ export default function HistoryPage() {
 
   useEffect(() => {
     setItems(selectedId ? transactionItems(selectedId) : [])
+    setPayments(selectedId ? transactionPayments(selectedId) : [])
     setReason('')
   }, [selectedId])
 
@@ -134,6 +146,33 @@ export default function HistoryPage() {
                 <span>Total</span>
                 <span>{formatRupiah(selected.total_amount)}</span>
               </div>
+
+              {payments.length > 0 && (
+                <div className="mt-3 rounded-lg bg-background p-3">
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-ink-soft">
+                    Pembayaran
+                  </p>
+                  <ul className="space-y-0.5 text-sm">
+                    {payments.map((p, i) => (
+                      <li key={i} className="flex justify-between text-ink">
+                        <span>
+                          {METHOD_LABEL[p.payment_method] ?? p.payment_method}
+                          {p.qris_reference_number ? ` · ${p.qris_reference_number}` : ''}
+                        </span>
+                        <span>{formatRupiah(p.amount_paid)}</span>
+                      </li>
+                    ))}
+                    {payments.some((p) => p.change_amount > 0) && (
+                      <li className="flex justify-between text-status-empty">
+                        <span>Kembalian</span>
+                        <span>
+                          {formatRupiah(payments.reduce((s, p) => s + p.change_amount, 0))}
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
 
               {selected.status === 'REFUNDED' ? (
                 <div className="mt-4 rounded-lg bg-status-occupied/10 px-3 py-2 text-center text-sm font-semibold text-status-occupied">

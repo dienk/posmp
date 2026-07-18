@@ -6,9 +6,10 @@ import { useSettings } from '../../lib/SettingsContext'
 import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
-import { fetchCategories, fetchProducts, saveOrder } from './posRepository'
+import { fetchCategories, fetchProducts, saveOrder, type PaymentInput } from './posRepository'
 import { validateVoucher } from '../vouchers/voucherRepository'
 import { listMembers, type Member } from '../members/membersRepository'
+import PaymentModal from './PaymentModal'
 import { useCart } from './useCart'
 
 export default function PosPage() {
@@ -35,8 +36,13 @@ export default function PosPage() {
   const [voucherMessage, setVoucherMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [member, setMember] = useState<Member | null>(null)
   const [memberQuery, setMemberQuery] = useState('')
+  const [showPayment, setShowPayment] = useState(false)
 
   const pointsPerAmount = getNumberSetting(settings, 'points_per_amount', 0)
+
+  // Total tagihan berjalan (untuk modal pembayaran).
+  const orderTax = taxEnabled ? Math.round((cart.subtotal - discount) * taxRate) : 0
+  const orderTotal = cart.subtotal - Math.min(discount, cart.subtotal) + orderTax
 
   useEffect(() => {
     setCategories(fetchCategories())
@@ -84,7 +90,7 @@ export default function PosPage() {
     }
   }
 
-  const finishOrder = async (status: 'DRAFT' | 'COMPLETED') => {
+  const finishOrder = async (status: 'DRAFT' | 'COMPLETED', payments?: PaymentInput[]) => {
     if (cart.items.length === 0 || saving) return
     setSaving(true)
     try {
@@ -101,6 +107,7 @@ export default function PosPage() {
         voucherId,
         memberId: member?.id,
         pointsPerAmount,
+        payments,
       })
       showToast(
         status === 'DRAFT'
@@ -219,9 +226,21 @@ export default function PosPage() {
           onQuantityChange={cart.setQuantity}
           onRemove={cart.removeProduct}
           onSaveDraft={() => finishOrder('DRAFT')}
-          onPay={() => finishOrder('COMPLETED')}
+          onPay={() => setShowPayment(true)}
         />
       </div>
+
+      {/* Modal pembayaran berganda */}
+      {showPayment && (
+        <PaymentModal
+          total={orderTotal}
+          onCancel={() => setShowPayment(false)}
+          onConfirm={(payments) => {
+            setShowPayment(false)
+            finishOrder('COMPLETED', payments)
+          }}
+        />
+      )}
 
       {/* Toast */}
       {toast && (

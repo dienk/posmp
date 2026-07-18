@@ -36,6 +36,22 @@ export function listTransactions(outletId: number, limit = 40): TxSummary[] {
   )
 }
 
+export interface TxPayment {
+  payment_method: string
+  amount_paid: number
+  tendered_amount: number
+  change_amount: number
+  qris_reference_number: string | null
+}
+
+export function transactionPayments(transactionId: number): TxPayment[] {
+  return query<TxPayment>(
+    `SELECT payment_method, amount_paid, tendered_amount, change_amount, qris_reference_number
+     FROM transaction_payments WHERE transaction_id = ? ORDER BY id`,
+    [transactionId],
+  )
+}
+
 export function transactionItems(transactionId: number): TxItem[] {
   return query<TxItem>(
     `SELECT d.product_id, p.name, d.quantity, d.unit_price, d.subtotal
