@@ -15,8 +15,10 @@ const NAV: NavItem[] = [
   { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout' },
   { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds' },
   { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue' },
+  { to: '/members', label: 'Member', icon: '⭐' },
   { to: '/vouchers', label: 'Voucher', icon: '🎟️' },
   { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' },
+  { to: '/reports', label: 'Laporan', icon: '📊' },
 ]
 
 export default function AppShell() {

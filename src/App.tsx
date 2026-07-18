@@ -11,6 +11,8 @@ import KdsPage from './features/kds/KdsPage'
 import VoucherPage from './features/vouchers/VoucherPage'
 import MarketplacePage from './features/marketplace/MarketplacePage'
 import SelfOrderPage from './features/selforder/SelfOrderPage'
+import MembersPage from './features/members/MembersPage'
+import ReportsPage from './features/reports/ReportsPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -24,6 +26,8 @@ const router = createHashRouter([
       { path: 'kds', element: <KdsPage /> },
       { path: 'vouchers', element: <VoucherPage /> },
       { path: 'marketplace', element: <MarketplacePage /> },
+      { path: 'members', element: <MembersPage /> },
+      { path: 'reports', element: <ReportsPage /> },
     ],
   },
   // Tampilan tanpa shell/navigasi (layar publik & pelanggan).

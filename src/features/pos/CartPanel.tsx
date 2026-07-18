@@ -18,6 +18,11 @@ interface Props {
   voucherCode: string
   discount: number
   voucherMessage: { ok: boolean; text: string } | null
+  member: { name: string; points: number } | null
+  memberQuery: string
+  onMemberQueryChange: (q: string) => void
+  onFindMember: () => void
+  onClearMember: () => void
   onVoucherCodeChange: (code: string) => void
   onApplyVoucher: () => void
   onRemoveVoucher: () => void
@@ -59,6 +64,40 @@ export default function CartPanel(props: Props) {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Member loyalitas */}
+      <div className="px-4 pt-3">
+        {props.member ? (
+          <div className="flex items-center justify-between rounded-lg bg-brand-soft px-3 py-2">
+            <span className="text-xs font-semibold text-ink">
+              ★ {props.member.name} · {props.member.points} poin
+            </span>
+            <button
+              onClick={props.onClearMember}
+              className="text-xs font-semibold text-status-occupied hover:opacity-70"
+            >
+              Lepas
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              value={props.memberQuery}
+              onChange={(e) => props.onMemberQueryChange(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && props.onFindMember()}
+              placeholder="No. HP / nama member"
+              className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+            />
+            <button
+              onClick={props.onFindMember}
+              disabled={!props.memberQuery.trim()}
+              className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+            >
+              Cari
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="px-4 pt-3 text-xs font-medium uppercase tracking-wide text-ink-soft">

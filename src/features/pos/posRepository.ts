@@ -46,6 +46,9 @@ export interface SaveOrderInput {
   status: 'DRAFT' | 'COMPLETED'
   discountAmount?: number
   voucherId?: number
+  memberId?: number
+  /** Rp per 1 poin (mis. 1000 = 1 poin per Rp1.000). 0/undefined = tanpa poin. */
+  pointsPerAmount?: number
   /** Terbitkan tiket ke KDS (fire to kitchen). Default true untuk pesanan F&B. */
   sendToKitchen?: boolean
 }
@@ -57,6 +60,7 @@ export interface SaveOrderResult {
   discount: number
   tax: number
   total: number
+  pointsEarned: number
 }
 
 /**
@@ -73,14 +77,20 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
   const invoiceNumber = generateInvoiceNumber()
   const orderSource = input.orderSource ?? 'POS_OFFLINE'
   const sendToKitchen = input.sendToKitchen ?? true
+  // Poin hanya dihitung saat transaksi lunas & ada member terpasang.
+  const pointsEarned =
+    input.status === 'COMPLETED' && input.memberId && input.pointsPerAmount
+      ? Math.floor(total / input.pointsPerAmount)
+      : 0
 
   db.run('BEGIN')
   try {
     db.run(
       `INSERT INTO transactions
          (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
-          voucher_id, subtotal_amount, discount_amount, tax_amount, total_amount, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          voucher_id, member_id, subtotal_amount, discount_amount, tax_amount, points_earned,
+          total_amount, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.outletId,
         invoiceNumber,
@@ -89,9 +99,11 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
         input.tableNumber ?? null,
         input.queueNumber ?? null,
         input.voucherId ?? null,
+        input.memberId ?? null,
         subtotal,
         discount,
         tax,
+        pointsEarned,
         total,
         input.status,
       ],
@@ -139,6 +151,16 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
       db.run('UPDATE vouchers SET used_count = used_count + 1 WHERE id = ?', [input.voucherId])
     }
 
+    // Akumulasi poin loyalitas member + audit di point_logs.
+    if (input.memberId && pointsEarned > 0) {
+      db.run('UPDATE members SET points = points + ? WHERE id = ?', [pointsEarned, input.memberId])
+      db.run(
+        `INSERT INTO point_logs (member_id, transaction_id, points_change, change_reason)
+         VALUES (?, ?, ?, 'TRANSACTION_EARNED')`,
+        [input.memberId, transactionId, pointsEarned],
+      )
+    }
+
     // Integrasi Table Layout: DRAFT menempati meja, pembayaran melunasi & mengosongkan.
     if (input.tableNumber) {
       const tableStatus = input.status === 'DRAFT' ? 'OCCUPIED' : 'EMPTY'
@@ -163,5 +185,5 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
     'SELECT id FROM transactions WHERE invoice_number = ?',
     [invoiceNumber],
   )[0].id
-  return { transactionId, invoiceNumber, subtotal, discount, tax, total }
+  return { transactionId, invoiceNumber, subtotal, discount, tax, total, pointsEarned }
 }

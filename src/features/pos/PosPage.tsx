@@ -8,6 +8,7 @@ import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
 import { fetchCategories, fetchProducts, saveOrder } from './posRepository'
 import { validateVoucher } from '../vouchers/voucherRepository'
+import { listMembers, type Member } from '../members/membersRepository'
 import { useCart } from './useCart'
 
 export default function PosPage() {
@@ -32,6 +33,10 @@ export default function PosPage() {
   const [voucherId, setVoucherId] = useState<number | undefined>()
   const [discount, setDiscount] = useState(0)
   const [voucherMessage, setVoucherMessage] = useState<{ ok: boolean; text: string } | null>(null)
+  const [member, setMember] = useState<Member | null>(null)
+  const [memberQuery, setMemberQuery] = useState('')
+
+  const pointsPerAmount = getNumberSetting(settings, 'points_per_amount', 0)
 
   useEffect(() => {
     setCategories(fetchCategories())
@@ -53,6 +58,16 @@ export default function PosPage() {
     setVoucherId(undefined)
     setDiscount(0)
     setVoucherMessage(null)
+  }
+
+  const handleFindMember = () => {
+    const found = listMembers(memberQuery)[0]
+    if (found) {
+      setMember(found)
+      setMemberQuery('')
+    } else {
+      showToast('Member tidak ditemukan.')
+    }
   }
 
   const handleApplyVoucher = () => {
@@ -84,14 +99,19 @@ export default function PosPage() {
         status,
         discountAmount: discount,
         voucherId,
+        memberId: member?.id,
+        pointsPerAmount,
       })
       showToast(
         status === 'DRAFT'
           ? `Draft tersimpan · ${result.invoiceNumber}`
-          : `Pembayaran selesai · ${result.invoiceNumber}`,
+          : `Pembayaran selesai · ${result.invoiceNumber}` +
+              (result.pointsEarned > 0 ? ` · +${result.pointsEarned} poin` : ''),
       )
       cart.clear()
       clearVoucher()
+      setMember(null)
+      setMemberQuery('')
       setCustomerName('')
       setInvoiceNumber(generateInvoiceNumber())
       refreshProducts()
@@ -186,6 +206,11 @@ export default function PosPage() {
           voucherCode={voucherCode}
           discount={discount}
           voucherMessage={voucherMessage}
+          member={member ? { name: member.name, points: member.points } : null}
+          memberQuery={memberQuery}
+          onMemberQueryChange={setMemberQuery}
+          onFindMember={handleFindMember}
+          onClearMember={() => setMember(null)}
           onVoucherCodeChange={setVoucherCode}
           onApplyVoucher={handleApplyVoucher}
           onRemoveVoucher={clearVoucher}
