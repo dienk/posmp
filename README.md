@@ -90,9 +90,9 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/queue` | Sistem Antrean (operator) |
 | `#/members` | Member & Loyalitas Poin |
 | `#/stockin` | Stok Masuk & Supplier |
-| `#/preorder` | Pre-Order & Uang Muka |
+| `#/history` | Transaksi › Riwayat & Refund |
+| `#/preorder` | Transaksi › Pre-Order & Uang Muka |
 | `#/installments` | Cicilan Internal |
-| `#/history` | Riwayat Transaksi & Refund |
 | `#/vouchers` | Voucher Generator |
 | `#/marketplace` | Integrasi Marketplace (config) |
 | `#/reports` | Dashboard & Laporan (+ Ekspor CSV) |

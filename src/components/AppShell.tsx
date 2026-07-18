@@ -12,23 +12,33 @@ interface NavItem {
   moduleKey?: string
 }
 
-const NAV: NavItem[] = [
-  { to: '/', label: 'Kasir', icon: '🧾' },
-  { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout' },
-  { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds' },
-  { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue' },
-  { to: '/members', label: 'Member', icon: '⭐' },
-  { to: '/stockin', label: 'Stok', icon: '📥' },
-  { to: '/preorder', label: 'Pre-Order', icon: '📅' },
-  { to: '/installments', label: 'Cicilan', icon: '💳' },
-  { to: '/history', label: 'Riwayat', icon: '🧾' },
-  { to: '/vouchers', label: 'Voucher', icon: '🎟️' },
-  { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' },
-  { to: '/reports', label: 'Laporan', icon: '📊' },
-]
+interface NavChild {
+  to: string
+  label: string
+  short: string
+  icon: string
+}
 
-// Grup "Setelan" beserta sub-menunya.
-const SETTINGS_GROUP = {
+interface NavGroupDef {
+  label: string
+  icon: string
+  children: NavChild[]
+}
+
+type NavEntry = { kind: 'link'; item: NavItem } | { kind: 'group'; group: NavGroupDef }
+
+// Grup "Transaksi" (Riwayat & Pre-Order).
+const TRANSAKSI_GROUP: NavGroupDef = {
+  label: 'Transaksi',
+  icon: '💰',
+  children: [
+    { to: '/history', label: 'Riwayat', short: 'Riwayat', icon: '🧾' },
+    { to: '/preorder', label: 'Pre-Order', short: 'Pre-Order', icon: '📅' },
+  ],
+}
+
+// Grup "Setelan" (Pengaturan & Desain Struk).
+const SETTINGS_GROUP: NavGroupDef = {
   label: 'Setelan',
   icon: '⚙️',
   children: [
@@ -37,11 +47,25 @@ const SETTINGS_GROUP = {
   ],
 }
 
+const SIDEBAR: NavEntry[] = [
+  { kind: 'link', item: { to: '/', label: 'Kasir', icon: '🧾' } },
+  { kind: 'group', group: TRANSAKSI_GROUP },
+  { kind: 'link', item: { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout' } },
+  { kind: 'link', item: { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds' } },
+  { kind: 'link', item: { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue' } },
+  { kind: 'link', item: { to: '/members', label: 'Member', icon: '⭐' } },
+  { kind: 'link', item: { to: '/stockin', label: 'Stok', icon: '📥' } },
+  { kind: 'link', item: { to: '/installments', label: 'Cicilan', icon: '💳' } },
+  { kind: 'link', item: { to: '/vouchers', label: 'Voucher', icon: '🎟️' } },
+  { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' } },
+  { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📊' } },
+  { kind: 'group', group: SETTINGS_GROUP },
+]
+
 export default function AppShell() {
   const { settings } = useSettings()
   const conn = useConnection()
   const { sidebarOpen, toggleSidebar } = useUI()
-  const items = NAV.filter((n) => !n.moduleKey || isModuleEnabled(settings, n.moduleKey))
 
   return (
     <div className="flex h-full">
@@ -71,26 +95,30 @@ export default function AppShell() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
-          {items.map((n) => (
-            <NavLink
-              key={n.to}
-              to={n.to}
-              end={n.to === '/'}
-              title={n.label}
-              className={({ isActive }) =>
-                'flex items-center rounded-xl font-medium transition ' +
-                (sidebarOpen
-                  ? 'gap-3 px-3 py-2.5 text-sm '
-                  : 'flex-col gap-1 py-2 text-[11px] w-16 ') +
-                (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
-              }
-            >
-              <span className="text-xl leading-none">{n.icon}</span>
-              {n.label}
-            </NavLink>
-          ))}
-
-          <SettingsGroup open={sidebarOpen} />
+          {SIDEBAR.map((entry, i) => {
+            if (entry.kind === 'group')
+              return <NavGroup key={`g-${i}`} group={entry.group} open={sidebarOpen} />
+            const n = entry.item
+            if (n.moduleKey && !isModuleEnabled(settings, n.moduleKey)) return null
+            return (
+              <NavLink
+                key={n.to}
+                to={n.to}
+                end={n.to === '/'}
+                title={n.label}
+                className={({ isActive }) =>
+                  'flex items-center rounded-xl font-medium transition ' +
+                  (sidebarOpen
+                    ? 'gap-3 px-3 py-2.5 text-sm '
+                    : 'flex-col gap-1 py-2 text-[11px] w-16 ') +
+                  (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
+                }
+              >
+                <span className="text-xl leading-none">{n.icon}</span>
+                {n.label}
+              </NavLink>
+            )
+          })}
         </div>
 
         <ConnectionBadge
@@ -107,9 +135,9 @@ export default function AppShell() {
   )
 }
 
-function SettingsGroup({ open }: { open: boolean }) {
+function NavGroup({ group, open }: { group: NavGroupDef; open: boolean }) {
   const location = useLocation()
-  const childActive = SETTINGS_GROUP.children.some((c) => location.pathname === c.to)
+  const childActive = group.children.some((c) => location.pathname === c.to)
   const [expanded, setExpanded] = useState(childActive)
   useEffect(() => {
     if (childActive) setExpanded(true)
@@ -119,7 +147,7 @@ function SettingsGroup({ open }: { open: boolean }) {
   if (!open) {
     return (
       <>
-        {SETTINGS_GROUP.children.map((c) => (
+        {group.children.map((c) => (
           <NavLink
             key={c.to}
             to={c.to}
@@ -137,7 +165,7 @@ function SettingsGroup({ open }: { open: boolean }) {
     )
   }
 
-  // Sidebar terbuka: accordion "Setelan" dengan sub-menu ter-indentasi.
+  // Sidebar terbuka: accordion grup dengan sub-menu ter-indentasi.
   return (
     <div>
       <button
@@ -147,13 +175,13 @@ function SettingsGroup({ open }: { open: boolean }) {
           (childActive ? 'text-ink' : 'text-ink-soft hover:bg-brand-soft')
         }
       >
-        <span className="text-xl leading-none">{SETTINGS_GROUP.icon}</span>
-        <span className="flex-1 text-left">{SETTINGS_GROUP.label}</span>
+        <span className="text-xl leading-none">{group.icon}</span>
+        <span className="flex-1 text-left">{group.label}</span>
         <span className="text-xs">{expanded ? '▾' : '▸'}</span>
       </button>
       {expanded && (
-        <div className="mt-0.5 flex flex-col gap-0.5 border-l border-black/10 pl-3 ml-4">
-          {SETTINGS_GROUP.children.map((c) => (
+        <div className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-black/10 pl-3">
+          {group.children.map((c) => (
             <NavLink
               key={c.to}
               to={c.to}
