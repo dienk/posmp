@@ -218,6 +218,29 @@ function migrateSchema(db: Database): boolean {
     ])
     changed = true
   }
+
+  // Tabel Stock Opname (header + detail) — dibuat untuk database lama.
+  if (!tableExists('stock_opnames')) {
+    db.run(`CREATE TABLE IF NOT EXISTS stock_opnames (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id INTEGER NOT NULL,
+      reference_number TEXT,
+      opname_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+      note TEXT,
+      FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+    )`)
+    db.run(`CREATE TABLE IF NOT EXISTS stock_opname_details (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      opname_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      system_qty INTEGER NOT NULL,
+      physical_qty INTEGER NOT NULL,
+      difference INTEGER NOT NULL,
+      FOREIGN KEY(opname_id) REFERENCES stock_opnames(id),
+      FOREIGN KEY(product_id) REFERENCES products(id)
+    )`)
+    changed = true
+  }
   return changed
 }
 

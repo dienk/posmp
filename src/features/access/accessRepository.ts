@@ -23,6 +23,7 @@ export const PERMISSIONS: { key: string; label: string }[] = [
   { key: 'queue', label: 'Antrean' },
   { key: 'members', label: 'Member' },
   { key: 'stockin', label: 'Stok Masuk' },
+  { key: 'stockopname', label: 'Stock Opname' },
   { key: 'installments', label: 'Cicilan' },
   { key: 'vouchers', label: 'Voucher' },
   { key: 'marketplace', label: 'Marketplace / Channel' },

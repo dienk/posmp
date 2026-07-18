@@ -9,7 +9,7 @@ native (Tauri / Capacitor).
 
 ## Fitur pada foundation ini (Milestone 1)
 
-- ⚙️ Inisialisasi database SQLite lokal dengan **25 tabel** (lihat `src/db/schema.sql`),
+- ⚙️ Inisialisasi database SQLite lokal dengan **27 tabel** (lihat `src/db/schema.sql`),
   dipersist otomatis ke **IndexedDB** — data bertahan walau browser ditutup.
 - 🧩 Modularitas fitur lewat tabel `app_settings` (KDS, Table Layout, Self-Order,
   Marketplace, Queue bisa dinyalakan/dimatikan).
@@ -37,7 +37,7 @@ npm run preview
 
 ```
 src/
-  db/            # schema.sql (25 tabel), database.ts (sql.js + IndexedDB), seed.ts
+  db/            # schema.sql (27 tabel), database.ts (sql.js + IndexedDB), seed.ts
   features/
     pos/         # Layar kasir: PosPage, ProductCard, CartPanel, useCart, posRepository
     tables/      # (roadmap) Interactive Table Layout
@@ -90,6 +90,7 @@ src/
 | **M35** ✅ | **Transaksi Draft** (Transaksi › Draft): daftar bill berstatus DRAFT (invoice, meja, item, total, tanggal) + detail item/catatan; aksi **Batalkan Draft** (`deleteDraft` — hapus draft + tiket dapur + kosongkan meja). Tersegar realtime `order:update`. |
 | **M36** ✅ | **Kasir — Buka Draft**: opsi "📂 Buka Draft" di menu "⋮" memuat bill DRAFT tersimpan kembali ke keranjang (item + catatan + invoice + fasilitas + member) untuk dilanjutkan. Saat disimpan/dibayar, draft lama **dihapus atomik** dalam transaksi SQL yang sama (`saveOrder.replaceDraftId`) sehingga tak duplikat & nomor invoice tetap. |
 | **M37** ✅ | **Setelan Tema lebih detail**: tiap preset kini menampilkan **rincian palet** (7 swatch peran warna + hex). Ditambah **editor Tema Kustom**: color picker per peran (brand/soft/strong, latar, permukaan, teks utama/sekunder) dengan pratinjau langsung & hex; simpan ke `app_settings` (`theme='custom'`, palet JSON di `theme_custom`) dan diterapkan seluruh aplikasi via `ThemeApplier`. |
+| **M38** ✅ | **Modul Stock Opname** (menu Stock Opname): lembar hitung stok fisik vs sistem dengan **mode scan barcode** (scan/ketik barcode + Enter → tambah hitungan fisik) + input/±  manual & selisih per produk; **Simpan Opname** menyetel `outlet_stocks.stock` ke jumlah fisik dan mencatat audit (`stock_opnames` 26 + `stock_opname_details` 27, via migrasi otomatis). Menampilkan opname terakhir. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -117,6 +118,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/queue` | Sistem Antrean (operator) |
 | `#/members` | Member & Loyalitas Poin |
 | `#/stockin` | Stok Masuk & Supplier |
+| `#/stock-opname` | Stock Opname (hitung stok fisik + scan barcode) |
 | `#/history` | Transaksi › Riwayat & Refund |
 | `#/drafts` | Transaksi › Draft (bill tersimpan) |
 | `#/preorder` | Transaksi › Pre-Order & Uang Muka |

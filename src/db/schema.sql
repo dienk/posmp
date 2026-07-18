@@ -1,5 +1,5 @@
 -- ============================================================================
--- POSMerahPutih v1.5 — Skema Database SQLite (25 tabel)
+-- POSMerahPutih v1.5 — Skema Database SQLite (27 tabel)
 -- Local-first: dieksekusi saat inisialisasi database di browser (sql.js).
 -- ============================================================================
 
@@ -337,4 +337,26 @@ CREATE TABLE IF NOT EXISTS taxes (
     description TEXT,
     is_default INTEGER NOT NULL DEFAULT 0,
     is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- 26. Tabel Stock Opname (Header sesi penghitungan stok fisik)
+CREATE TABLE IF NOT EXISTS stock_opnames (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    outlet_id INTEGER NOT NULL,
+    reference_number TEXT,
+    opname_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    note TEXT,
+    FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+);
+
+-- 27. Tabel Detail Stock Opname (stok sistem vs fisik per produk)
+CREATE TABLE IF NOT EXISTS stock_opname_details (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    opname_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    system_qty INTEGER NOT NULL,
+    physical_qty INTEGER NOT NULL,
+    difference INTEGER NOT NULL,
+    FOREIGN KEY(opname_id) REFERENCES stock_opnames(id),
+    FOREIGN KEY(product_id) REFERENCES products(id)
 );

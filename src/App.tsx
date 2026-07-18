@@ -17,6 +17,7 @@ import MembersPage from './features/members/MembersPage'
 import DashboardPage from './features/reports/DashboardPage'
 import LaporanPage from './features/reports/LaporanPage'
 import StockInPage from './features/stockin/StockInPage'
+import StockOpnamePage from './features/stockopname/StockOpnamePage'
 import HistoryPage from './features/history/HistoryPage'
 import DraftsPage from './features/drafts/DraftsPage'
 import PreorderPage from './features/preorder/PreorderPage'
@@ -50,6 +51,7 @@ const router = createHashRouter([
       { path: 'marketplace', element: <MarketplacePage /> },
       { path: 'members', element: <MembersPage /> },
       { path: 'stockin', element: <StockInPage /> },
+      { path: 'stock-opname', element: <StockOpnamePage /> },
       { path: 'preorder', element: <PreorderPage /> },
       { path: 'installments', element: <InstallmentsPage /> },
       { path: 'history', element: <HistoryPage /> },
