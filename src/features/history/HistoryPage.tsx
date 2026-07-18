@@ -4,11 +4,14 @@ import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { publish } from '../../lib/realtime'
 import { useRealtime } from '../../lib/useRealtime'
+import ReceiptModal from '../receipt/ReceiptModal'
 import {
+  getReceipt,
   listTransactions,
   processRefund,
   transactionItems,
   transactionPayments,
+  type ReceiptData,
   type TxItem,
   type TxPayment,
   type TxSummary,
@@ -38,6 +41,7 @@ export default function HistoryPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [items, setItems] = useState<TxItem[]>([])
   const [payments, setPayments] = useState<TxPayment[]>([])
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null)
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -174,6 +178,16 @@ export default function HistoryPage() {
                 </div>
               )}
 
+              <button
+                onClick={() => {
+                  const r = getReceipt(selected.id)
+                  if (r) setReceipt(r)
+                }}
+                className="mt-3 w-full rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+              >
+                🧾 Lihat Struk
+              </button>
+
               {selected.status === 'REFUNDED' ? (
                 <div className="mt-4 rounded-lg bg-status-occupied/10 px-3 py-2 text-center text-sm font-semibold text-status-occupied">
                   Transaksi ini sudah direfund.
@@ -210,6 +224,8 @@ export default function HistoryPage() {
           )}
         </section>
       </div>
+
+      {receipt && <ReceiptModal data={receipt} onClose={() => setReceipt(null)} />}
 
       {toast && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-white shadow-lg">

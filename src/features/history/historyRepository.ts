@@ -36,6 +36,50 @@ export function listTransactions(outletId: number, limit = 40): TxSummary[] {
   )
 }
 
+export interface ReceiptData {
+  outlet: { name: string; address: string | null; phone: string | null }
+  invoice_number: string
+  transaction_date: string
+  order_source: string
+  facility_type: string
+  table_number: string | null
+  member_name: string | null
+  subtotal_amount: number
+  discount_amount: number
+  tax_amount: number
+  total_amount: number
+  points_earned: number
+  status: string
+  items: TxItem[]
+  payments: TxPayment[]
+}
+
+/** Ambil semua data untuk mencetak struk sebuah transaksi. */
+export function getReceipt(transactionId: number): ReceiptData | undefined {
+  const header = query<
+    Omit<ReceiptData, 'outlet' | 'items' | 'payments'> & { outlet_id: number }
+  >(
+    `SELECT t.outlet_id, t.invoice_number, t.transaction_date, t.order_source, t.facility_type,
+            t.table_number, t.subtotal_amount, t.discount_amount, t.tax_amount, t.total_amount,
+            t.points_earned, t.status, m.name AS member_name
+     FROM transactions t
+     LEFT JOIN members m ON m.id = t.member_id
+     WHERE t.id = ?`,
+    [transactionId],
+  )[0]
+  if (!header) return undefined
+  const outlet = query<{ name: string; address: string | null; phone: string | null }>(
+    'SELECT name, address, phone FROM outlets WHERE id = ?',
+    [header.outlet_id],
+  )[0] ?? { name: 'POSMerahPutih', address: null, phone: null }
+  return {
+    ...header,
+    outlet,
+    items: transactionItems(transactionId),
+    payments: transactionPayments(transactionId),
+  }
+}
+
 export interface TxPayment {
   payment_method: string
   amount_paid: number

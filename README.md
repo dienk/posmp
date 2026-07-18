@@ -64,6 +64,7 @@ src/
 | **M9** ✅ | **Cicilan Internal** (PRD 4.5): rencana kredit member (pokok + tenor + bunga flat), angsuran bulanan → sisa berkurang, jatuh tempo maju, status UNPAID→PARTIALLY_PAID→PAID (`transaction_installments`) |
 | **M10** ✅ | **Split Bill** (`parent_transaction_id`): pisah item satu order ke beberapa nota tertaut, **Voucher-as-tender** (PRD 4.4): bayar pakai gift card (`VALUE_DEPOSIT`) di modal pembayaran. Nomor invoice kini ber-suffix urut agar unik. |
 | **M11** ✅ | **Pengaturan Fasilitas** (PRD 4.7): kelola outlet, tarif pajak, rasio poin, dan **toggle modul** (KDS/Meja/Antrean/Self-Order/Marketplace) — perubahan modul langsung memperbarui menu navigasi tanpa reload. |
+| **M12** ✅ | **Struk / Receipt**: lihat & cetak ulang struk transaksi dari Riwayat (header outlet, item, pajak, pembayaran + kembalian, poin). Cetak via iframe tersembunyi. |
 
 ### Sinkronisasi real-time (local-first)
 
