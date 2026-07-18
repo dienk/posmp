@@ -4,7 +4,6 @@ import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
 import {
-  exportTransactionsCsv,
   salesBySource,
   todaySummary,
   topProducts,
@@ -21,7 +20,7 @@ const SOURCE_LABEL: Record<string, string> = {
   TIKTOK: 'TikTok',
 }
 
-export default function ReportsPage() {
+export default function DashboardPage() {
   const { settings } = useSettings()
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
 
@@ -40,30 +39,11 @@ export default function ReportsPage() {
   const maxQty = useMemo(() => Math.max(1, ...top.map((t) => t.qty)), [top])
   const maxSource = useMemo(() => Math.max(1, ...sources.map((s) => s.total)), [sources])
 
-  const handleExport = () => {
-    const csv = exportTransactionsCsv(outletId)
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `laporan-transaksi-outlet${outletId}.csv`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
-  }
-
   return (
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
-        <h1 className="text-lg font-bold text-ink">Dashboard & Laporan</h1>
+        <h1 className="text-lg font-bold text-ink">Dashboard</h1>
         <span className="text-xs text-ink-soft">Ringkasan hari ini</span>
-        <button
-          onClick={handleExport}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
-          ⬇ Ekspor CSV
-        </button>
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
@@ -76,7 +56,6 @@ export default function ReportsPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {/* Penjualan per sumber */}
           <section className="rounded-card bg-white p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Penjualan per Sumber
@@ -106,7 +85,6 @@ export default function ReportsPage() {
             )}
           </section>
 
-          {/* Produk terlaris */}
           <section className="rounded-card bg-white p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Produk Terlaris

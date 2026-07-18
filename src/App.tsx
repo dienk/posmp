@@ -14,7 +14,8 @@ import VoucherPage from './features/vouchers/VoucherPage'
 import MarketplacePage from './features/marketplace/MarketplacePage'
 import SelfOrderPage from './features/selforder/SelfOrderPage'
 import MembersPage from './features/members/MembersPage'
-import ReportsPage from './features/reports/ReportsPage'
+import DashboardPage from './features/reports/DashboardPage'
+import LaporanPage from './features/reports/LaporanPage'
 import StockInPage from './features/stockin/StockInPage'
 import HistoryPage from './features/history/HistoryPage'
 import PreorderPage from './features/preorder/PreorderPage'
@@ -46,7 +47,8 @@ const router = createHashRouter([
       { path: 'preorder', element: <PreorderPage /> },
       { path: 'installments', element: <InstallmentsPage /> },
       { path: 'history', element: <HistoryPage /> },
-      { path: 'reports', element: <ReportsPage /> },
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'reports', element: <LaporanPage /> },
       { path: 'products', element: <ProductsPage /> },
       { path: 'categories', element: <CategoriesPage /> },
       { path: 'contacts', element: <ContactsPage /> },

@@ -79,7 +79,8 @@ const SIDEBAR: NavEntry[] = [
   { kind: 'link', item: { to: '/installments', label: 'Cicilan', icon: '💳', perm: 'installments' } },
   { kind: 'link', item: { to: '/vouchers', label: 'Voucher', icon: '🎟️', perm: 'vouchers' } },
   { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace', perm: 'marketplace' } },
-  { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📊', perm: 'reports' } },
+  { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: '📊', perm: 'reports' } },
+  { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📋', perm: 'reports' } },
   { kind: 'group', group: SETTINGS_GROUP },
 ]
 

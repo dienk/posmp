@@ -103,7 +103,8 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/installments` | Cicilan Internal |
 | `#/vouchers` | Voucher Generator |
 | `#/marketplace` | Integrasi Marketplace (config) |
-| `#/reports` | Dashboard & Laporan (+ Ekspor CSV) |
+| `#/dashboard` | Dashboard manajer (KPI, penjualan per sumber, produk terlaris) |
+| `#/reports` | Laporan transaksi (tabel + Ekspor CSV) |
 | `#/settings` | Setelan › Pengaturan (outlet, pajak, poin, modul) |
 | `#/personas` | Setelan › Persona (pengguna aplikasi) |
 | `#/roles` | Setelan › Peran & Hak Akses |
