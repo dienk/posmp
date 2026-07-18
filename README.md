@@ -89,6 +89,7 @@ src/
 | **M34** ✅ | **Kasir — menu opsi aksi**: "Simpan Bill (Draft)" & "Split Bill" dipindah ke **menu dropdown "⋮"** di **sebelah kiri** tombol "Bayar" (tombol Bayar kini lebih dominan). Menu tutup saat memilih/klik luar; Split Bill nonaktif bila item < 2. |
 | **M35** ✅ | **Transaksi Draft** (Transaksi › Draft): daftar bill berstatus DRAFT (invoice, meja, item, total, tanggal) + detail item/catatan; aksi **Batalkan Draft** (`deleteDraft` — hapus draft + tiket dapur + kosongkan meja). Tersegar realtime `order:update`. |
 | **M36** ✅ | **Kasir — Buka Draft**: opsi "📂 Buka Draft" di menu "⋮" memuat bill DRAFT tersimpan kembali ke keranjang (item + catatan + invoice + fasilitas + member) untuk dilanjutkan. Saat disimpan/dibayar, draft lama **dihapus atomik** dalam transaksi SQL yang sama (`saveOrder.replaceDraftId`) sehingga tak duplikat & nomor invoice tetap. |
+| **M37** ✅ | **Setelan Tema lebih detail**: tiap preset kini menampilkan **rincian palet** (7 swatch peran warna + hex). Ditambah **editor Tema Kustom**: color picker per peran (brand/soft/strong, latar, permukaan, teks utama/sekunder) dengan pratinjau langsung & hex; simpan ke `app_settings` (`theme='custom'`, palet JSON di `theme_custom`) dan diterapkan seluruh aplikasi via `ThemeApplier`. |
 
 ### Sinkronisasi real-time (local-first)
 

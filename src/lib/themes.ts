@@ -77,19 +77,70 @@ export const THEMES: Theme[] = [
 ]
 
 export const DEFAULT_THEME_ID = 'merahputih'
+export const CUSTOM_THEME_ID = 'custom'
 
-/** Terapkan tema ke :root. Tema tak dikenal jatuh ke bawaan (Merah Putih). */
-export function applyTheme(id: string | undefined): void {
-  if (typeof document === 'undefined') return
+/** Peran warna palet + label untuk editor tema kustom. */
+export const PALETTE_ROLES: { key: keyof Theme['vars']; label: string; hint: string }[] = [
+  { key: '--c-brand', label: 'Aksen / Brand', hint: 'Pil kategori, badge member' },
+  { key: '--c-brand-soft', label: 'Aksen Lembut', hint: 'Latar sorotan' },
+  { key: '--c-brand-strong', label: 'Aksen Kuat', hint: 'Tombol brand' },
+  { key: '--c-background', label: 'Latar', hint: 'Latar halaman' },
+  { key: '--c-surface', label: 'Permukaan', hint: 'Kartu produk' },
+  { key: '--c-ink', label: 'Teks Utama', hint: 'Judul & angka' },
+  { key: '--c-ink-soft', label: 'Teks Sekunder', hint: 'Keterangan' },
+]
+
+/** Palet sebuah preset (atau bawaan bila id tak dikenal). */
+export function themeVars(id: string | undefined): Theme['vars'] {
   const theme =
     THEMES.find((x) => x.id === id) ??
     THEMES.find((x) => x.id === DEFAULT_THEME_ID) ??
     THEMES[0]
+  return theme.vars
+}
+
+/**
+ * Terapkan tema ke :root. Untuk id 'custom', pakai `customVars` (channel "R G B");
+ * peran yang tak diisi jatuh ke bawaan. Tema preset tak dikenal → bawaan.
+ */
+export function applyTheme(id: string | undefined, customVars?: Partial<Theme['vars']>): void {
+  if (typeof document === 'undefined') return
   const root = document.documentElement
-  for (const [k, v] of Object.entries(theme.vars)) root.style.setProperty(k, v)
+  const vars: Theme['vars'] =
+    id === CUSTOM_THEME_ID
+      ? { ...themeVars(DEFAULT_THEME_ID), ...(customVars ?? {}) }
+      : themeVars(id)
+  for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v)
 }
 
 /** Warna CSS siap-pakai dari channel (untuk swatch di pemilih tema). */
 export function rgb(channels: string): string {
   return `rgb(${channels})`
+}
+
+/** Channel "R G B" → hex (#rrggbb) untuk input warna. */
+export function channelsToHex(channels: string): string {
+  const [r, g, b] = channels.trim().split(/\s+/).map((n) => Number(n) || 0)
+  const h = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0')
+  return `#${h(r)}${h(g)}${h(b)}`
+}
+
+/** Hex (#rrggbb) → channel "R G B". */
+export function hexToChannels(hex: string): string {
+  const m = hex.replace('#', '')
+  const r = parseInt(m.slice(0, 2), 16)
+  const g = parseInt(m.slice(2, 4), 16)
+  const b = parseInt(m.slice(4, 6), 16)
+  return `${Number.isFinite(r) ? r : 0} ${Number.isFinite(g) ? g : 0} ${Number.isFinite(b) ? b : 0}`
+}
+
+/** Baca palet kustom tersimpan (JSON) dari app_settings; null bila tak valid. */
+export function parseCustomVars(raw: string | undefined): Theme['vars'] | undefined {
+  if (!raw) return undefined
+  try {
+    const obj = JSON.parse(raw) as Partial<Theme['vars']>
+    return { ...themeVars(DEFAULT_THEME_ID), ...obj }
+  } catch {
+    return undefined
+  }
 }

@@ -3,7 +3,7 @@ import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { initDatabase } from './db/database'
 import { SettingsProvider, useSettings } from './lib/SettingsContext'
 import { UIProvider } from './lib/UIContext'
-import { applyTheme } from './lib/themes'
+import { applyTheme, parseCustomVars } from './lib/themes'
 import AppShell from './components/AppShell'
 import PosPage from './features/pos/PosPage'
 import TablesPage from './features/tables/TablesPage'
@@ -131,7 +131,7 @@ export default function App() {
 function ThemeApplier() {
   const { settings } = useSettings()
   useEffect(() => {
-    applyTheme(settings.theme)
-  }, [settings.theme])
+    applyTheme(settings.theme, parseCustomVars(settings.theme_custom))
+  }, [settings.theme, settings.theme_custom])
   return null
 }
