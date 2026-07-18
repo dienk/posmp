@@ -8,6 +8,7 @@ import {
   fileToScaledDataUrl,
   getReceiptConfig,
   receiptConfigToSettings,
+  urlToScaledDataUrl,
   type ReceiptAlign,
   type LogoPosition,
   type ReceiptConfig,
@@ -21,6 +22,8 @@ export default function ReceiptDesignPage() {
   const [cfg, setCfg] = useState<ReceiptConfig>(() => getReceiptConfig(settings))
   const [toast, setToast] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [logoUrl, setLogoUrl] = useState('')
+  const [loadingUrl, setLoadingUrl] = useState(false)
 
   const set = <K extends keyof ReceiptConfig>(key: K, value: ReceiptConfig[K]) =>
     setCfg((prev) => ({ ...prev, [key]: value }))
@@ -38,6 +41,20 @@ export default function ReceiptDesignPage() {
       set('logo', await fileToScaledDataUrl(file))
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Gagal memuat gambar')
+    }
+  }
+
+  const handleLogoUrl = async () => {
+    if (!logoUrl.trim() || loadingUrl) return
+    setLoadingUrl(true)
+    try {
+      set('logo', await urlToScaledDataUrl(logoUrl))
+      setLogoUrl('')
+      showToast('Logo dari URL berhasil dipasang.')
+    } catch {
+      showToast('Tidak bisa mengunduh dari URL (CORS/akses). Coba unggah file atau URL publik.')
+    } finally {
+      setLoadingUrl(false)
     }
   }
 
@@ -127,6 +144,29 @@ export default function ReceiptDesignPage() {
                 )}
               </div>
             </div>
+            <div className="mt-3">
+              <span className="mb-1 block text-xs font-medium text-ink-soft">Logo dari URL</span>
+              <div className="flex gap-2">
+                <input
+                  className={inputCls}
+                  value={logoUrl}
+                  onChange={(e) => setLogoUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLogoUrl()}
+                  placeholder="https://…/logo.png"
+                />
+                <button
+                  onClick={handleLogoUrl}
+                  disabled={!logoUrl.trim() || loadingUrl}
+                  className="shrink-0 rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+                >
+                  {loadingUrl ? 'Memuat…' : 'Muat'}
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-ink-soft">
+                URL harus dapat diakses publik & mengizinkan CORS.
+              </p>
+            </div>
+
             <div className="mt-3">
               <span className="mb-1 block text-xs font-medium text-ink-soft">Posisi Logo</span>
               <div className="flex gap-2">

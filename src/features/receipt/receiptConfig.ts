@@ -78,23 +78,46 @@ export function fileToScaledDataUrl(file: File, maxWidth = 240): Promise<string>
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(reader.error)
-    reader.onload = () => {
-      const img = new Image()
-      img.onerror = () => reject(new Error('Gambar tidak valid.'))
-      img.onload = () => {
-        const scale = Math.min(1, maxWidth / img.width)
-        const w = Math.round(img.width * scale)
-        const h = Math.round(img.height * scale)
-        const canvas = document.createElement('canvas')
-        canvas.width = w
-        canvas.height = h
-        const ctx = canvas.getContext('2d')
-        if (!ctx) return reject(new Error('Canvas tidak didukung.'))
-        ctx.drawImage(img, 0, 0, w, h)
-        resolve(canvas.toDataURL('image/png'))
-      }
-      img.src = reader.result as string
-    }
+    reader.onload = () => resolve(scaleDataUrl(reader.result as string, maxWidth))
     reader.readAsDataURL(file)
   })
+}
+
+/** Perkecil data URL gambar hingga lebar maksimum, kembalikan PNG data URL. */
+export function scaleDataUrl(dataUrl: string, maxWidth = 240): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onerror = () => reject(new Error('Gambar tidak valid.'))
+    img.onload = () => {
+      const scale = Math.min(1, maxWidth / img.width)
+      const w = Math.max(1, Math.round(img.width * scale))
+      const h = Math.max(1, Math.round(img.height * scale))
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return reject(new Error('Canvas tidak didukung.'))
+      ctx.drawImage(img, 0, 0, w, h)
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.src = dataUrl
+  })
+}
+
+/**
+ * Unduh gambar dari URL lalu jadikan data URL (self-contained, local-first).
+ * Butuh gambar yang dapat diakses & mengizinkan CORS. Melempar error bila gagal.
+ */
+export async function urlToScaledDataUrl(url: string, maxWidth = 240): Promise<string> {
+  const resp = await fetch(url.trim(), { mode: 'cors' })
+  if (!resp.ok) throw new Error(`Gagal mengunduh (HTTP ${resp.status}).`)
+  const blob = await resp.blob()
+  if (!blob.type.startsWith('image/')) throw new Error('URL bukan gambar.')
+  const dataUrl = await new Promise<string>((res, rej) => {
+    const fr = new FileReader()
+    fr.onload = () => res(fr.result as string)
+    fr.onerror = () => rej(fr.error)
+    fr.readAsDataURL(blob)
+  })
+  return scaleDataUrl(dataUrl, maxWidth)
 }
