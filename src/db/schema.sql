@@ -1,5 +1,5 @@
 -- ============================================================================
--- POSMerahPutih v1.5 — Skema Database SQLite (22 tabel)
+-- POSMerahPutih v1.5 — Skema Database SQLite (23 tabel)
 -- Local-first: dieksekusi saat inisialisasi database di browser (sql.js).
 -- ============================================================================
 
@@ -300,4 +300,15 @@ CREATE TABLE IF NOT EXISTS kds_tickets (
 CREATE TABLE IF NOT EXISTS app_settings (
     setting_key TEXT PRIMARY KEY,
     setting_value TEXT NOT NULL
+);
+
+-- 23. Tabel Kasir (Titik/Mesin Kasir per Outlet)
+CREATE TABLE IF NOT EXISTS cashiers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    outlet_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    code TEXT,
+    location TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY(outlet_id) REFERENCES outlets(id)
 );

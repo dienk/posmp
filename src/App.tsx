@@ -28,6 +28,8 @@ import ThemePage from './features/theme/ThemePage'
 import ProductsPage from './features/products/ProductsPage'
 import CategoriesPage from './features/products/CategoriesPage'
 import ContactsPage from './features/contacts/ContactsPage'
+import OutletsPage from './features/outlets/OutletsPage'
+import CashiersPage from './features/cashiers/CashiersPage'
 import CardDesignPage from './features/membercard/CardDesignPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
@@ -52,6 +54,8 @@ const router = createHashRouter([
       { path: 'products', element: <ProductsPage /> },
       { path: 'categories', element: <CategoriesPage /> },
       { path: 'contacts', element: <ContactsPage /> },
+      { path: 'outlets', element: <OutletsPage /> },
+      { path: 'cashiers', element: <CashiersPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: 'personas', element: <PersonaPage /> },
       { path: 'roles', element: <RolesPage /> },

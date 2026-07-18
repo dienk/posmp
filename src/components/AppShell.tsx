@@ -36,6 +36,8 @@ const DATA_MASTER_GROUP: NavGroupDef = {
   icon: '🗂️',
   perm: 'datamaster',
   children: [
+    { to: '/outlets', label: 'Outlet', short: 'Outlet', icon: '🏬' },
+    { to: '/cashiers', label: 'Kasir', short: 'Kasir', icon: '🧑‍💻' },
     { to: '/products', label: 'Produk', short: 'Produk', icon: '📦' },
     { to: '/categories', label: 'Kategori Produk', short: 'Kategori', icon: '🏷️' },
     { to: '/contacts', label: 'Contact', short: 'Contact', icon: '📇' },

@@ -103,6 +103,33 @@ function migrateSchema(db: Database): boolean {
       changed = true
     }
   }
+
+  // Tabel kasir (titik/mesin kasir per outlet) — dibuat untuk database lama.
+  const hasCashiers = db.exec(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='cashiers'`,
+  ).length > 0
+  if (!hasCashiers) {
+    db.run(`CREATE TABLE IF NOT EXISTS cashiers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      code TEXT,
+      location TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+    )`)
+    // Beri satu kasir default untuk tiap outlet yang sudah ada.
+    const outlets = db.exec('SELECT id FROM outlets ORDER BY id')
+    if (outlets[0]) {
+      for (const row of outlets[0].values) {
+        db.run(
+          `INSERT INTO cashiers (outlet_id, name, code, is_active) VALUES (?, 'Kasir 1', 'KSR-01', 1)`,
+          [Number(row[0])],
+        )
+      }
+    }
+    changed = true
+  }
   return changed
 }
 

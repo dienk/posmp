@@ -8,6 +8,16 @@ export interface Outlet {
   is_active: number
 }
 
+export interface Cashier {
+  id: number
+  outlet_id: number
+  name: string
+  code: string | null
+  location: string | null
+  is_active: number
+  outlet_name?: string | null
+}
+
 export interface Category {
   id: number
   name: string

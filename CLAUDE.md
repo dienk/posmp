@@ -47,7 +47,7 @@ di akhir, lalu `publish('...')` event realtime yang relevan.
 ```
 src/
   db/
-    schema.sql          # 22 tabel (sumber kebenaran skema)
+    schema.sql          # 23 tabel (sumber kebenaran skema)
     database.ts         # init sql.js + IndexedDB persist + query/execute
     seed.ts             # data awal (outlet, kategori, produk, meja, app_settings)
   lib/
@@ -67,7 +67,8 @@ capacitor.config.ts        # konfigurasi mobile (Capacitor)
 
 Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `vouchers`,
 `marketplace`, `members`, `reports`, `stockin`, `history` (refund), `preorder`,
-`installments`, `settings`.
+`installments`, `settings`, `products`, `contacts`, `outlets`, `cashiers`,
+`access`, `theme`, `membercard`.
 
 ## Menambah rute/modul baru
 
@@ -88,7 +89,9 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
 - **IndexedDB ter-scope per origin termasuk PORT.** Saat verifikasi dengan
   `npm run preview` di port berbeda, database mulai kosong (seed ulang) — ini
   ekspektasi, bukan bug.
-- **Skema 22 tabel bersifat tetap** (acuan PRD v1.5). Fitur baru sedapat mungkin
+- **Skema inti (22 tabel PRD v1.5) bersifat tetap**; penambahan hanya bila fitur
+  baru benar-benar butuh (mis. tabel ke-23 `cashiers`). Selain itu, fitur baru
+  sedapat mungkin
   memanfaatkan kolom yang ada (mis. `parent_transaction_id`, `is_preorder`,
   `transaction_payments.voucher_id`) alih-alih menambah tabel.
 - **Status transaksi**: `DRAFT` (bill tersimpan) · `PREPARING` (pre-order/antre

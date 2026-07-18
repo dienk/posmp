@@ -12,6 +12,13 @@ export function seedDatabase(db: Database): void {
      VALUES ('POSMerahPutih Pusat', 'Jl. Merdeka No. 17, Jakarta', '021-5550100', 1)`,
   )
 
+  // Dua titik kasir untuk outlet pusat.
+  db.run(
+    `INSERT INTO cashiers (outlet_id, name, code, location, is_active) VALUES
+       (1, 'Kasir 1', 'KSR-01', 'Depan', 1),
+       (1, 'Kasir 2', 'KSR-02', 'Drive-Thru', 1)`,
+  )
+
   const categories: Array<[string, string]> = [
     ['Makanan', '#F2C6A1'],
     ['Minuman', '#CFC6D9'],

@@ -9,7 +9,7 @@ native (Tauri / Capacitor).
 
 ## Fitur pada foundation ini (Milestone 1)
 
-- ⚙️ Inisialisasi database SQLite lokal dengan **22 tabel** (lihat `src/db/schema.sql`),
+- ⚙️ Inisialisasi database SQLite lokal dengan **23 tabel** (lihat `src/db/schema.sql`),
   dipersist otomatis ke **IndexedDB** — data bertahan walau browser ditutup.
 - 🧩 Modularitas fitur lewat tabel `app_settings` (KDS, Table Layout, Self-Order,
   Marketplace, Queue bisa dinyalakan/dimatikan).
@@ -37,7 +37,7 @@ npm run preview
 
 ```
 src/
-  db/            # schema.sql (22 tabel), database.ts (sql.js + IndexedDB), seed.ts
+  db/            # schema.sql (23 tabel), database.ts (sql.js + IndexedDB), seed.ts
   features/
     pos/         # Layar kasir: PosPage, ProductCard, CartPanel, useCart, posRepository
     tables/      # (roadmap) Interactive Table Layout
@@ -76,6 +76,7 @@ src/
 | **M21** ✅ | **Data Master**: grup menu baru berisi **Produk** (CRUD katalog + kategori, dgn stok awal), **Kategori Produk** (CRUD kategori: nama, warna, jumlah produk), dan **Contact** (tab **Pelanggan**/member, **Pemasok**/supplier, **Karyawan**/persona, **Penjual**/baru di `app_settings`). |
 | **M22** ✅ | **Member CRUD lengkap**: identitas (nama/kontak/email/alamat/tgl lahir/jenis kelamin/pekerjaan), keanggotaan (no. kartu, **tingkatan** Silver/Gold/Platinum/Diamond, tgl daftar, masa berlaku, **status** Aktif/Nonaktif/Ditangguhkan/Diblokir), loyalti (poin, **saldo/kredit**, preferensi) + **riwayat transaksi & penukaran poin**. Kolom `members` diperluas via migrasi otomatis. |
 | **M23** ✅ | **ID Card member dengan template desainable** (Setelan › Desain Kartu): editor kartu (judul, warna gradien/preset, logo, barcode, tampil tier/masa berlaku/poin) + pratinjau langsung; tombol **Kartu ID** di detail member untuk lihat, **cetak**, & **unduh PNG** kartu. |
+| **M24** ✅ | **Data Master Outlet & Kasir**: **Outlet** (CRUD cabang: nama, alamat, telepon, aktif/nonaktif; hapus dijaga bila masih ada kasir/transaksi/stok/meja), **Kasir** (CRUD titik/mesin kasir per outlet: nama, kode, lokasi, status; filter per outlet). Tabel `cashiers` (ke-23) dibuat via migrasi otomatis untuk database lama. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -90,6 +91,8 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | Path | Layar |
 |------|-------|
 | `#/` | Kasir (POS) — + diskon voucher |
+| `#/outlets` | Data Master › Outlet (cabang) |
+| `#/cashiers` | Data Master › Kasir (titik kasir per outlet) |
 | `#/products` | Data Master › Produk (katalog) |
 | `#/categories` | Data Master › Kategori Produk |
 | `#/contacts` | Data Master › Contact (pelanggan/pemasok/karyawan/penjual) |
