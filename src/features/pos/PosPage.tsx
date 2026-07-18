@@ -7,6 +7,7 @@ import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
 import { fetchCategories, fetchProducts, saveOrder } from './posRepository'
+import { validateVoucher } from '../vouchers/voucherRepository'
 import { useCart } from './useCart'
 
 export default function PosPage() {
@@ -27,6 +28,10 @@ export default function PosPage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [invoiceNumber, setInvoiceNumber] = useState(() => generateInvoiceNumber())
+  const [voucherCode, setVoucherCode] = useState('')
+  const [voucherId, setVoucherId] = useState<number | undefined>()
+  const [discount, setDiscount] = useState(0)
+  const [voucherMessage, setVoucherMessage] = useState<{ ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
     setCategories(fetchCategories())
@@ -43,6 +48,27 @@ export default function PosPage() {
 
   const refreshProducts = () => setProducts(fetchProducts(outletId, activeCategory, keyword))
 
+  const clearVoucher = () => {
+    setVoucherCode('')
+    setVoucherId(undefined)
+    setDiscount(0)
+    setVoucherMessage(null)
+  }
+
+  const handleApplyVoucher = () => {
+    const result = validateVoucher(voucherCode, cart.subtotal)
+    if (result.ok && result.voucher) {
+      setVoucherId(result.voucher.id)
+      setDiscount(result.discount ?? 0)
+      setVoucherCode(result.voucher.code)
+      setVoucherMessage({ ok: true, text: result.message })
+    } else {
+      setVoucherId(undefined)
+      setDiscount(0)
+      setVoucherMessage({ ok: false, text: result.message })
+    }
+  }
+
   const finishOrder = async (status: 'DRAFT' | 'COMPLETED') => {
     if (cart.items.length === 0 || saving) return
     setSaving(true)
@@ -56,6 +82,8 @@ export default function PosPage() {
         taxRate,
         taxEnabled,
         status,
+        discountAmount: discount,
+        voucherId,
       })
       showToast(
         status === 'DRAFT'
@@ -63,6 +91,7 @@ export default function PosPage() {
           : `Pembayaran selesai · ${result.invoiceNumber}`,
       )
       cart.clear()
+      clearVoucher()
       setCustomerName('')
       setInvoiceNumber(generateInvoiceNumber())
       refreshProducts()
@@ -154,6 +183,12 @@ export default function PosPage() {
           taxEnabled={taxEnabled}
           taxRate={taxRate}
           saving={saving}
+          voucherCode={voucherCode}
+          discount={discount}
+          voucherMessage={voucherMessage}
+          onVoucherCodeChange={setVoucherCode}
+          onApplyVoucher={handleApplyVoucher}
+          onRemoveVoucher={clearVoucher}
           onCustomerNameChange={setCustomerName}
           onFacilityChange={setFacilityType}
           onQuantityChange={cart.setQuantity}

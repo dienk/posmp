@@ -15,6 +15,12 @@ interface Props {
   taxEnabled: boolean
   taxRate: number
   saving: boolean
+  voucherCode: string
+  discount: number
+  voucherMessage: { ok: boolean; text: string } | null
+  onVoucherCodeChange: (code: string) => void
+  onApplyVoucher: () => void
+  onRemoveVoucher: () => void
   onCustomerNameChange: (name: string) => void
   onFacilityChange: (facility: FacilityType) => void
   onQuantityChange: (productId: number, quantity: number) => void
@@ -25,8 +31,9 @@ interface Props {
 
 export default function CartPanel(props: Props) {
   const subtotal = props.items.reduce((s, it) => s + it.product.price * it.quantity, 0)
-  const tax = props.taxEnabled ? Math.round(subtotal * props.taxRate) : 0
-  const total = subtotal + tax
+  const discount = Math.min(props.discount, subtotal)
+  const tax = props.taxEnabled ? Math.round((subtotal - discount) * props.taxRate) : 0
+  const total = subtotal - discount + tax
   const empty = props.items.length === 0
 
   return (
@@ -107,13 +114,62 @@ export default function CartPanel(props: Props) {
         )}
       </div>
 
+      {/* Voucher */}
+      <div className="border-t border-black/5 px-4 pt-3">
+        {discount > 0 ? (
+          <div className="flex items-center justify-between rounded-lg bg-status-empty/10 px-3 py-2">
+            <span className="text-xs font-semibold text-status-empty">
+              Voucher {props.voucherCode} diterapkan
+            </span>
+            <button
+              onClick={props.onRemoveVoucher}
+              className="text-xs font-semibold text-status-occupied hover:opacity-70"
+            >
+              Hapus
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              value={props.voucherCode}
+              onChange={(e) => props.onVoucherCodeChange(e.target.value)}
+              placeholder="Kode voucher"
+              className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-2 text-sm uppercase outline-none focus:border-brand-strong"
+            />
+            <button
+              onClick={props.onApplyVoucher}
+              disabled={empty || !props.voucherCode.trim()}
+              className="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+            >
+              Pakai
+            </button>
+          </div>
+        )}
+        {props.voucherMessage && (
+          <p
+            className={
+              'mt-1.5 text-xs ' +
+              (props.voucherMessage.ok ? 'text-status-empty' : 'text-status-occupied')
+            }
+          >
+            {props.voucherMessage.text}
+          </p>
+        )}
+      </div>
+
       {/* Ringkasan & aksi */}
-      <div className="border-t border-black/5 p-4">
+      <div className="p-4">
         <dl className="space-y-1 text-sm">
           <div className="flex justify-between text-ink-soft">
             <dt>Subtotal</dt>
             <dd>{formatRupiah(subtotal)}</dd>
           </div>
+          {discount > 0 && (
+            <div className="flex justify-between text-status-empty">
+              <dt>Diskon</dt>
+              <dd>−{formatRupiah(discount)}</dd>
+            </div>
+          )}
           {props.taxEnabled && (
             <div className="flex justify-between text-ink-soft">
               <dt>Pajak ({Math.round(props.taxRate * 100)}%)</dt>

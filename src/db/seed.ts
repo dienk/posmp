@@ -64,7 +64,7 @@ export function seedDatabase(db: Database): void {
     ['module_table_layout', '1'],
     ['module_kds', '1'],
     ['module_self_order', '1'],
-    ['module_marketplace', '0'],
+    ['module_marketplace', '1'],
     ['module_queue', '1'],
     ['points_per_amount', '1000'], // 1 poin per Rp1.000
   ]

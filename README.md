@@ -52,18 +52,30 @@ src/
 | Milestone | Cakupan |
 |-----------|---------|
 | **M1** ✅ | Init proyek, SQLite 22 tabel, app_settings, layar kasir inti |
-| **M2** 🚧 | Router + shell navigasi, **Canvas Table Layout** (drag-drop, indikator warna, integrasi POS), **Queue** (terbit A/B, monitor TV publik, TTS). _Self-Order menyusul._ |
-| **M3** | Kitchen Display System (WebSocket), Voucher Generator massal, pembayaran voucher, integrasi marketplace (Shopee/Tokopedia/TikTok) |
-| **M4** | Uji offline-first, performa WebSocket lokal, kompilasi Tauri (desktop) & Capacitor (mobile) |
+| **M2** ✅ | Router + shell navigasi, **Canvas Table Layout** (drag-drop, indikator warna, integrasi POS), **Queue** (terbit A/B, monitor TV publik, TTS) |
+| **M3** ✅ | Bus real-time lokal (BroadcastChannel), **KDS** (aging timer, check-off item), **Self-Order** (menu QR pelanggan → dapur), **Voucher Generator** massal + diskon voucher di POS, **Marketplace** config scaffold |
+| **M4** | Uji offline-first, **relay WebSocket LAN** (menggantikan BroadcastChannel untuk sinkron lintas-perangkat), sinkronisasi marketplace nyata via API, kompilasi Tauri (desktop) & Capacitor (mobile) |
+
+### Sinkronisasi real-time (local-first)
+
+Perubahan antar-layar disiarkan lewat `BroadcastChannel` (`src/lib/realtime.ts`) —
+instan untuk layar pada origin/perangkat yang sama (Kasir, KDS, Self-Order, Monitor).
+Transport ini dipetakan ke **WebSocket relay LAN** pada M4 untuk sinkron lintas-perangkat
+dalam satu jaringan lokal. Catatan: BroadcastChannel tidak mengirim balik ke pengirimnya,
+jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut menyegar.
 
 ### Rute aplikasi
 
 | Path | Layar |
 |------|-------|
-| `#/` | Kasir (POS) |
+| `#/` | Kasir (POS) — + diskon voucher |
 | `#/tables` | Tata Letak Meja |
+| `#/kds` | Kitchen Display System (dapur) |
 | `#/queue` | Sistem Antrean (operator) |
+| `#/vouchers` | Voucher Generator |
+| `#/marketplace` | Integrasi Marketplace (config) |
 | `#/monitor` | Monitor antrean publik (Smart TV) |
+| `#/order/:tableNumber` | Self-Order pelanggan (QR meja) |
 
 ## Catatan teknis
 

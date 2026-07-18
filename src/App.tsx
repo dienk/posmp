@@ -7,6 +7,10 @@ import PosPage from './features/pos/PosPage'
 import TablesPage from './features/tables/TablesPage'
 import QueuePage from './features/queue/QueuePage'
 import QueueMonitor from './features/queue/QueueMonitor'
+import KdsPage from './features/kds/KdsPage'
+import VoucherPage from './features/vouchers/VoucherPage'
+import MarketplacePage from './features/marketplace/MarketplacePage'
+import SelfOrderPage from './features/selforder/SelfOrderPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -17,10 +21,14 @@ const router = createHashRouter([
       { index: true, element: <PosPage /> },
       { path: 'tables', element: <TablesPage /> },
       { path: 'queue', element: <QueuePage /> },
+      { path: 'kds', element: <KdsPage /> },
+      { path: 'vouchers', element: <VoucherPage /> },
+      { path: 'marketplace', element: <MarketplacePage /> },
     ],
   },
-  // Tampilan monitor publik untuk Smart TV (tanpa shell/navigasi).
+  // Tampilan tanpa shell/navigasi (layar publik & pelanggan).
   { path: '/monitor', element: <QueueMonitor /> },
+  { path: '/order/:tableNumber', element: <SelfOrderPage /> },
 ])
 
 type BootState =

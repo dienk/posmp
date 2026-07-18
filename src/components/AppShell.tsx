@@ -12,7 +12,10 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/', label: 'Kasir', icon: '🧾' },
   { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout' },
+  { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds' },
   { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue' },
+  { to: '/vouchers', label: 'Voucher', icon: '🎟️' },
+  { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' },
 ]
 
 export default function AppShell() {

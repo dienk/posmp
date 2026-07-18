@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
+import { useRealtime } from '../../lib/useRealtime'
 import type { DiningTable, TableStatus } from '../../types'
 import {
   addTable,
@@ -31,6 +32,7 @@ export default function TablesPage() {
 
   const reload = () => setTables(fetchTables(outletId))
   useEffect(reload, [outletId])
+  useRealtime('tables:update', reload)
 
   const selected = useMemo(
     () => tables.find((t) => t.id === selectedId) ?? null,

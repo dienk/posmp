@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
+import { useRealtime } from '../../lib/useRealtime'
 import { callQueueNumber } from '../../lib/tts'
 import type { FacilityType } from '../../types'
 import {
@@ -23,6 +24,8 @@ export default function QueuePage() {
 
   const reload = () => setTickets(fetchActiveQueue(outletId))
   useEffect(reload, [outletId])
+  useRealtime('queue:update', reload)
+  useRealtime('order:update', reload)
 
   const handleIssue = async (facility: FacilityType) => {
     await issueQueue(outletId, facility)

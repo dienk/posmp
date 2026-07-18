@@ -1,5 +1,6 @@
 import { getDb, persist, query } from '../../db/database'
 import { generateInvoiceNumber } from '../../lib/format'
+import { publish } from '../../lib/realtime'
 import type { CartItem, Category, FacilityType, Product } from '../../types'
 
 export function fetchCategories(): Category[] {
@@ -36,18 +37,24 @@ export interface SaveOrderInput {
   outletId: number
   items: CartItem[]
   facilityType: FacilityType
+  orderSource?: string
   customerName?: string
   tableNumber?: string
   queueNumber?: string
   taxRate: number
   taxEnabled: boolean
   status: 'DRAFT' | 'COMPLETED'
+  discountAmount?: number
+  voucherId?: number
+  /** Terbitkan tiket ke KDS (fire to kitchen). Default true untuk pesanan F&B. */
+  sendToKitchen?: boolean
 }
 
 export interface SaveOrderResult {
   transactionId: number
   invoiceNumber: string
   subtotal: number
+  discount: number
   tax: number
   total: number
 }
@@ -59,24 +66,31 @@ export interface SaveOrderResult {
 export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult> {
   const db = getDb()
   const subtotal = input.items.reduce((sum, it) => sum + it.product.price * it.quantity, 0)
-  const tax = input.taxEnabled ? Math.round(subtotal * input.taxRate) : 0
-  const total = subtotal + tax
+  const discount = Math.min(input.discountAmount ?? 0, subtotal)
+  const taxable = subtotal - discount
+  const tax = input.taxEnabled ? Math.round(taxable * input.taxRate) : 0
+  const total = taxable + tax
   const invoiceNumber = generateInvoiceNumber()
+  const orderSource = input.orderSource ?? 'POS_OFFLINE'
+  const sendToKitchen = input.sendToKitchen ?? true
 
   db.run('BEGIN')
   try {
     db.run(
       `INSERT INTO transactions
          (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
-          subtotal_amount, discount_amount, tax_amount, total_amount, status)
-       VALUES (?, ?, ?, 'POS_OFFLINE', ?, ?, ?, 0, ?, ?, ?)`,
+          voucher_id, subtotal_amount, discount_amount, tax_amount, total_amount, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.outletId,
         invoiceNumber,
         input.facilityType,
+        orderSource,
         input.tableNumber ?? null,
         input.queueNumber ?? null,
+        input.voucherId ?? null,
         subtotal,
+        discount,
         tax,
         total,
         input.status,
@@ -84,11 +98,13 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
     )
     const transactionId = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
 
+    // Pesanan yang dikirim ke dapur menandai item sebagai COOKING.
+    const initialCookStatus = sendToKitchen ? 'COOKING' : 'PENDING'
     for (const it of input.items) {
       db.run(
         `INSERT INTO transaction_details
-           (transaction_id, product_id, quantity, unit_price, subtotal, notes)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+           (transaction_id, product_id, quantity, unit_price, subtotal, notes, cooking_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           transactionId,
           it.product.id,
@@ -96,6 +112,7 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
           it.product.price,
           it.product.price * it.quantity,
           it.notes ?? null,
+          initialCookStatus,
         ],
       )
       // Kurangi stok fisik outlet saat transaksi diselesaikan.
@@ -106,6 +123,20 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
           [it.quantity, input.outletId, it.product.id],
         )
       }
+    }
+
+    // Fire to Kitchen: buat tiket KDS.
+    if (sendToKitchen) {
+      db.run(
+        `INSERT INTO kds_tickets (transaction_id, outlet_id, table_number, status)
+         VALUES (?, ?, ?, 'PREPARING')`,
+        [transactionId, input.outletId, input.tableNumber ?? null],
+      )
+    }
+
+    // Catat pemakaian voucher.
+    if (input.voucherId) {
+      db.run('UPDATE vouchers SET used_count = used_count + 1 WHERE id = ?', [input.voucherId])
     }
 
     // Integrasi Table Layout: DRAFT menempati meja, pembayaran melunasi & mengosongkan.
@@ -124,9 +155,13 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
   }
 
   await persist()
+  if (sendToKitchen) publish('kds:update')
+  if (input.tableNumber) publish('tables:update')
+  publish('order:update')
+
   const transactionId = query<{ id: number }>(
     'SELECT id FROM transactions WHERE invoice_number = ?',
     [invoiceNumber],
   )[0].id
-  return { transactionId, invoiceNumber, subtotal, tax, total }
+  return { transactionId, invoiceNumber, subtotal, discount, tax, total }
 }
