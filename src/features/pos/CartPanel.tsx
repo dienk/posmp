@@ -69,6 +69,7 @@ export default function CartPanel(props: Props) {
   const [noteShownIds, setNoteShownIds] = useState<Set<number>>(new Set())
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickerQuery, setPickerQuery] = useState('')
+  const [actionsOpen, setActionsOpen] = useState(false)
 
   const showItemNote = (id: number) => noteShownIds.has(id)
   const toggleItemNote = (id: number) =>
@@ -430,23 +431,58 @@ export default function CartPanel(props: Props) {
           )}
         </dl>
 
-        <div className="mt-4 grid gap-2">
+        <div className="mt-4 flex items-stretch gap-2">
+          {/* Menu opsi (kiri): Simpan Draft & Split Bill — sembunyi saat pre-order */}
           {!(props.showPreorder && props.isPreorder) && (
-            <button
-              type="button"
-              disabled={empty || props.saving}
-              onClick={props.onSaveDraft}
-              className="rounded-xl border border-brand-strong bg-brand py-3 text-sm font-semibold
-                         text-ink transition hover:bg-brand-strong disabled:opacity-40"
-            >
-              Simpan Bill (Draft)
-            </button>
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                disabled={props.saving}
+                onClick={() => setActionsOpen((v) => !v)}
+                aria-label="Opsi lain"
+                title="Opsi lain: Simpan Draft, Split Bill"
+                className="flex h-full items-center rounded-xl border border-black/10 px-3 text-lg
+                           font-bold text-ink transition hover:bg-background disabled:opacity-40"
+              >
+                ⋮
+              </button>
+              {actionsOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} />
+                  <div className="absolute bottom-full left-0 z-20 mb-2 w-52 overflow-hidden rounded-xl border border-black/10 bg-white shadow-lg">
+                    <button
+                      type="button"
+                      disabled={empty || props.saving}
+                      onClick={() => {
+                        setActionsOpen(false)
+                        props.onSaveDraft()
+                      }}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                    >
+                      💾 Simpan Bill (Draft)
+                    </button>
+                    <button
+                      type="button"
+                      disabled={props.saving || props.items.length <= 1}
+                      onClick={() => {
+                        setActionsOpen(false)
+                        props.onSplit()
+                      }}
+                      title={props.items.length <= 1 ? 'Butuh minimal 2 item' : undefined}
+                      className="flex w-full items-center gap-2 border-t border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                    >
+                      ⑃ Split Bill
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           )}
           <button
             type="button"
             disabled={empty || props.saving}
             onClick={props.onPay}
-            className="rounded-xl bg-status-occupied py-3.5 text-base font-bold text-white
+            className="flex-1 rounded-xl bg-status-occupied py-3.5 text-base font-bold text-white
                        shadow transition hover:brightness-95 disabled:opacity-40"
           >
             {props.saving
@@ -455,17 +491,6 @@ export default function CartPanel(props: Props) {
                 ? `Simpan Pre-Order · DP ${formatRupiah(Math.min(props.dpAmount, total))}`
                 : `Bayar · ${formatRupiah(total)}`}
           </button>
-          {!(props.showPreorder && props.isPreorder) && props.items.length > 1 && (
-            <button
-              type="button"
-              disabled={props.saving}
-              onClick={props.onSplit}
-              className="rounded-xl border border-black/10 py-2 text-sm font-semibold text-ink
-                         transition hover:bg-background disabled:opacity-40"
-            >
-              ⑃ Split Bill
-            </button>
-          )}
         </div>
       </div>
     </aside>
