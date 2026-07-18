@@ -65,6 +65,7 @@ src/
 | **M10** ✅ | **Split Bill** (`parent_transaction_id`): pisah item satu order ke beberapa nota tertaut, **Voucher-as-tender** (PRD 4.4): bayar pakai gift card (`VALUE_DEPOSIT`) di modal pembayaran. Nomor invoice kini ber-suffix urut agar unik. |
 | **M11** ✅ | **Pengaturan Fasilitas** (PRD 4.7): kelola outlet, tarif pajak, rasio poin, dan **toggle modul** (KDS/Meja/Antrean/Self-Order/Marketplace) — perubahan modul langsung memperbarui menu navigasi tanpa reload. |
 | **M12** ✅ | **Struk / Receipt**: lihat & cetak ulang struk transaksi dari Riwayat (header outlet, item, pajak, pembayaran + kembalian, poin). Cetak via iframe tersembunyi. |
+| **M13** ✅ | **Desain Struk**: kustomisasi struk (tagline, catatan kaki/tambahan, tampil/sembunyi alamat/telepon/member/poin, lebar 58/80mm) dengan pratinjau langsung; tersimpan di `app_settings` & diterapkan ke struk tampil/cetak. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -91,6 +92,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/marketplace` | Integrasi Marketplace (config) |
 | `#/reports` | Dashboard & Laporan (+ Ekspor CSV) |
 | `#/settings` | Pengaturan (outlet, pajak, poin, modul) |
+| `#/receipt-design` | Desain Struk (kustomisasi + pratinjau) |
 | `#/monitor` | Monitor antrean publik (Smart TV) |
 | `#/order/:tableNumber` | Self-Order pelanggan (QR meja) |
 
