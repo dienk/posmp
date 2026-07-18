@@ -82,9 +82,16 @@ export default function SelfOrderPage() {
 
   return (
     <div className="mx-auto flex h-full max-w-md flex-col bg-background">
-      <header className="bg-status-occupied px-4 py-4 text-white">
-        <p className="text-xs opacity-90">POSMerahPutih · Self-Order</p>
-        <h1 className="text-lg font-bold">Meja {tableNumber}</h1>
+      <header className="flex items-center gap-3 bg-status-occupied px-4 py-4 text-white">
+        <img
+          src="/logo-mark.png"
+          alt="POS Merah Putih"
+          className="h-11 w-11 rounded-lg bg-white p-0.5"
+        />
+        <div>
+          <p className="text-xs opacity-90">POSMerahPutih · Self-Order</p>
+          <h1 className="text-lg font-bold">Meja {tableNumber}</h1>
+        </div>
       </header>
 
       <div className="flex gap-2 overflow-x-auto px-4 py-3">

@@ -69,8 +69,10 @@ export function buildReceiptHtml(d: ReceiptData, c: ReceiptConfig): string {
   const width = RECEIPT_WIDTH_PX[c.paperWidth]
   const block = (html: string) =>
     `<div style="text-align:${c.align};white-space:pre-line">${html}</div>`
+  // Logo relatif (default aplikasi) di-absolutkan agar termuat di iframe cetak.
+  const logoSrc = c.logo.startsWith('/') ? location.origin + c.logo : c.logo
   const logo = c.logo
-    ? `<div style="text-align:${c.align}"><img src="${c.logo}" style="max-width:100%;max-height:96px"/></div>`
+    ? `<div style="text-align:${c.align}"><img src="${logoSrc}" style="max-width:100%;max-height:96px"/></div>`
     : ''
   const header =
     block(

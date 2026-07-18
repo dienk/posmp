@@ -26,7 +26,14 @@ export default function QueueMonitor() {
   return (
     <div className="flex h-full flex-col bg-ink text-white">
       <header className="flex items-center justify-between px-10 py-6">
-        <h1 className="text-3xl font-extrabold">POSMerahPutih</h1>
+        <div className="flex items-center gap-4">
+          <img
+            src="/logo-mark.png"
+            alt="POS Merah Putih"
+            className="h-14 w-14 rounded-xl bg-white p-1"
+          />
+          <h1 className="text-3xl font-extrabold">POSMerahPutih</h1>
+        </div>
         <span className="text-lg text-white/70">Antrean Pesanan</span>
       </header>
 

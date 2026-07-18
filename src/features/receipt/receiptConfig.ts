@@ -16,8 +16,9 @@ export interface ReceiptConfig {
   paperWidth: 58 | 80 // mm
 }
 
+// Default: logo aplikasi. Bisa diganti (unggah/URL) atau dihapus via Desain Struk.
 export const RECEIPT_DEFAULTS: ReceiptConfig = {
-  logo: '',
+  logo: '/logo-mark.png',
   logoPosition: 'top',
   align: 'center',
   tagline: '',
