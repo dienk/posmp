@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { initDatabase } from './db/database'
-import { SettingsProvider } from './lib/SettingsContext'
+import { SettingsProvider, useSettings } from './lib/SettingsContext'
 import { UIProvider } from './lib/UIContext'
+import { applyTheme } from './lib/themes'
 import AppShell from './components/AppShell'
 import PosPage from './features/pos/PosPage'
 import TablesPage from './features/tables/TablesPage'
@@ -22,6 +23,7 @@ import SettingsPage from './features/settings/SettingsPage'
 import ReceiptDesignPage from './features/receipt/ReceiptDesignPage'
 import PersonaPage from './features/access/PersonaPage'
 import RolesPage from './features/access/RolesPage'
+import ThemePage from './features/theme/ThemePage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -44,6 +46,7 @@ const router = createHashRouter([
       { path: 'settings', element: <SettingsPage /> },
       { path: 'personas', element: <PersonaPage /> },
       { path: 'roles', element: <RolesPage /> },
+      { path: 'theme', element: <ThemePage /> },
       { path: 'receipt-design', element: <ReceiptDesignPage /> },
     ],
   },
@@ -94,9 +97,19 @@ export default function App() {
 
   return (
     <SettingsProvider>
+      <ThemeApplier />
       <UIProvider>
         <RouterProvider router={router} />
       </UIProvider>
     </SettingsProvider>
   )
+}
+
+/** Terapkan tema tersimpan saat muat & setiap kali pilihan tema berubah. */
+function ThemeApplier() {
+  const { settings } = useSettings()
+  useEffect(() => {
+    applyTheme(settings.theme)
+  }, [settings.theme])
+  return null
 }

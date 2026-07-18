@@ -4,22 +4,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Palet visual POSMerahPutih (PRD v1.5)
+        // Palet visual POSMerahPutih — nilai dari CSS variables (bisa berganti tema).
+        // Format channel "R G B" agar modifier opacity Tailwind tetap berfungsi.
         brand: {
-          DEFAULT: '#CFC6D9', // ungu pucat keabu-abuan - CTA utama
-          soft: '#E4DEEC',
-          strong: '#B4A7C7',
+          DEFAULT: 'rgb(var(--c-brand) / <alpha-value>)',
+          soft: 'rgb(var(--c-brand-soft) / <alpha-value>)',
+          strong: 'rgb(var(--c-brand-strong) / <alpha-value>)',
         },
-        background: '#F2E0D4', // krem terang - latar
-        surface: '#F2C6A1', // persik - kartu produk & panel keranjang
+        background: 'rgb(var(--c-background) / <alpha-value>)',
+        surface: 'rgb(var(--c-surface) / <alpha-value>)',
         ink: {
-          DEFAULT: '#717888', // abu-abu gelap - teks utama
-          soft: '#D9ABA0', // merah muda kecoklatan - teks sekunder
+          DEFAULT: 'rgb(var(--c-ink) / <alpha-value>)',
+          soft: 'rgb(var(--c-ink-soft) / <alpha-value>)',
         },
         status: {
-          empty: '#4CAF50', // meja kosong (hijau)
-          occupied: '#E53935', // meja terisi (merah)
-          waiting: '#FBC02D', // menunggu tagihan (kuning)
+          empty: 'rgb(var(--c-empty) / <alpha-value>)', // hijau (semantik)
+          occupied: 'rgb(var(--c-occupied) / <alpha-value>)', // merah (semantik)
+          waiting: 'rgb(var(--c-waiting) / <alpha-value>)', // kuning (semantik)
         },
       },
       borderRadius: {

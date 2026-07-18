@@ -49,6 +49,7 @@ const SETTINGS_GROUP: NavGroupDef = {
     { to: '/settings', label: 'Pengaturan', short: 'Setelan', icon: '🛠️' },
     { to: '/personas', label: 'Persona', short: 'Persona', icon: '🧑‍💼' },
     { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: '🔑' },
+    { to: '/theme', label: 'Tema', short: 'Tema', icon: '🎨' },
     { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: '🖨️' },
   ],
 }

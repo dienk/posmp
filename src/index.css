@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Palet default (tema "Klasik"). Nilai channel "R G B" agar opacity berfungsi.
+   Tema lain menimpa variabel ini pada :root saat dipilih. */
+:root {
+  --c-brand: 207 198 217;
+  --c-brand-soft: 228 222 236;
+  --c-brand-strong: 180 167 199;
+  --c-background: 242 224 212;
+  --c-surface: 242 198 161;
+  --c-ink: 113 120 136;
+  --c-ink-soft: 217 171 160;
+  /* Status semantik (tetap lintas-tema) */
+  --c-empty: 76 175 80;
+  --c-occupied: 229 57 53;
+  --c-waiting: 251 192 45;
+}
+
 @layer base {
   html,
   body,
@@ -13,7 +29,7 @@
     margin: 0;
     font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
-    color: theme('colors.ink.DEFAULT');
-    background-color: theme('colors.background');
+    color: rgb(var(--c-ink));
+    background-color: rgb(var(--c-background));
   }
 }
