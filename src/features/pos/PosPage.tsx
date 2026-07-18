@@ -7,9 +7,11 @@ import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
 import { fetchCategories, fetchProducts, saveOrder, type PaymentInput } from './posRepository'
-import { validateVoucher } from '../vouchers/voucherRepository'
+import { validateVoucher, validateTenderVoucher } from '../vouchers/voucherRepository'
 import { listMembers, type Member } from '../members/membersRepository'
 import PaymentModal from './PaymentModal'
+import SplitBillModal from './SplitBillModal'
+import type { CartItem } from '../../types'
 import { useCart } from './useCart'
 
 export default function PosPage() {
@@ -37,6 +39,7 @@ export default function PosPage() {
   const [member, setMember] = useState<Member | null>(null)
   const [memberQuery, setMemberQuery] = useState('')
   const [showPayment, setShowPayment] = useState(false)
+  const [showSplit, setShowSplit] = useState(false)
   const [isPreorder, setIsPreorder] = useState(false)
   const [preorderDeadline, setPreorderDeadline] = useState('')
   const [dpAmount, setDpAmount] = useState(0)
@@ -176,6 +179,39 @@ export default function PosPage() {
     else setShowPayment(true)
   }
 
+  const handleSplitConfirm = async (bills: CartItem[][]) => {
+    setShowSplit(false)
+    if (saving) return
+    setSaving(true)
+    try {
+      let parentId: number | undefined
+      for (const billItems of bills) {
+        const sub = billItems.reduce((s, it) => s + it.product.price * it.quantity, 0)
+        const billTax = taxEnabled ? Math.round(sub * taxRate) : 0
+        const billTotalAmt = sub + billTax
+        const res = await saveOrder({
+          outletId,
+          items: billItems,
+          facilityType,
+          tableNumber,
+          taxRate,
+          taxEnabled,
+          status: 'COMPLETED',
+          sendToKitchen: false,
+          parentTransactionId: parentId,
+          payments: [{ method: 'CASH', amountPaid: billTotalAmt, tenderedAmount: billTotalAmt }],
+        })
+        if (parentId === undefined) parentId = res.transactionId
+      }
+      showToast(`${bills.length} nota split bill dibuat.`)
+      resetOrder()
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal split bill')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const categoryPills = useMemo(
     () => [{ id: undefined, name: 'Semua' } as const, ...categories],
     [categories],
@@ -280,6 +316,7 @@ export default function PosPage() {
           onRemove={cart.removeProduct}
           onSaveDraft={() => finishOrder('DRAFT')}
           onPay={handlePay}
+          onSplit={() => setShowSplit(true)}
         />
       </div>
 
@@ -287,11 +324,23 @@ export default function PosPage() {
       {showPayment && (
         <PaymentModal
           total={orderTotal}
+          onCheckVoucher={validateTenderVoucher}
           onCancel={() => setShowPayment(false)}
           onConfirm={(payments) => {
             setShowPayment(false)
             finishOrder('COMPLETED', payments)
           }}
+        />
+      )}
+
+      {/* Modal split bill */}
+      {showSplit && (
+        <SplitBillModal
+          items={cart.items}
+          taxRate={taxRate}
+          taxEnabled={taxEnabled}
+          onCancel={() => setShowSplit(false)}
+          onConfirm={handleSplitConfirm}
         />
       )}
 

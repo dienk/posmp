@@ -47,6 +47,8 @@ src/
   types/         # tipe domain
 ```
 
+> **Status: seluruh spesifikasi fungsional PRD v1.5 telah diimplementasikan** (M1–M10). Yang tersisa bersifat operasional/integrasi eksternal: adapter API marketplace nyata & kompilasi native (butuh toolchain & kredensial di mesin lokal).
+
 ## Roadmap (mengikuti Milestone PRD)
 
 | Milestone | Cakupan |
@@ -60,6 +62,7 @@ src/
 | **M7** ✅ | **Pembayaran Berganda** (PRD 4.5): modal checkout multi-metode (Tunai/QRIS/Debit/Kredit), kalkulasi kembalian, referensi QRIS, dicatat ke `transaction_payments` & tampil di Riwayat |
 | **M8** ✅ | **Pre-Order & Uang Muka** (PRD 4.6): buat pesanan di muka dengan tenggat + DP (stok belum dipotong), pelunasan saat ambil (potong stok + poin) via modal pembayaran |
 | **M9** ✅ | **Cicilan Internal** (PRD 4.5): rencana kredit member (pokok + tenor + bunga flat), angsuran bulanan → sisa berkurang, jatuh tempo maju, status UNPAID→PARTIALLY_PAID→PAID (`transaction_installments`) |
+| **M10** ✅ | **Split Bill** (`parent_transaction_id`): pisah item satu order ke beberapa nota tertaut, **Voucher-as-tender** (PRD 4.4): bayar pakai gift card (`VALUE_DEPOSIT`) di modal pembayaran. Nomor invoice kini ber-suffix urut agar unik. |
 
 ### Sinkronisasi real-time (local-first)
 

@@ -73,6 +73,8 @@ export interface SaveOrderInput {
   isPreorder?: boolean
   preorderDeadline?: string | null
   downPaymentReceived?: number
+  /** Split Bill: menautkan nota anak ke transaksi induk. */
+  parentTransactionId?: number
 }
 
 export interface SaveOrderResult {
@@ -110,9 +112,10 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
     db.run(
       `INSERT INTO transactions
          (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
-          voucher_id, member_id, subtotal_amount, discount_amount, tax_amount, points_earned,
-          total_amount, status, is_preorder, preorder_deadline, down_payment_received)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          voucher_id, member_id, parent_transaction_id, subtotal_amount, discount_amount,
+          tax_amount, points_earned, total_amount, status, is_preorder, preorder_deadline,
+          down_payment_received)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.outletId,
         invoiceNumber,
@@ -122,6 +125,7 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
         input.queueNumber ?? null,
         input.voucherId ?? null,
         input.memberId ?? null,
+        input.parentTransactionId ?? null,
         subtotal,
         discount,
         tax,
@@ -193,6 +197,10 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
           p.qrisReference ?? null,
         ],
       )
+      // Voucher yang dipakai sebagai alat bayar (gift card) ditandai terpakai.
+      if (p.voucherId) {
+        db.run('UPDATE vouchers SET used_count = used_count + 1 WHERE id = ?', [p.voucherId])
+      }
     }
 
     // Akumulasi poin loyalitas member + audit di point_logs.

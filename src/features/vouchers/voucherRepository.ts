@@ -171,6 +171,32 @@ export function validateVoucher(code: string, subtotal: number): VoucherValidati
   return { ok: true, message: 'Voucher diterapkan.', voucher, discount }
 }
 
+export interface TenderVoucherResult {
+  ok: boolean
+  message: string
+  voucherId?: number
+  value?: number
+}
+
+/**
+ * Validasi voucher sebagai alat pembayaran (gift card / VALUE_DEPOSIT).
+ * Berbeda dari diskon: nilai voucher dipakai langsung membayar tagihan.
+ */
+export function validateTenderVoucher(code: string): TenderVoucherResult {
+  const voucher = query<Voucher>('SELECT * FROM vouchers WHERE code = ?', [
+    code.trim().toUpperCase(),
+  ])[0]
+  if (!voucher) return { ok: false, message: 'Kode voucher tidak ditemukan.' }
+  if (voucher.discount_type !== 'VALUE_DEPOSIT')
+    return { ok: false, message: 'Voucher ini bukan gift card / saldo.' }
+  if (!voucher.is_active) return { ok: false, message: 'Voucher tidak aktif.' }
+  if (voucher.used_count >= voucher.usage_limit)
+    return { ok: false, message: 'Voucher sudah terpakai.' }
+  if (voucher.expiry_date && new Date(voucher.expiry_date) < new Date())
+    return { ok: false, message: 'Voucher sudah kedaluwarsa.' }
+  return { ok: true, message: 'Voucher valid.', voucherId: voucher.id, value: voucher.discount_value }
+}
+
 export async function deactivateVoucherCampaign(campaignId: number): Promise<void> {
   await execute('UPDATE vouchers SET is_active = 0 WHERE campaign_id = ?', [campaignId])
 }

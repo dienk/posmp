@@ -2,28 +2,41 @@ import { useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
 import type { PaymentInput, PaymentMethod } from './posRepository'
 
+export interface TenderVoucherCheck {
+  ok: boolean
+  message: string
+  voucherId?: number
+  value?: number
+}
+
 const METHODS: { value: PaymentMethod; label: string; icon: string }[] = [
   { value: 'CASH', label: 'Tunai', icon: '💵' },
   { value: 'QRIS', label: 'QRIS', icon: '📱' },
   { value: 'DEBIT_CARD', label: 'Debit', icon: '💳' },
   { value: 'CREDIT_CARD', label: 'Kredit', icon: '💳' },
+  { value: 'VOUCHER', label: 'Voucher', icon: '🎟️' },
 ]
 
 interface Row {
   method: PaymentMethod
   amount: number
   qrisRef: string
+  voucherCode?: string
+  voucherId?: number
+  voucherMsg?: { ok: boolean; text: string }
 }
 
 interface Props {
   total: number
   onCancel: () => void
   onConfirm: (payments: PaymentInput[]) => void
+  /** Validasi voucher gift card sebagai alat bayar. */
+  onCheckVoucher?: (code: string) => TenderVoucherCheck
 }
 
 const QUICK_CASH = [0, 50000, 100000, 150000, 200000]
 
-export default function PaymentModal({ total, onCancel, onConfirm }: Props) {
+export default function PaymentModal({ total, onCancel, onConfirm, onCheckVoucher }: Props) {
   const [rows, setRows] = useState<Row[]>([{ method: 'CASH', amount: total, qrisRef: '' }])
 
   const paid = useMemo(() => rows.reduce((s, r) => s + (r.amount || 0), 0), [rows])
@@ -32,10 +45,27 @@ export default function PaymentModal({ total, onCancel, onConfirm }: Props) {
   const canConfirm = paid >= total && total > 0
 
   const addRow = (method: PaymentMethod) =>
-    setRows((prev) => [...prev, { method, amount: remaining, qrisRef: '' }])
+    setRows((prev) => [...prev, { method, amount: method === 'VOUCHER' ? 0 : remaining, qrisRef: '' }])
   const updateRow = (idx: number, patch: Partial<Row>) =>
     setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)))
   const removeRow = (idx: number) => setRows((prev) => prev.filter((_, i) => i !== idx))
+
+  const checkVoucher = (idx: number, code: string) => {
+    if (!onCheckVoucher) return
+    const res = onCheckVoucher(code)
+    if (res.ok && res.value) {
+      // Sisa tagihan di luar baris voucher ini.
+      const otherPaid = rows.reduce((s, r, i) => (i === idx ? s : s + (r.amount || 0)), 0)
+      const applied = Math.min(res.value, Math.max(0, total - otherPaid))
+      updateRow(idx, {
+        amount: applied,
+        voucherId: res.voucherId,
+        voucherMsg: { ok: true, text: `${res.message} (saldo ${res.value.toLocaleString('id-ID')})` },
+      })
+    } else {
+      updateRow(idx, { amount: 0, voucherId: undefined, voucherMsg: { ok: false, text: res.message } })
+    }
+  }
 
   const handleConfirm = () => {
     // Alokasikan amountPaid berurutan; kelebihan menjadi kembalian (biasanya tunai).
@@ -51,6 +81,7 @@ export default function PaymentModal({ total, onCancel, onConfirm }: Props) {
           tenderedAmount: r.amount,
           changeAmount: r.amount - applied,
           qrisReference: r.method === 'QRIS' ? r.qrisRef || undefined : undefined,
+          voucherId: r.method === 'VOUCHER' ? r.voucherId : undefined,
         }
       })
     onConfirm(payments)
@@ -128,6 +159,38 @@ export default function PaymentModal({ total, onCancel, onConfirm }: Props) {
                     placeholder="No. Referensi / RRN (opsional)"
                     className="mt-2 w-full rounded-lg border border-black/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
                   />
+                )}
+                {r.method === 'VOUCHER' && (
+                  <div className="mt-2">
+                    <div className="flex gap-2">
+                      <input
+                        value={r.voucherCode ?? ''}
+                        onChange={(e) => updateRow(idx, { voucherCode: e.target.value })}
+                        onKeyDown={(e) =>
+                          e.key === 'Enter' && checkVoucher(idx, r.voucherCode ?? '')
+                        }
+                        placeholder="Kode gift card"
+                        className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-1.5 text-sm uppercase outline-none focus:border-brand-strong"
+                      />
+                      <button
+                        onClick={() => checkVoucher(idx, r.voucherCode ?? '')}
+                        disabled={!r.voucherCode?.trim()}
+                        className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+                      >
+                        Cek
+                      </button>
+                    </div>
+                    {r.voucherMsg && (
+                      <p
+                        className={
+                          'mt-1 text-xs ' +
+                          (r.voucherMsg.ok ? 'text-status-empty' : 'text-status-occupied')
+                        }
+                      >
+                        {r.voucherMsg.text}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             ))}

@@ -38,6 +38,7 @@ interface Props {
   onRemove: (productId: number) => void
   onSaveDraft: () => void
   onPay: () => void
+  onSplit: () => void
 }
 
 export default function CartPanel(props: Props) {
@@ -300,6 +301,17 @@ export default function CartPanel(props: Props) {
                 ? `Simpan Pre-Order · DP ${formatRupiah(Math.min(props.dpAmount, total))}`
                 : `Bayar · ${formatRupiah(total)}`}
           </button>
+          {!props.isPreorder && props.items.length > 1 && (
+            <button
+              type="button"
+              disabled={props.saving}
+              onClick={props.onSplit}
+              className="rounded-xl border border-black/10 py-2 text-sm font-semibold text-ink
+                         transition hover:bg-background disabled:opacity-40"
+            >
+              ⑃ Split Bill
+            </button>
+          )}
         </div>
       </div>
     </aside>
