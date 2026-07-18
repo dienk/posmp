@@ -57,8 +57,8 @@ export function seedDatabase(db: Database): void {
   // Layout meja contoh (grid 4 kolom)
   for (let i = 1; i <= 8; i++) {
     db.run(
-      `INSERT INTO dining_tables (outlet_id, table_number, section_name, grid_x, grid_y, capacity, status)
-       VALUES (1, ?, 'INDOOR', ?, ?, 4, 'EMPTY')`,
+      `INSERT INTO dining_tables (outlet_id, table_number, section_name, grid_x, grid_y, capacity, max_capacity, status)
+       VALUES (1, ?, 'INDOOR', ?, ?, 4, 6, 'EMPTY')`,
       [`T-${String(i).padStart(2, '0')}`, (i - 1) % 4, Math.floor((i - 1) / 4)],
     )
   }

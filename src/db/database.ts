@@ -130,6 +130,14 @@ function migrateSchema(db: Database): boolean {
     }
     changed = true
   }
+
+  // Kolom kapasitas maksimum pada meja (default = kapasitas standar saat ini).
+  const tableCols = columnsOf('dining_tables')
+  if (!tableCols.has('max_capacity')) {
+    db.run('ALTER TABLE dining_tables ADD COLUMN max_capacity INTEGER DEFAULT 4')
+    db.run('UPDATE dining_tables SET max_capacity = capacity WHERE max_capacity IS NULL OR max_capacity < capacity')
+    changed = true
+  }
   return changed
 }
 

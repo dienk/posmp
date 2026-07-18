@@ -103,7 +103,8 @@ CREATE TABLE IF NOT EXISTS dining_tables (
     section_name TEXT DEFAULT 'INDOOR', -- 'INDOOR', 'OUTDOOR', 'VIP'
     grid_x INTEGER DEFAULT 0,
     grid_y INTEGER DEFAULT 0,
-    capacity INTEGER DEFAULT 4,
+    capacity INTEGER DEFAULT 4,       -- kapasitas standar
+    max_capacity INTEGER DEFAULT 4,   -- kapasitas maksimum
     status TEXT DEFAULT 'EMPTY', -- 'EMPTY', 'OCCUPIED', 'WAITING_BILL'
     FOREIGN KEY(outlet_id) REFERENCES outlets(id),
     UNIQUE(outlet_id, table_number)

@@ -54,6 +54,7 @@ export interface DiningTable {
   grid_x: number
   grid_y: number
   capacity: number
+  max_capacity: number
   status: TableStatus
 }
 

@@ -77,6 +77,7 @@ src/
 | **M22** ✅ | **Member CRUD lengkap**: identitas (nama/kontak/email/alamat/tgl lahir/jenis kelamin/pekerjaan), keanggotaan (no. kartu, **tingkatan** Silver/Gold/Platinum/Diamond, tgl daftar, masa berlaku, **status** Aktif/Nonaktif/Ditangguhkan/Diblokir), loyalti (poin, **saldo/kredit**, preferensi) + **riwayat transaksi & penukaran poin**. Kolom `members` diperluas via migrasi otomatis. |
 | **M23** ✅ | **ID Card member dengan template desainable** (Setelan › Desain Kartu): editor kartu (judul, warna gradien/preset, logo, barcode, tampil tier/masa berlaku/poin) + pratinjau langsung; tombol **Kartu ID** di detail member untuk lihat, **cetak**, & **unduh PNG** kartu. |
 | **M24** ✅ | **Data Master Outlet & Kasir**: **Outlet** (CRUD cabang: nama, alamat, telepon, aktif/nonaktif; hapus dijaga bila masih ada kasir/transaksi/stok/meja), **Kasir** (CRUD titik/mesin kasir per outlet: nama, kode, lokasi, status; filter per outlet). Tabel `cashiers` (ke-23) dibuat via migrasi otomatis untuk database lama. |
+| **M25** ✅ | **Master Meja** (Data Master): CRUD meja lintas outlet (nomor/nama, area INDOOR/OUTDOOR/VIP, **kapasitas standar** & **kapasitas maksimum**) + filter per outlet. Kolom `max_capacity` ditambahkan ke `dining_tables` via migrasi otomatis (default = kapasitas saat ini). |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -93,6 +94,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/` | Kasir (POS) — + diskon voucher |
 | `#/outlets` | Data Master › Outlet (cabang) |
 | `#/cashiers` | Data Master › Kasir (titik kasir per outlet) |
+| `#/master-tables` | Data Master › Master Meja (kapasitas standar & maksimum) |
 | `#/products` | Data Master › Produk (katalog) |
 | `#/categories` | Data Master › Kategori Produk |
 | `#/contacts` | Data Master › Contact (pelanggan/pemasok/karyawan/penjual) |

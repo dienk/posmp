@@ -184,7 +184,8 @@ export default function TablesPage() {
               </button>
             </div>
             <p className="mt-1 text-sm text-ink-soft">
-              {selected.section_name} · Kapasitas {selected.capacity} orang
+              {selected.section_name} · Kapasitas {selected.capacity}
+              {selected.max_capacity > selected.capacity ? `–${selected.max_capacity}` : ''} orang
             </p>
             <div className="mt-3">
               <span
