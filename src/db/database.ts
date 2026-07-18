@@ -9,6 +9,8 @@ const IDB_STORE = 'sqlite'
 const IDB_KEY = 'main.db'
 
 let dbInstance: Database | null = null
+// Simpan factory sql.js agar snapshot bisa dimuat ulang dari IndexedDB (lintas-tab).
+let sqlEngine: Awaited<ReturnType<typeof initSqlJs>> | null = null
 
 /** Buka koneksi IndexedDB tempat file SQLite dipersist. */
 function openIndexedDb(): Promise<IDBDatabase> {
@@ -54,6 +56,7 @@ export async function initDatabase(): Promise<Database> {
   if (dbInstance) return dbInstance
 
   const SQL = await initSqlJs({ locateFile: () => sqlWasmUrl })
+  sqlEngine = SQL
   const persisted = await loadPersisted()
 
   if (persisted) {
@@ -68,6 +71,22 @@ export async function initDatabase(): Promise<Database> {
   const migrated = migrateSchema(dbInstance)
   dbInstance.run('PRAGMA foreign_keys = ON;')
   if (migrated) await persist()
+  return dbInstance
+}
+
+/**
+ * Muat ulang snapshot database dari IndexedDB ke memori, mengganti instance
+ * saat ini. Karena tiap tab memegang salinan sql.js in-memory sendiri, tampilan
+ * read-only lintas-tab (mis. Monitor TV, Self-Order) harus memanggil ini agar
+ * melihat tulisan terbaru dari tab kasir. Aman & idempoten.
+ */
+export async function reloadDatabase(): Promise<Database> {
+  if (!sqlEngine) return initDatabase()
+  const persisted = await loadPersisted()
+  if (!persisted) return dbInstance ?? initDatabase()
+  dbInstance?.close()
+  dbInstance = new sqlEngine.Database(persisted)
+  dbInstance.run('PRAGMA foreign_keys = ON;')
   return dbInstance
 }
 

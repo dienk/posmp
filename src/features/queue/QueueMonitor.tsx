@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
+import { reloadDatabase } from '../../db/database'
+import { subscribe } from '../../lib/realtime'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { fetchActiveQueue, type QueueTicket } from './queueRepository'
 
 /**
  * Tampilan monitor publik untuk Smart TV.
- * Local-first: memantau antrean dengan polling IndexedDB tiap 3 detik
- * (akan digantikan push WebSocket lokal pada Milestone 3).
+ * Tab ini read-only & terpisah dari kasir, jadi salinan sql.js in-memory-nya
+ * bisa basi. Karena itu setiap penyegaran memuat ulang snapshot DB dari
+ * IndexedDB dulu (reloadDatabase) — dipicu event realtime lintas-tab
+ * (`queue:update`/`order:update`) plus polling cadangan tiap 3 detik.
  */
 export default function QueueMonitor() {
   const { settings } = useSettings()
@@ -14,10 +18,21 @@ export default function QueueMonitor() {
   const [tickets, setTickets] = useState<QueueTicket[]>([])
 
   useEffect(() => {
-    const tick = () => setTickets(fetchActiveQueue(outletId))
-    tick()
-    const id = window.setInterval(tick, 3000)
-    return () => window.clearInterval(id)
+    let alive = true
+    const refresh = async () => {
+      await reloadDatabase()
+      if (alive) setTickets(fetchActiveQueue(outletId))
+    }
+    refresh()
+    const unsubQueue = subscribe('queue:update', refresh)
+    const unsubOrder = subscribe('order:update', refresh)
+    const id = window.setInterval(refresh, 3000)
+    return () => {
+      alive = false
+      unsubQueue()
+      unsubOrder()
+      window.clearInterval(id)
+    }
   }, [outletId])
 
   const preparing = tickets.filter((t) => t.status === 'PREPARING')

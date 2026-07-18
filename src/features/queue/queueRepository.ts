@@ -1,5 +1,6 @@
 import { execute, query } from '../../db/database'
 import { generateInvoiceNumber } from '../../lib/format'
+import { publish } from '../../lib/realtime'
 import type { FacilityType } from '../../types'
 
 export type QueueStatus = 'PREPARING' | 'READY' | 'COMPLETED'
@@ -41,6 +42,7 @@ export async function issueQueue(outletId: number, facility: FacilityType): Prom
      VALUES (?, ?, ?, 'POS_OFFLINE', ?, 0, 0, 'PREPARING')`,
     [outletId, generateInvoiceNumber(), facility, queueNumber],
   )
+  publish('queue:update')
   return queueNumber
 }
 
@@ -58,4 +60,5 @@ export function fetchActiveQueue(outletId: number): QueueTicket[] {
 
 export async function setQueueStatus(id: number, status: QueueStatus): Promise<void> {
   await execute('UPDATE transactions SET status = ? WHERE id = ?', [status, id])
+  publish('queue:update')
 }

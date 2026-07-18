@@ -89,6 +89,12 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
 - **IndexedDB ter-scope per origin termasuk PORT.** Saat verifikasi dengan
   `npm run preview` di port berbeda, database mulai kosong (seed ulang) — ini
   ekspektasi, bukan bug.
+- **Tiap tab punya salinan sql.js in-memory sendiri.** `dbInstance` singleton per
+  tab dimuat sekali saat boot; tulisan tab lain (yang `persist()` ke IndexedDB)
+  **tidak** otomatis terlihat. Tampilan read-only lintas-tab (Monitor TV,
+  Self-Order) **harus** panggil `reloadDatabase()` (memuat ulang snapshot dari
+  IndexedDB) sebelum query, dipicu event realtime + polling. Pastikan pula mutasi
+  memicu `publish(...)` agar tab lain dapat event. Tab penulis tak perlu reload.
 - **Skema inti (22 tabel PRD v1.5) bersifat tetap**; penambahan hanya bila fitur
   baru benar-benar butuh (mis. tabel ke-23 `cashiers`). Selain itu, fitur baru
   sedapat mungkin
