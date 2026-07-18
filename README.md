@@ -96,8 +96,8 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/vouchers` | Voucher Generator |
 | `#/marketplace` | Integrasi Marketplace (config) |
 | `#/reports` | Dashboard & Laporan (+ Ekspor CSV) |
-| `#/settings` | Pengaturan (outlet, pajak, poin, modul) |
-| `#/receipt-design` | Desain Struk (kustomisasi + pratinjau) |
+| `#/settings` | Setelan › Pengaturan (outlet, pajak, poin, modul) |
+| `#/receipt-design` | Setelan › Desain Struk (kustomisasi + pratinjau) |
 | `#/monitor` | Monitor antrean publik (Smart TV) |
 | `#/order/:tableNumber` | Self-Order pelanggan (QR meja) |
 

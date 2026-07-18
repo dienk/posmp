@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useSettings } from '../lib/SettingsContext'
 import { isModuleEnabled } from '../lib/settings'
 import { useConnection } from '../lib/useConnection'
@@ -24,9 +25,17 @@ const NAV: NavItem[] = [
   { to: '/vouchers', label: 'Voucher', icon: '🎟️' },
   { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' },
   { to: '/reports', label: 'Laporan', icon: '📊' },
-  { to: '/receipt-design', label: 'Struk', icon: '🖨️' },
-  { to: '/settings', label: 'Setelan', icon: '⚙️' },
 ]
+
+// Grup "Setelan" beserta sub-menunya.
+const SETTINGS_GROUP = {
+  label: 'Setelan',
+  icon: '⚙️',
+  children: [
+    { to: '/settings', label: 'Pengaturan', short: 'Setelan', icon: '🛠️' },
+    { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: '🖨️' },
+  ],
+}
 
 export default function AppShell() {
   const { settings } = useSettings()
@@ -80,6 +89,8 @@ export default function AppShell() {
               {n.label}
             </NavLink>
           ))}
+
+          <SettingsGroup open={sidebarOpen} />
         </div>
 
         <ConnectionBadge
@@ -92,6 +103,71 @@ export default function AppShell() {
       <main className="min-w-0 flex-1">
         <Outlet />
       </main>
+    </div>
+  )
+}
+
+function SettingsGroup({ open }: { open: boolean }) {
+  const location = useLocation()
+  const childActive = SETTINGS_GROUP.children.some((c) => location.pathname === c.to)
+  const [expanded, setExpanded] = useState(childActive)
+  useEffect(() => {
+    if (childActive) setExpanded(true)
+  }, [childActive])
+
+  // Sidebar ringkas: tampilkan sub-menu sebagai ikon datar agar tetap terjangkau.
+  if (!open) {
+    return (
+      <>
+        {SETTINGS_GROUP.children.map((c) => (
+          <NavLink
+            key={c.to}
+            to={c.to}
+            title={c.label}
+            className={({ isActive }) =>
+              'flex w-16 flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium transition ' +
+              (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
+            }
+          >
+            <span className="text-xl leading-none">{c.icon}</span>
+            {c.short}
+          </NavLink>
+        ))}
+      </>
+    )
+  }
+
+  // Sidebar terbuka: accordion "Setelan" dengan sub-menu ter-indentasi.
+  return (
+    <div>
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className={
+          'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ' +
+          (childActive ? 'text-ink' : 'text-ink-soft hover:bg-brand-soft')
+        }
+      >
+        <span className="text-xl leading-none">{SETTINGS_GROUP.icon}</span>
+        <span className="flex-1 text-left">{SETTINGS_GROUP.label}</span>
+        <span className="text-xs">{expanded ? '▾' : '▸'}</span>
+      </button>
+      {expanded && (
+        <div className="mt-0.5 flex flex-col gap-0.5 border-l border-black/10 pl-3 ml-4">
+          {SETTINGS_GROUP.children.map((c) => (
+            <NavLink
+              key={c.to}
+              to={c.to}
+              className={({ isActive }) =>
+                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ' +
+                (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
+              }
+            >
+              <span className="text-base leading-none">{c.icon}</span>
+              {c.label}
+            </NavLink>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
