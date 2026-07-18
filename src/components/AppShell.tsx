@@ -16,6 +16,8 @@ const NAV: NavItem[] = [
   { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds' },
   { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue' },
   { to: '/members', label: 'Member', icon: '⭐' },
+  { to: '/stockin', label: 'Stok', icon: '📥' },
+  { to: '/history', label: 'Riwayat', icon: '🧾' },
   { to: '/vouchers', label: 'Voucher', icon: '🎟️' },
   { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' },
   { to: '/reports', label: 'Laporan', icon: '📊' },

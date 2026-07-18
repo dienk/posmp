@@ -56,6 +56,7 @@ src/
 | **M3** ✅ | Bus real-time lokal (BroadcastChannel), **KDS** (aging timer, check-off item), **Self-Order** (menu QR pelanggan → dapur), **Voucher Generator** massal + diskon voucher di POS, **Marketplace** config scaffold |
 | **M4** ✅ | **Relay WebSocket LAN** (`server/relay.mjs`, sinkron lintas-perangkat), **Sync Queue offline-first** (auto-flush saat online), indikator koneksi, konfigurasi **Tauri** (desktop) & **Capacitor** (mobile). _Adapter API marketplace nyata & kompilasi native butuh toolchain lokal._ |
 | **M5** ✅ | **Member & Loyalitas** (CRUD, poin otomatis saat bayar + audit `point_logs`), **Dashboard & Laporan** manajer (KPI, penjualan per sumber, produk terlaris), **Ekspor CSV** (PRD 4.8) |
+| **M6** ✅ | **Supplier & Stok Masuk** (penerimaan barang → tambah stok + catat HPP), **Riwayat Transaksi & Refund** (pengembalian dana → restok + audit `refunds`/`refund_details` + koreksi poin member) |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -74,6 +75,8 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/kds` | Kitchen Display System (dapur) |
 | `#/queue` | Sistem Antrean (operator) |
 | `#/members` | Member & Loyalitas Poin |
+| `#/stockin` | Stok Masuk & Supplier |
+| `#/history` | Riwayat Transaksi & Refund |
 | `#/vouchers` | Voucher Generator |
 | `#/marketplace` | Integrasi Marketplace (config) |
 | `#/reports` | Dashboard & Laporan (+ Ekspor CSV) |
