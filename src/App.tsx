@@ -1,11 +1,31 @@
 import { useEffect, useState } from 'react'
+import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { initDatabase } from './db/database'
-import { loadSettings } from './lib/settings'
+import { SettingsProvider } from './lib/SettingsContext'
+import AppShell from './components/AppShell'
 import PosPage from './features/pos/PosPage'
+import TablesPage from './features/tables/TablesPage'
+import QueuePage from './features/queue/QueuePage'
+import QueueMonitor from './features/queue/QueueMonitor'
+
+// Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
+const router = createHashRouter([
+  {
+    path: '/',
+    element: <AppShell />,
+    children: [
+      { index: true, element: <PosPage /> },
+      { path: 'tables', element: <TablesPage /> },
+      { path: 'queue', element: <QueuePage /> },
+    ],
+  },
+  // Tampilan monitor publik untuk Smart TV (tanpa shell/navigasi).
+  { path: '/monitor', element: <QueueMonitor /> },
+])
 
 type BootState =
   | { phase: 'loading' }
-  | { phase: 'ready'; settings: Record<string, string> }
+  | { phase: 'ready' }
   | { phase: 'error'; message: string }
 
 export default function App() {
@@ -14,10 +34,7 @@ export default function App() {
   useEffect(() => {
     let mounted = true
     initDatabase()
-      .then(() => {
-        if (!mounted) return
-        setState({ phase: 'ready', settings: loadSettings() })
-      })
+      .then(() => mounted && setState({ phase: 'ready' }))
       .catch((err: unknown) => {
         if (!mounted) return
         setState({ phase: 'error', message: err instanceof Error ? err.message : String(err) })
@@ -45,5 +62,9 @@ export default function App() {
     )
   }
 
-  return <PosPage settings={state.settings} />
+  return (
+    <SettingsProvider>
+      <RouterProvider router={router} />
+    </SettingsProvider>
+  )
 }

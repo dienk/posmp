@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { generateInvoiceNumber } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
+import { useSettings } from '../../lib/SettingsContext'
 import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
 import { fetchCategories, fetchProducts, saveOrder } from './posRepository'
 import { useCart } from './useCart'
 
-interface Props {
-  settings: Record<string, string>
-}
-
-export default function PosPage({ settings }: Props) {
+export default function PosPage() {
+  const { settings } = useSettings()
+  const location = useLocation()
+  const tableNumber = (location.state as { tableNumber?: string } | null)?.tableNumber
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
   const taxRate = getNumberSetting(settings, 'tax_rate', 0.1)
   const taxEnabled = settings.tax_enabled === '1'
@@ -51,6 +52,7 @@ export default function PosPage({ settings }: Props) {
         items: cart.items,
         facilityType,
         customerName,
+        tableNumber,
         taxRate,
         taxEnabled,
         status,
@@ -98,6 +100,11 @@ export default function PosPage({ settings }: Props) {
             />
           </div>
           <div className="flex items-center gap-2 text-sm font-medium text-ink">
+            {tableNumber && (
+              <span className="rounded-lg bg-status-occupied px-2.5 py-1 text-xs font-semibold text-white">
+                Meja {tableNumber}
+              </span>
+            )}
             <span className="hidden sm:inline">👤 Kasir</span>
           </div>
         </header>

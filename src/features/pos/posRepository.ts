@@ -37,6 +37,8 @@ export interface SaveOrderInput {
   items: CartItem[]
   facilityType: FacilityType
   customerName?: string
+  tableNumber?: string
+  queueNumber?: string
   taxRate: number
   taxEnabled: boolean
   status: 'DRAFT' | 'COMPLETED'
@@ -65,10 +67,20 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
   try {
     db.run(
       `INSERT INTO transactions
-         (outlet_id, invoice_number, facility_type, order_source,
+         (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
           subtotal_amount, discount_amount, tax_amount, total_amount, status)
-       VALUES (?, ?, ?, 'POS_OFFLINE', ?, 0, ?, ?, ?)`,
-      [input.outletId, invoiceNumber, input.facilityType, subtotal, tax, total, input.status],
+       VALUES (?, ?, ?, 'POS_OFFLINE', ?, ?, ?, 0, ?, ?, ?)`,
+      [
+        input.outletId,
+        invoiceNumber,
+        input.facilityType,
+        input.tableNumber ?? null,
+        input.queueNumber ?? null,
+        subtotal,
+        tax,
+        total,
+        input.status,
+      ],
     )
     const transactionId = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
 
@@ -94,6 +106,16 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
           [it.quantity, input.outletId, it.product.id],
         )
       }
+    }
+
+    // Integrasi Table Layout: DRAFT menempati meja, pembayaran melunasi & mengosongkan.
+    if (input.tableNumber) {
+      const tableStatus = input.status === 'DRAFT' ? 'OCCUPIED' : 'EMPTY'
+      db.run('UPDATE dining_tables SET status = ? WHERE outlet_id = ? AND table_number = ?', [
+        tableStatus,
+        input.outletId,
+        input.tableNumber,
+      ])
     }
     db.run('COMMIT')
   } catch (err) {

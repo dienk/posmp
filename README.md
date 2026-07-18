@@ -52,9 +52,18 @@ src/
 | Milestone | Cakupan |
 |-----------|---------|
 | **M1** ✅ | Init proyek, SQLite 22 tabel, app_settings, layar kasir inti |
-| **M2** | Canvas Table Layout, antrean fisik (Queue), Self-Order (sinkron lokal) |
+| **M2** 🚧 | Router + shell navigasi, **Canvas Table Layout** (drag-drop, indikator warna, integrasi POS), **Queue** (terbit A/B, monitor TV publik, TTS). _Self-Order menyusul._ |
 | **M3** | Kitchen Display System (WebSocket), Voucher Generator massal, pembayaran voucher, integrasi marketplace (Shopee/Tokopedia/TikTok) |
 | **M4** | Uji offline-first, performa WebSocket lokal, kompilasi Tauri (desktop) & Capacitor (mobile) |
+
+### Rute aplikasi
+
+| Path | Layar |
+|------|-------|
+| `#/` | Kasir (POS) |
+| `#/tables` | Tata Letak Meja |
+| `#/queue` | Sistem Antrean (operator) |
+| `#/monitor` | Monitor antrean publik (Smart TV) |
 
 ## Catatan teknis
 
