@@ -25,6 +25,7 @@ import PersonaPage from './features/access/PersonaPage'
 import RolesPage from './features/access/RolesPage'
 import ThemePage from './features/theme/ThemePage'
 import ProductsPage from './features/products/ProductsPage'
+import CategoriesPage from './features/products/CategoriesPage'
 import ContactsPage from './features/contacts/ContactsPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
@@ -46,6 +47,7 @@ const router = createHashRouter([
       { path: 'history', element: <HistoryPage /> },
       { path: 'reports', element: <ReportsPage /> },
       { path: 'products', element: <ProductsPage /> },
+      { path: 'categories', element: <CategoriesPage /> },
       { path: 'contacts', element: <ContactsPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: 'personas', element: <PersonaPage /> },

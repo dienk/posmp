@@ -73,7 +73,7 @@ src/
 | **M18** ✅ | **Logo di semua permukaan**: header **Monitor TV** & **Self-Order**, serta **logo default struk** (path relatif di-absolutkan agar tetap tercetak; bisa diganti/hapus via Desain Struk). |
 | **M19** ✅ | **Persona & Peran/Hak Akses** (di Setelan): kelola pengguna (persona) + peran dengan izin per-menu (disimpan JSON di `app_settings`). Persona aktif memfilter menu sidebar sesuai hak akses; **Setelan selalu tampil** agar tak terkunci. |
 | **M20** ✅ | **Tema** (di Setelan): 6 pilihan tema (Klasik/bawaan + Merah Putih, Laut, Hutan, Senja, Anggur) via CSS variables; berlaku seketika seluruh aplikasi & tersimpan. Warna status (hijau/merah/kuning) tetap semantik. |
-| **M21** ✅ | **Data Master**: grup menu baru berisi **Produk** (CRUD katalog + kategori, dgn stok awal) dan **Contact** (tab **Pelanggan**/member, **Pemasok**/supplier, **Karyawan**/persona, **Penjual**/baru di `app_settings`). |
+| **M21** ✅ | **Data Master**: grup menu baru berisi **Produk** (CRUD katalog + kategori, dgn stok awal), **Kategori Produk** (CRUD kategori: nama, warna, jumlah produk), dan **Contact** (tab **Pelanggan**/member, **Pemasok**/supplier, **Karyawan**/persona, **Penjual**/baru di `app_settings`). |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -88,7 +88,8 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | Path | Layar |
 |------|-------|
 | `#/` | Kasir (POS) — + diskon voucher |
-| `#/products` | Data Master › Produk (katalog + kategori) |
+| `#/products` | Data Master › Produk (katalog) |
+| `#/categories` | Data Master › Kategori Produk |
 | `#/contacts` | Data Master › Contact (pelanggan/pemasok/karyawan/penjual) |
 | `#/tables` | Tata Letak Meja |
 | `#/kds` | Kitchen Display System (dapur) |

@@ -5,6 +5,43 @@ export function listCategories(): Category[] {
   return query<Category>('SELECT id, name, color_code FROM categories ORDER BY name')
 }
 
+export interface CategoryWithCount extends Category {
+  product_count: number
+}
+
+export function listCategoriesWithCount(): CategoryWithCount[] {
+  return query<CategoryWithCount>(
+    `SELECT c.id, c.name, c.color_code, COUNT(p.id) AS product_count
+     FROM categories c
+     LEFT JOIN products p ON p.category_id = c.id
+     GROUP BY c.id
+     ORDER BY c.name`,
+  )
+}
+
+export async function updateCategory(id: number, name: string, color: string | null): Promise<void> {
+  await execute('UPDATE categories SET name = ?, color_code = ? WHERE id = ?', [
+    name.trim(),
+    color,
+    id,
+  ])
+}
+
+/** Hapus kategori; produk terkait dijadikan tanpa kategori (bukan dihapus). */
+export async function deleteCategory(id: number): Promise<void> {
+  const db = getDb()
+  db.run('BEGIN')
+  try {
+    db.run('UPDATE products SET category_id = NULL WHERE category_id = ?', [id])
+    db.run('DELETE FROM categories WHERE id = ?', [id])
+    db.run('COMMIT')
+  } catch (err) {
+    db.run('ROLLBACK')
+    throw err
+  }
+  await persist()
+}
+
 export function listProducts(outletId: number): Product[] {
   return query<Product>(
     `SELECT p.id, p.category_id, p.name, p.sku, p.price, p.image_path,

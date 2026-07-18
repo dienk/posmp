@@ -37,6 +37,7 @@ const DATA_MASTER_GROUP: NavGroupDef = {
   perm: 'datamaster',
   children: [
     { to: '/products', label: 'Produk', short: 'Produk', icon: '📦' },
+    { to: '/categories', label: 'Kategori Produk', short: 'Kategori', icon: '🏷️' },
     { to: '/contacts', label: 'Contact', short: 'Contact', icon: '📇' },
   ],
 }
