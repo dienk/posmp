@@ -45,9 +45,11 @@ export default function AppShell() {
         {/* Header: logo + tombol toggle */}
         <div className={'mb-3 flex items-center ' + (sidebarOpen ? 'justify-between' : 'flex-col gap-2')}>
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-status-occupied text-xs font-bold text-white">
-              PMP
-            </div>
+            <img
+              src="/logo-mark.png"
+              alt="POS Merah Putih"
+              className="h-10 w-10 shrink-0 rounded-xl object-contain"
+            />
             {sidebarOpen && <span className="text-sm font-bold text-ink">POSMerahPutih</span>}
           </div>
           <button

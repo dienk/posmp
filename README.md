@@ -69,6 +69,7 @@ src/
 | **M14** ✅ | **Desain Struk lanjutan**: unggah **logo/gambar** (otomatis di-resize, posisi atas/bawah), **teks multiline** (tagline/penutup/catatan), dan **perataan** header/footer (kiri/tengah/kanan) — semua dengan pratinjau langsung. |
 | **M15** ✅ | **Menu sidebar aktif**: sidebar dapat dibuka/tutup (expand berlabel ↔ ringkas ikon) via tombol ☰ di header sidebar maupun header Kasir; konten menyesuaikan lebar. |
 | **M16** ✅ | **Logo dari URL**: pasang logo struk dengan menempel URL gambar (diunduh & disimpan sebagai data URL agar tetap local-first). Butuh URL publik yang mengizinkan CORS. |
+| **M17** ✅ | **Logo aplikasi**: brand POS Merah Putih terpasang di badge sidebar, favicon tab, dan layar loading (`public/logo-mark.png` + `public/logo-full.png`). |
 
 ### Sinkronisasi real-time (local-first)
 

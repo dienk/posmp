@@ -71,8 +71,9 @@ export default function App() {
 
   if (state.phase === 'loading') {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 text-ink">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand border-t-transparent" />
+      <div className="flex h-full flex-col items-center justify-center gap-4 text-ink">
+        <img src="/logo-mark.png" alt="POS Merah Putih" className="h-24 w-24 rounded-2xl" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand border-t-transparent" />
         <p className="text-sm">Menyiapkan database lokal…</p>
       </div>
     )
