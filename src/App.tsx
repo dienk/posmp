@@ -20,6 +20,8 @@ import PreorderPage from './features/preorder/PreorderPage'
 import InstallmentsPage from './features/installments/InstallmentsPage'
 import SettingsPage from './features/settings/SettingsPage'
 import ReceiptDesignPage from './features/receipt/ReceiptDesignPage'
+import PersonaPage from './features/access/PersonaPage'
+import RolesPage from './features/access/RolesPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -40,6 +42,8 @@ const router = createHashRouter([
       { path: 'history', element: <HistoryPage /> },
       { path: 'reports', element: <ReportsPage /> },
       { path: 'settings', element: <SettingsPage /> },
+      { path: 'personas', element: <PersonaPage /> },
+      { path: 'roles', element: <RolesPage /> },
       { path: 'receipt-design', element: <ReceiptDesignPage /> },
     ],
   },

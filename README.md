@@ -71,6 +71,7 @@ src/
 | **M16** ✅ | **Logo dari URL**: pasang logo struk dengan menempel URL gambar (diunduh & disimpan sebagai data URL agar tetap local-first). Butuh URL publik yang mengizinkan CORS. |
 | **M17** ✅ | **Logo aplikasi**: brand POS Merah Putih terpasang di badge sidebar, favicon tab, dan layar loading (`public/logo-mark.png` + `public/logo-full.png`). |
 | **M18** ✅ | **Logo di semua permukaan**: header **Monitor TV** & **Self-Order**, serta **logo default struk** (path relatif di-absolutkan agar tetap tercetak; bisa diganti/hapus via Desain Struk). |
+| **M19** ✅ | **Persona & Peran/Hak Akses** (di Setelan): kelola pengguna (persona) + peran dengan izin per-menu (disimpan JSON di `app_settings`). Persona aktif memfilter menu sidebar sesuai hak akses; **Setelan selalu tampil** agar tak terkunci. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -97,6 +98,8 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/marketplace` | Integrasi Marketplace (config) |
 | `#/reports` | Dashboard & Laporan (+ Ekspor CSV) |
 | `#/settings` | Setelan › Pengaturan (outlet, pajak, poin, modul) |
+| `#/personas` | Setelan › Persona (pengguna aplikasi) |
+| `#/roles` | Setelan › Peran & Hak Akses |
 | `#/receipt-design` | Setelan › Desain Struk (kustomisasi + pratinjau) |
 | `#/monitor` | Monitor antrean publik (Smart TV) |
 | `#/order/:tableNumber` | Self-Order pelanggan (QR meja) |

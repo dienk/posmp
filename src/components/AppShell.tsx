@@ -4,12 +4,14 @@ import { useSettings } from '../lib/SettingsContext'
 import { isModuleEnabled } from '../lib/settings'
 import { useConnection } from '../lib/useConnection'
 import { useUI } from '../lib/UIContext'
+import { effectivePerms } from '../features/access/accessRepository'
 
 interface NavItem {
   to: string
   label: string
   icon: string
   moduleKey?: string
+  perm?: string
 }
 
 interface NavChild {
@@ -23,6 +25,7 @@ interface NavGroupDef {
   label: string
   icon: string
   children: NavChild[]
+  perm?: string
 }
 
 type NavEntry = { kind: 'link'; item: NavItem } | { kind: 'group'; group: NavGroupDef }
@@ -31,34 +34,37 @@ type NavEntry = { kind: 'link'; item: NavItem } | { kind: 'group'; group: NavGro
 const TRANSAKSI_GROUP: NavGroupDef = {
   label: 'Transaksi',
   icon: '💰',
+  perm: 'transaksi',
   children: [
     { to: '/history', label: 'Riwayat', short: 'Riwayat', icon: '🧾' },
     { to: '/preorder', label: 'Pre-Order', short: 'Pre-Order', icon: '📅' },
   ],
 }
 
-// Grup "Setelan" (Pengaturan & Desain Struk).
+// Grup "Setelan" (selalu tampil agar pengaturan tidak terkunci).
 const SETTINGS_GROUP: NavGroupDef = {
   label: 'Setelan',
   icon: '⚙️',
   children: [
     { to: '/settings', label: 'Pengaturan', short: 'Setelan', icon: '🛠️' },
+    { to: '/personas', label: 'Persona', short: 'Persona', icon: '🧑‍💼' },
+    { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: '🔑' },
     { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: '🖨️' },
   ],
 }
 
 const SIDEBAR: NavEntry[] = [
-  { kind: 'link', item: { to: '/', label: 'Kasir', icon: '🧾' } },
+  { kind: 'link', item: { to: '/', label: 'Kasir', icon: '🧾', perm: 'kasir' } },
   { kind: 'group', group: TRANSAKSI_GROUP },
-  { kind: 'link', item: { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout' } },
-  { kind: 'link', item: { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds' } },
-  { kind: 'link', item: { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue' } },
-  { kind: 'link', item: { to: '/members', label: 'Member', icon: '⭐' } },
-  { kind: 'link', item: { to: '/stockin', label: 'Stok', icon: '📥' } },
-  { kind: 'link', item: { to: '/installments', label: 'Cicilan', icon: '💳' } },
-  { kind: 'link', item: { to: '/vouchers', label: 'Voucher', icon: '🎟️' } },
-  { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' } },
-  { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📊' } },
+  { kind: 'link', item: { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout', perm: 'tables' } },
+  { kind: 'link', item: { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds', perm: 'kds' } },
+  { kind: 'link', item: { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue', perm: 'queue' } },
+  { kind: 'link', item: { to: '/members', label: 'Member', icon: '⭐', perm: 'members' } },
+  { kind: 'link', item: { to: '/stockin', label: 'Stok', icon: '📥', perm: 'stockin' } },
+  { kind: 'link', item: { to: '/installments', label: 'Cicilan', icon: '💳', perm: 'installments' } },
+  { kind: 'link', item: { to: '/vouchers', label: 'Voucher', icon: '🎟️', perm: 'vouchers' } },
+  { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace', perm: 'marketplace' } },
+  { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📊', perm: 'reports' } },
   { kind: 'group', group: SETTINGS_GROUP },
 ]
 
@@ -66,6 +72,8 @@ export default function AppShell() {
   const { settings } = useSettings()
   const conn = useConnection()
   const { sidebarOpen, toggleSidebar } = useUI()
+  // Izin efektif persona aktif; null = tanpa pembatasan.
+  const perms = effectivePerms(settings)
 
   return (
     <div className="flex h-full">
@@ -96,10 +104,14 @@ export default function AppShell() {
 
         <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
           {SIDEBAR.map((entry, i) => {
-            if (entry.kind === 'group')
+            if (entry.kind === 'group') {
+              // Setelan (tanpa perm) selalu tampil; grup lain ikut hak akses.
+              if (entry.group.perm && perms && !perms.has(entry.group.perm)) return null
               return <NavGroup key={`g-${i}`} group={entry.group} open={sidebarOpen} />
+            }
             const n = entry.item
             if (n.moduleKey && !isModuleEnabled(settings, n.moduleKey)) return null
+            if (n.perm && perms && !perms.has(n.perm)) return null
             return (
               <NavLink
                 key={n.to}
