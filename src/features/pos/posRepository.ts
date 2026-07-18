@@ -59,7 +59,7 @@ export interface SaveOrderInput {
   queueNumber?: string
   taxRate: number
   taxEnabled: boolean
-  status: 'DRAFT' | 'COMPLETED'
+  status: 'DRAFT' | 'COMPLETED' | 'PREPARING'
   discountAmount?: number
   voucherId?: number
   memberId?: number
@@ -69,6 +69,10 @@ export interface SaveOrderInput {
   payments?: PaymentInput[]
   /** Terbitkan tiket ke KDS (fire to kitchen). Default true untuk pesanan F&B. */
   sendToKitchen?: boolean
+  /** Pre-Order: pesanan di muka dengan tenggat & uang muka. */
+  isPreorder?: boolean
+  preorderDeadline?: string | null
+  downPaymentReceived?: number
 }
 
 export interface SaveOrderResult {
@@ -107,8 +111,8 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
       `INSERT INTO transactions
          (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
           voucher_id, member_id, subtotal_amount, discount_amount, tax_amount, points_earned,
-          total_amount, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          total_amount, status, is_preorder, preorder_deadline, down_payment_received)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.outletId,
         invoiceNumber,
@@ -124,6 +128,9 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
         pointsEarned,
         total,
         input.status,
+        input.isPreorder ? 1 : 0,
+        input.preorderDeadline ?? null,
+        input.downPaymentReceived ?? 0,
       ],
     )
     const transactionId = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id

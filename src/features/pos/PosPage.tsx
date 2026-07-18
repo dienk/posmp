@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { generateInvoiceNumber } from '../../lib/format'
+import { formatRupiah, generateInvoiceNumber } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import type { Category, FacilityType, Product } from '../../types'
@@ -37,6 +37,9 @@ export default function PosPage() {
   const [member, setMember] = useState<Member | null>(null)
   const [memberQuery, setMemberQuery] = useState('')
   const [showPayment, setShowPayment] = useState(false)
+  const [isPreorder, setIsPreorder] = useState(false)
+  const [preorderDeadline, setPreorderDeadline] = useState('')
+  const [dpAmount, setDpAmount] = useState(0)
 
   const pointsPerAmount = getNumberSetting(settings, 'points_per_amount', 0)
 
@@ -115,18 +118,62 @@ export default function PosPage() {
           : `Pembayaran selesai · ${result.invoiceNumber}` +
               (result.pointsEarned > 0 ? ` · +${result.pointsEarned} poin` : ''),
       )
-      cart.clear()
-      clearVoucher()
-      setMember(null)
-      setMemberQuery('')
-      setCustomerName('')
-      setInvoiceNumber(generateInvoiceNumber())
-      refreshProducts()
+      resetOrder()
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Terjadi kesalahan')
     } finally {
       setSaving(false)
     }
+  }
+
+  const resetOrder = () => {
+    cart.clear()
+    clearVoucher()
+    setMember(null)
+    setMemberQuery('')
+    setCustomerName('')
+    setIsPreorder(false)
+    setPreorderDeadline('')
+    setDpAmount(0)
+    setInvoiceNumber(generateInvoiceNumber())
+    refreshProducts()
+  }
+
+  const createPreorder = async () => {
+    if (cart.items.length === 0 || saving) return
+    const dp = Math.min(dpAmount, orderTotal)
+    setSaving(true)
+    try {
+      const result = await saveOrder({
+        outletId,
+        items: cart.items,
+        facilityType,
+        customerName,
+        tableNumber,
+        taxRate,
+        taxEnabled,
+        status: 'PREPARING',
+        discountAmount: discount,
+        voucherId,
+        memberId: member?.id,
+        sendToKitchen: false,
+        isPreorder: true,
+        preorderDeadline: preorderDeadline || null,
+        downPaymentReceived: dp,
+        payments: dp > 0 ? [{ method: 'CASH', amountPaid: dp, tenderedAmount: dp }] : [],
+      })
+      showToast(`Pre-Order tersimpan · ${result.invoiceNumber} · DP ${formatRupiah(dp)}`)
+      resetOrder()
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Terjadi kesalahan')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handlePay = () => {
+    if (isPreorder) createPreorder()
+    else setShowPayment(true)
   }
 
   const categoryPills = useMemo(
@@ -218,6 +265,12 @@ export default function PosPage() {
           onMemberQueryChange={setMemberQuery}
           onFindMember={handleFindMember}
           onClearMember={() => setMember(null)}
+          isPreorder={isPreorder}
+          preorderDeadline={preorderDeadline}
+          dpAmount={dpAmount}
+          onTogglePreorder={setIsPreorder}
+          onDeadlineChange={setPreorderDeadline}
+          onDpChange={setDpAmount}
           onVoucherCodeChange={setVoucherCode}
           onApplyVoucher={handleApplyVoucher}
           onRemoveVoucher={clearVoucher}
@@ -226,7 +279,7 @@ export default function PosPage() {
           onQuantityChange={cart.setQuantity}
           onRemove={cart.removeProduct}
           onSaveDraft={() => finishOrder('DRAFT')}
-          onPay={() => setShowPayment(true)}
+          onPay={handlePay}
         />
       </div>
 

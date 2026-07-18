@@ -17,6 +17,7 @@ const NAV: NavItem[] = [
   { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue' },
   { to: '/members', label: 'Member', icon: '⭐' },
   { to: '/stockin', label: 'Stok', icon: '📥' },
+  { to: '/preorder', label: 'Pre-Order', icon: '📅' },
   { to: '/history', label: 'Riwayat', icon: '🧾' },
   { to: '/vouchers', label: 'Voucher', icon: '🎟️' },
   { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace' },

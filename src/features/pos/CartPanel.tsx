@@ -23,6 +23,12 @@ interface Props {
   onMemberQueryChange: (q: string) => void
   onFindMember: () => void
   onClearMember: () => void
+  isPreorder: boolean
+  preorderDeadline: string
+  dpAmount: number
+  onTogglePreorder: (on: boolean) => void
+  onDeadlineChange: (v: string) => void
+  onDpChange: (v: number) => void
   onVoucherCodeChange: (code: string) => void
   onApplyVoucher: () => void
   onRemoveVoucher: () => void
@@ -196,6 +202,42 @@ export default function CartPanel(props: Props) {
         )}
       </div>
 
+      {/* Pre-Order */}
+      <div className="px-4 pt-3">
+        <label className="flex items-center gap-2 text-sm font-medium text-ink">
+          <input
+            type="checkbox"
+            checked={props.isPreorder}
+            onChange={(e) => props.onTogglePreorder(e.target.checked)}
+            className="h-4 w-4 accent-status-occupied"
+          />
+          Pre-Order (pesan di muka)
+        </label>
+        {props.isPreorder && (
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <label className="block">
+              <span className="mb-1 block text-[11px] text-ink-soft">Tenggat ambil</span>
+              <input
+                type="date"
+                value={props.preorderDeadline}
+                onChange={(e) => props.onDeadlineChange(e.target.value)}
+                className="w-full rounded-lg border border-black/10 px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[11px] text-ink-soft">Uang Muka (DP)</span>
+              <input
+                type="number"
+                min={0}
+                value={props.dpAmount}
+                onChange={(e) => props.onDpChange(Number(e.target.value))}
+                className="w-full rounded-lg border border-black/10 px-2 py-1.5 text-right text-sm outline-none focus:border-brand-strong"
+              />
+            </label>
+          </div>
+        )}
+      </div>
+
       {/* Ringkasan & aksi */}
       <div className="p-4">
         <dl className="space-y-1 text-sm">
@@ -219,18 +261,32 @@ export default function CartPanel(props: Props) {
             <dt className="text-base font-semibold text-ink">TOTAL</dt>
             <dd className="text-2xl font-extrabold text-status-occupied">{formatRupiah(total)}</dd>
           </div>
+          {props.isPreorder && (
+            <>
+              <div className="flex justify-between text-status-empty">
+                <dt>Uang Muka</dt>
+                <dd>{formatRupiah(Math.min(props.dpAmount, total))}</dd>
+              </div>
+              <div className="flex justify-between text-ink-soft">
+                <dt>Sisa saat ambil</dt>
+                <dd>{formatRupiah(Math.max(0, total - props.dpAmount))}</dd>
+              </div>
+            </>
+          )}
         </dl>
 
         <div className="mt-4 grid gap-2">
-          <button
-            type="button"
-            disabled={empty || props.saving}
-            onClick={props.onSaveDraft}
-            className="rounded-xl border border-brand-strong bg-brand py-3 text-sm font-semibold
-                       text-ink transition hover:bg-brand-strong disabled:opacity-40"
-          >
-            Simpan Bill (Draft)
-          </button>
+          {!props.isPreorder && (
+            <button
+              type="button"
+              disabled={empty || props.saving}
+              onClick={props.onSaveDraft}
+              className="rounded-xl border border-brand-strong bg-brand py-3 text-sm font-semibold
+                         text-ink transition hover:bg-brand-strong disabled:opacity-40"
+            >
+              Simpan Bill (Draft)
+            </button>
+          )}
           <button
             type="button"
             disabled={empty || props.saving}
@@ -238,7 +294,11 @@ export default function CartPanel(props: Props) {
             className="rounded-xl bg-status-occupied py-3.5 text-base font-bold text-white
                        shadow transition hover:brightness-95 disabled:opacity-40"
           >
-            {props.saving ? 'Memproses…' : `Bayar · ${formatRupiah(total)}`}
+            {props.saving
+              ? 'Memproses…'
+              : props.isPreorder
+                ? `Simpan Pre-Order · DP ${formatRupiah(Math.min(props.dpAmount, total))}`
+                : `Bayar · ${formatRupiah(total)}`}
           </button>
         </div>
       </div>

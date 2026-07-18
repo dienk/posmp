@@ -15,6 +15,7 @@ import MembersPage from './features/members/MembersPage'
 import ReportsPage from './features/reports/ReportsPage'
 import StockInPage from './features/stockin/StockInPage'
 import HistoryPage from './features/history/HistoryPage'
+import PreorderPage from './features/preorder/PreorderPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -30,6 +31,7 @@ const router = createHashRouter([
       { path: 'marketplace', element: <MarketplacePage /> },
       { path: 'members', element: <MembersPage /> },
       { path: 'stockin', element: <StockInPage /> },
+      { path: 'preorder', element: <PreorderPage /> },
       { path: 'history', element: <HistoryPage /> },
       { path: 'reports', element: <ReportsPage /> },
     ],
