@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useSettings } from '../lib/SettingsContext'
 import { isModuleEnabled } from '../lib/settings'
+import { useConnection } from '../lib/useConnection'
 
 interface NavItem {
   to: string
@@ -20,6 +21,7 @@ const NAV: NavItem[] = [
 
 export default function AppShell() {
   const { settings } = useSettings()
+  const conn = useConnection()
   const items = NAV.filter((n) => !n.moduleKey || isModuleEnabled(settings, n.moduleKey))
 
   return (
@@ -42,10 +44,45 @@ export default function AppShell() {
             {n.label}
           </NavLink>
         ))}
+        <ConnectionBadge online={conn.online} relay={conn.relay} pending={conn.pending} />
       </nav>
       <main className="min-w-0 flex-1">
         <Outlet />
       </main>
+    </div>
+  )
+}
+
+function ConnectionBadge({
+  online,
+  relay,
+  pending,
+}: {
+  online: boolean
+  relay: string
+  pending: number
+}) {
+  const relayOn = relay === 'connected'
+  return (
+    <div className="mt-auto flex flex-col items-center gap-1.5 pt-3 text-[10px] text-ink-soft">
+      <span className="flex items-center gap-1" title={online ? 'Online' : 'Offline'}>
+        <span className={`h-2 w-2 rounded-full ${online ? 'bg-status-empty' : 'bg-status-occupied'}`} />
+        {online ? 'Online' : 'Offline'}
+      </span>
+      <span className="flex items-center gap-1" title={`Relay LAN: ${relay}`}>
+        <span
+          className={`h-2 w-2 rounded-full ${relayOn ? 'bg-status-empty' : 'bg-ink-soft/50'}`}
+        />
+        Relay
+      </span>
+      {pending > 0 && (
+        <span
+          className="rounded-full bg-status-waiting px-1.5 py-0.5 font-bold text-white"
+          title="Operasi menunggu sinkronisasi"
+        >
+          {pending} antre
+        </span>
+      )}
     </div>
   )
 }

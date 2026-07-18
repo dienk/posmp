@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useConnection } from '../../lib/useConnection'
+import { flush, getPending, subscribeQueue, type SyncOp } from '../../lib/syncQueue'
 import {
   addChannel,
   listChannels,
@@ -21,9 +23,12 @@ export default function MarketplacePage() {
   const [shopId, setShopId] = useState('')
   const [shopName, setShopName] = useState('')
   const [toast, setToast] = useState<string | null>(null)
+  const [queue, setQueue] = useState<SyncOp[]>(() => getPending())
+  const conn = useConnection()
 
   const reload = () => setChannels(listChannels())
   useEffect(reload, [])
+  useEffect(() => subscribeQueue(() => setQueue(getPending())), [])
 
   const showToast = (m: string) => {
     setToast(m)
@@ -41,7 +46,11 @@ export default function MarketplacePage() {
   const handleSync = async (c: MarketplaceChannel) => {
     await markSynced(c.id)
     reload()
-    showToast(`Stok ${c.shop_name} masuk antrean sinkronisasi.`)
+    showToast(
+      conn.online
+        ? `Stok ${c.shop_name} dikirim ke antrean sinkronisasi.`
+        : `Offline — sinkron ${c.shop_name} ditunda di antrean.`,
+    )
   }
 
   return (
@@ -160,6 +169,60 @@ export default function MarketplacePage() {
               })}
             </ul>
           )}
+        </section>
+
+        {/* Sync Queue (offline-first) */}
+        <section className="rounded-card bg-white p-5 shadow-card">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
+              Antrean Sinkronisasi
+            </h2>
+            <div className="flex items-center gap-2 text-xs">
+              <span
+                className={
+                  'flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ' +
+                  (conn.online
+                    ? 'bg-status-empty/15 text-status-empty'
+                    : 'bg-status-occupied/15 text-status-occupied')
+                }
+              >
+                <span
+                  className={`h-2 w-2 rounded-full ${conn.online ? 'bg-status-empty' : 'bg-status-occupied'}`}
+                />
+                {conn.online ? 'Online' : 'Offline'}
+              </span>
+              <button
+                onClick={() => flush()}
+                disabled={!conn.online || queue.length === 0}
+                className="rounded-lg bg-brand px-3 py-1 font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+              >
+                Flush Sekarang
+              </button>
+            </div>
+          </div>
+          {queue.length === 0 ? (
+            <p className="py-4 text-center text-sm text-ink-soft">
+              Antrean kosong — semua perubahan tersinkron.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {queue.map((op) => (
+                <li
+                  key={op.id}
+                  className="flex items-center justify-between rounded-xl bg-background px-4 py-2.5 text-sm"
+                >
+                  <span className="text-ink">{op.description}</span>
+                  <span className="text-xs text-ink-soft">
+                    {conn.online ? 'mengirim…' : 'menunggu koneksi'}
+                    {op.attempts > 0 && ` · ${op.attempts}×`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-2 text-xs text-ink-soft">
+            Saat offline, operasi menunggu di sini dan otomatis terkirim ketika koneksi pulih.
+          </p>
         </section>
       </div>
 

@@ -54,7 +54,7 @@ src/
 | **M1** ✅ | Init proyek, SQLite 22 tabel, app_settings, layar kasir inti |
 | **M2** ✅ | Router + shell navigasi, **Canvas Table Layout** (drag-drop, indikator warna, integrasi POS), **Queue** (terbit A/B, monitor TV publik, TTS) |
 | **M3** ✅ | Bus real-time lokal (BroadcastChannel), **KDS** (aging timer, check-off item), **Self-Order** (menu QR pelanggan → dapur), **Voucher Generator** massal + diskon voucher di POS, **Marketplace** config scaffold |
-| **M4** | Uji offline-first, **relay WebSocket LAN** (menggantikan BroadcastChannel untuk sinkron lintas-perangkat), sinkronisasi marketplace nyata via API, kompilasi Tauri (desktop) & Capacitor (mobile) |
+| **M4** ✅ | **Relay WebSocket LAN** (`server/relay.mjs`, sinkron lintas-perangkat), **Sync Queue offline-first** (auto-flush saat online), indikator koneksi, konfigurasi **Tauri** (desktop) & **Capacitor** (mobile). _Adapter API marketplace nyata & kompilasi native butuh toolchain lokal._ |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -76,6 +76,46 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/marketplace` | Integrasi Marketplace (config) |
 | `#/monitor` | Monitor antrean publik (Smart TV) |
 | `#/order/:tableNumber` | Self-Order pelanggan (QR meja) |
+
+## Sinkronisasi lintas-perangkat (Relay WebSocket LAN)
+
+Untuk sinkron real-time antar-perangkat dalam satu jaringan lokal (Tablet Kasir ↔
+Kitchen Display ↔ Self-Order ↔ Monitor TV), jalankan relay ringan tanpa dependensi:
+
+```bash
+npm run relay          # ws://0.0.0.0:7071 (health: http://localhost:7071/)
+```
+
+Klien web otomatis menyambung ke `ws://<host>:7071` dan menyambung ulang bila relay
+dinyalakan belakangan. Bila relay tak aktif, aplikasi tetap jalan penuh dengan
+BroadcastChannel (sekelas perangkat). Indikator **Online/Relay/antre** ada di bilah kiri.
+
+## Offline-first & Sync Queue
+
+Operasi yang butuh internet (mis. push stok marketplace) masuk **Sync Queue** lokal
+(`src/lib/syncQueue.ts`). Saat offline, operasi mengendap; saat online kembali, antrean
+otomatis di-_flush_. Transaksi kasir, KDS, meja, dan antrean tetap berjalan penuh tanpa
+internet.
+
+## Kompilasi Native (butuh toolchain lokal)
+
+**Desktop (Tauri v2)** — perlu Rust + prasyarat OS ([tauri.app](https://tauri.app)):
+
+```bash
+npm i -D @tauri-apps/cli
+npm run tauri:dev      # jalankan sebagai app desktop
+npm run tauri:build    # bundel .app/.dmg/.msi/.deb
+```
+
+**Mobile (Capacitor)** — perlu Android SDK / Xcode:
+
+```bash
+npm i -D @capacitor/cli && npm i @capacitor/core @capacitor/android @capacitor/ios
+npm run build && npx cap add android && npm run cap:sync
+npm run cap:android    # buka di Android Studio
+```
+
+Konfigurasi sudah disediakan: `src-tauri/` dan `capacitor.config.ts`.
 
 ## Catatan teknis
 

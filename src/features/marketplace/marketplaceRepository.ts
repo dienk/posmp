@@ -1,4 +1,5 @@
 import { execute, query } from '../../db/database'
+import { enqueue } from '../../lib/syncQueue'
 
 export type Platform = 'SHOPEE' | 'TOKOPEDIA' | 'TIKTOK'
 
@@ -79,14 +80,24 @@ export async function addMapping(
 }
 
 /**
- * Simulasi push sinkronisasi stok ke marketplace.
+ * Jadwalkan sinkronisasi stok ke marketplace secara offline-first.
  *
- * CATATAN: Integrasi nyata memerlukan kredensial & panggilan API resmi tiap
- * platform (Shopee/Tokopedia/TikTok). Pada mode offline-first, perubahan stok
- * seharusnya masuk Sync Queue dan dikirim saat internet pulih (Milestone 4).
- * Fungsi ini hanya menandai waktu sinkron terakhir sebagai placeholder.
+ * Operasi dimasukkan ke Sync Queue lokal (outbox). Bila online, antrean langsung
+ * di-flush; bila offline, operasi menunggu dan otomatis terkirim saat koneksi pulih.
+ *
+ * CATATAN: pengiriman nyata ke API Shopee/Tokopedia/TikTok memerlukan kredensial &
+ * adapter tiap platform — di sini panggilan API disimulasikan pada tahap flush.
  */
 export async function markSynced(channelId: number): Promise<void> {
+  const channel = query<{ shop_name: string | null }>(
+    'SELECT shop_name FROM marketplace_channels WHERE id = ?',
+    [channelId],
+  )[0]
+  enqueue({
+    type: 'STOCK_SYNC',
+    channelId,
+    description: `Push stok ke ${channel?.shop_name ?? `channel #${channelId}`}`,
+  })
   await execute(
     `UPDATE marketplace_channels SET last_synced_at = datetime('now','localtime') WHERE id = ?`,
     [channelId],
