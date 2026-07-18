@@ -43,13 +43,26 @@ CREATE TABLE IF NOT EXISTS outlet_stocks (
     UNIQUE(outlet_id, product_id)
 );
 
--- 5. Tabel Member (Data Pelanggan & Poin Loyalitas)
+-- 5. Tabel Member (Data Pelanggan, Keanggotaan & Poin Loyalitas)
 CREATE TABLE IF NOT EXISTS members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     phone TEXT UNIQUE NOT NULL,
     email TEXT,
     points INTEGER NOT NULL DEFAULT 0,
+    -- Identitas pribadi
+    address TEXT,
+    birth_date DATE,
+    gender TEXT, -- 'L' / 'P'
+    occupation TEXT,
+    -- Administratif keanggotaan
+    member_number TEXT,
+    tier TEXT DEFAULT 'SILVER', -- 'SILVER','GOLD','PLATINUM','DIAMOND'
+    expiry_date DATE,
+    status TEXT NOT NULL DEFAULT 'ACTIVE', -- 'ACTIVE','INACTIVE','BLOCKED','SUSPENDED'
+    -- Loyalti
+    balance REAL NOT NULL DEFAULT 0, -- saldo/kredit deposit
+    preferences TEXT, -- preferensi produk/kategori
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

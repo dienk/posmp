@@ -65,8 +65,45 @@ export async function initDatabase(): Promise<Database> {
     await persist()
   }
 
+  const migrated = migrateSchema(dbInstance)
   dbInstance.run('PRAGMA foreign_keys = ON;')
+  if (migrated) await persist()
   return dbInstance
+}
+
+/**
+ * Migrasi ringan: menambah kolom baru pada tabel yang sudah ada di database lama
+ * (SQLite tak punya "ADD COLUMN IF NOT EXISTS"). Idempoten & aman dipanggil ulang.
+ * Mengembalikan true bila ada perubahan (perlu dipersist).
+ */
+function migrateSchema(db: Database): boolean {
+  let changed = false
+  const columnsOf = (table: string): Set<string> => {
+    const res = db.exec(`PRAGMA table_info('${table}')`)
+    return new Set(res[0] ? res[0].values.map((r) => String(r[1])) : [])
+  }
+
+  // Perluasan tabel members (data keanggotaan lengkap).
+  const memberCols = columnsOf('members')
+  const memberAdds: [string, string][] = [
+    ['address', 'TEXT'],
+    ['birth_date', 'DATE'],
+    ['gender', 'TEXT'],
+    ['occupation', 'TEXT'],
+    ['member_number', 'TEXT'],
+    ['tier', "TEXT DEFAULT 'SILVER'"],
+    ['expiry_date', 'DATE'],
+    ['status', "TEXT NOT NULL DEFAULT 'ACTIVE'"],
+    ['balance', 'REAL NOT NULL DEFAULT 0'],
+    ['preferences', 'TEXT'],
+  ]
+  for (const [name, def] of memberAdds) {
+    if (!memberCols.has(name)) {
+      db.run(`ALTER TABLE members ADD COLUMN ${name} ${def}`)
+      changed = true
+    }
+  }
+  return changed
 }
 
 export function getDb(): Database {

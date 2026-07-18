@@ -61,7 +61,7 @@ export default function ContactsPage() {
     try {
       if (tab === 'pelanggan') {
         if (!phone.trim()) return showToast('Nomor HP wajib untuk pelanggan.')
-        await createMember(name, phone, extra || null)
+        await createMember({ name, phone, email: extra || null })
         setMembers(listMembers())
       } else if (tab === 'pemasok') {
         await createSupplier(name, extra || null, phone || null)
