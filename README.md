@@ -59,6 +59,7 @@ src/
 | **M6** ✅ | **Supplier & Stok Masuk** (penerimaan barang → tambah stok + catat HPP), **Riwayat Transaksi & Refund** (pengembalian dana → restok + audit `refunds`/`refund_details` + koreksi poin member) |
 | **M7** ✅ | **Pembayaran Berganda** (PRD 4.5): modal checkout multi-metode (Tunai/QRIS/Debit/Kredit), kalkulasi kembalian, referensi QRIS, dicatat ke `transaction_payments` & tampil di Riwayat |
 | **M8** ✅ | **Pre-Order & Uang Muka** (PRD 4.6): buat pesanan di muka dengan tenggat + DP (stok belum dipotong), pelunasan saat ambil (potong stok + poin) via modal pembayaran |
+| **M9** ✅ | **Cicilan Internal** (PRD 4.5): rencana kredit member (pokok + tenor + bunga flat), angsuran bulanan → sisa berkurang, jatuh tempo maju, status UNPAID→PARTIALLY_PAID→PAID (`transaction_installments`) |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -79,6 +80,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/members` | Member & Loyalitas Poin |
 | `#/stockin` | Stok Masuk & Supplier |
 | `#/preorder` | Pre-Order & Uang Muka |
+| `#/installments` | Cicilan Internal |
 | `#/history` | Riwayat Transaksi & Refund |
 | `#/vouchers` | Voucher Generator |
 | `#/marketplace` | Integrasi Marketplace (config) |
