@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { initDatabase } from './db/database'
 import { SettingsProvider } from './lib/SettingsContext'
+import { UIProvider } from './lib/UIContext'
 import AppShell from './components/AppShell'
 import PosPage from './features/pos/PosPage'
 import TablesPage from './features/tables/TablesPage'
@@ -88,7 +89,9 @@ export default function App() {
 
   return (
     <SettingsProvider>
-      <RouterProvider router={router} />
+      <UIProvider>
+        <RouterProvider router={router} />
+      </UIProvider>
     </SettingsProvider>
   )
 }

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { formatRupiah, generateInvoiceNumber } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
+import { useUI } from '../../lib/UIContext'
 import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
@@ -16,6 +17,7 @@ import { useCart } from './useCart'
 
 export default function PosPage() {
   const { settings } = useSettings()
+  const { toggleSidebar } = useUI()
   const location = useLocation()
   const tableNumber = (location.state as { tableNumber?: string } | null)?.tableNumber
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
@@ -223,7 +225,11 @@ export default function PosPage() {
       <section className="flex min-w-0 flex-1 flex-col" style={{ flexBasis: '65%' }}>
         {/* Header */}
         <header className="flex items-center gap-3 bg-white/70 px-4 py-3 backdrop-blur">
-          <button className="rounded-lg p-2 text-ink hover:bg-background" aria-label="Menu">
+          <button
+            onClick={toggleSidebar}
+            className="rounded-lg p-2 text-ink hover:bg-background"
+            aria-label="Menu"
+          >
             ☰
           </button>
           <div className="relative flex-1">

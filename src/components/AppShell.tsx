@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useSettings } from '../lib/SettingsContext'
 import { isModuleEnabled } from '../lib/settings'
 import { useConnection } from '../lib/useConnection'
+import { useUI } from '../lib/UIContext'
 
 interface NavItem {
   to: string
@@ -30,29 +31,61 @@ const NAV: NavItem[] = [
 export default function AppShell() {
   const { settings } = useSettings()
   const conn = useConnection()
+  const { sidebarOpen, toggleSidebar } = useUI()
   const items = NAV.filter((n) => !n.moduleKey || isModuleEnabled(settings, n.moduleKey))
 
   return (
     <div className="flex h-full">
-      <nav className="flex w-20 flex-col items-center gap-1 bg-white/80 py-4 backdrop-blur">
-        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-status-occupied text-xs font-bold text-white">
-          PMP
-        </div>
-        {items.map((n) => (
-          <NavLink
-            key={n.to}
-            to={n.to}
-            end={n.to === '/'}
-            className={({ isActive }) =>
-              'flex w-16 flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium transition ' +
-              (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
-            }
+      <nav
+        className={
+          'flex flex-col bg-white/80 py-3 backdrop-blur transition-all duration-200 ' +
+          (sidebarOpen ? 'w-52 px-3' : 'w-20 items-center px-2')
+        }
+      >
+        {/* Header: logo + tombol toggle */}
+        <div className={'mb-3 flex items-center ' + (sidebarOpen ? 'justify-between' : 'flex-col gap-2')}>
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-status-occupied text-xs font-bold text-white">
+              PMP
+            </div>
+            {sidebarOpen && <span className="text-sm font-bold text-ink">POSMerahPutih</span>}
+          </div>
+          <button
+            onClick={toggleSidebar}
+            aria-label={sidebarOpen ? 'Tutup menu' : 'Buka menu'}
+            className="rounded-lg p-2 text-lg text-ink-soft hover:bg-background hover:text-ink"
           >
-            <span className="text-xl">{n.icon}</span>
-            {n.label}
-          </NavLink>
-        ))}
-        <ConnectionBadge online={conn.online} relay={conn.relay} pending={conn.pending} />
+            ☰
+          </button>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+          {items.map((n) => (
+            <NavLink
+              key={n.to}
+              to={n.to}
+              end={n.to === '/'}
+              title={n.label}
+              className={({ isActive }) =>
+                'flex items-center rounded-xl font-medium transition ' +
+                (sidebarOpen
+                  ? 'gap-3 px-3 py-2.5 text-sm '
+                  : 'flex-col gap-1 py-2 text-[11px] w-16 ') +
+                (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
+              }
+            >
+              <span className="text-xl leading-none">{n.icon}</span>
+              {n.label}
+            </NavLink>
+          ))}
+        </div>
+
+        <ConnectionBadge
+          open={sidebarOpen}
+          online={conn.online}
+          relay={conn.relay}
+          pending={conn.pending}
+        />
       </nav>
       <main className="min-w-0 flex-1">
         <Outlet />
@@ -62,25 +95,30 @@ export default function AppShell() {
 }
 
 function ConnectionBadge({
+  open,
   online,
   relay,
   pending,
 }: {
+  open: boolean
   online: boolean
   relay: string
   pending: number
 }) {
   const relayOn = relay === 'connected'
   return (
-    <div className="mt-auto flex flex-col items-center gap-1.5 pt-3 text-[10px] text-ink-soft">
+    <div
+      className={
+        'mt-2 border-t border-black/5 pt-2 text-[10px] text-ink-soft ' +
+        (open ? 'flex items-center gap-3 px-1' : 'flex flex-col items-center gap-1.5')
+      }
+    >
       <span className="flex items-center gap-1" title={online ? 'Online' : 'Offline'}>
         <span className={`h-2 w-2 rounded-full ${online ? 'bg-status-empty' : 'bg-status-occupied'}`} />
         {online ? 'Online' : 'Offline'}
       </span>
       <span className="flex items-center gap-1" title={`Relay LAN: ${relay}`}>
-        <span
-          className={`h-2 w-2 rounded-full ${relayOn ? 'bg-status-empty' : 'bg-ink-soft/50'}`}
-        />
+        <span className={`h-2 w-2 rounded-full ${relayOn ? 'bg-status-empty' : 'bg-ink-soft/50'}`} />
         Relay
       </span>
       {pending > 0 && (
