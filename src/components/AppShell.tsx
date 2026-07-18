@@ -63,6 +63,7 @@ const SETTINGS_GROUP: NavGroupDef = {
     { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: '🔑' },
     { to: '/theme', label: 'Tema', short: 'Tema', icon: '🎨' },
     { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: '🖨️' },
+    { to: '/card-design', label: 'Desain Kartu', short: 'Kartu', icon: '🪪' },
   ],
 }
 

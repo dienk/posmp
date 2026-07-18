@@ -27,6 +27,7 @@ import ThemePage from './features/theme/ThemePage'
 import ProductsPage from './features/products/ProductsPage'
 import CategoriesPage from './features/products/CategoriesPage'
 import ContactsPage from './features/contacts/ContactsPage'
+import CardDesignPage from './features/membercard/CardDesignPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -54,6 +55,7 @@ const router = createHashRouter([
       { path: 'roles', element: <RolesPage /> },
       { path: 'theme', element: <ThemePage /> },
       { path: 'receipt-design', element: <ReceiptDesignPage /> },
+      { path: 'card-design', element: <CardDesignPage /> },
     ],
   },
   // Tampilan tanpa shell/navigasi (layar publik & pelanggan).

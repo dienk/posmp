@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
+import { useSettings } from '../../lib/SettingsContext'
+import { MemberCardModal } from '../membercard/MemberCard'
+import { getCardConfig } from '../membercard/cardConfig'
 import {
   createMember,
   deleteMember,
@@ -53,10 +56,13 @@ const EMPTY: MemberInput = {
 type Mode = { kind: 'view'; id: number } | { kind: 'form'; id: number | 'new' } | null
 
 export default function MembersPage() {
+  const { settings } = useSettings()
+  const cardConfig = useMemo(() => getCardConfig(settings), [settings])
   const [members, setMembers] = useState<Member[]>([])
   const [keyword, setKeyword] = useState('')
   const [mode, setMode] = useState<Mode>(null)
   const [form, setForm] = useState<MemberInput>(EMPTY)
+  const [cardMember, setCardMember] = useState<Member | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
   const reload = () => setMembers(listMembers(keyword))
@@ -200,6 +206,7 @@ export default function MembersPage() {
               points={points}
               onEdit={() => startEdit(selected)}
               onDelete={() => remove(selected)}
+              onCard={() => setCardMember(selected)}
             />
           ) : (
             <div className="flex h-40 items-center justify-center rounded-card bg-white text-sm text-ink-soft shadow-card">
@@ -208,6 +215,20 @@ export default function MembersPage() {
           )}
         </section>
       </div>
+
+      {cardMember && (
+        <MemberCardModal
+          member={{
+            name: cardMember.name,
+            member_number: cardMember.member_number,
+            tier: cardMember.tier,
+            expiry_date: cardMember.expiry_date,
+            points: cardMember.points,
+          }}
+          config={cardConfig}
+          onClose={() => setCardMember(null)}
+        />
+      )}
 
       {toast && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-white shadow-lg">
@@ -225,12 +246,14 @@ function MemberDetail({
   points,
   onEdit,
   onDelete,
+  onCard,
 }: {
   m: Member
   txs: ReturnType<typeof memberTransactions>
   points: ReturnType<typeof memberPointHistory>
   onEdit: () => void
   onDelete: () => void
+  onCard: () => void
 }) {
   return (
     <div className="space-y-4">
@@ -268,7 +291,13 @@ function MemberDetail({
           <p className="text-sm text-ink">{m.preferences || '—'}</p>
         </Section>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            onClick={onCard}
+            className="rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-white hover:brightness-110"
+          >
+            🪪 Kartu ID
+          </button>
           <button
             onClick={onEdit}
             className="rounded-xl bg-status-occupied px-5 py-2.5 text-sm font-bold text-white hover:brightness-95"
