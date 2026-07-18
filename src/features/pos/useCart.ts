@@ -39,10 +39,13 @@ export function useCart() {
 
   const clear = useCallback(() => setItems([]), [])
 
+  /** Ganti seluruh isi keranjang (mis. saat membuka draft tersimpan). */
+  const replace = useCallback((next: CartItem[]) => setItems(next), [])
+
   const subtotal = useMemo(
     () => items.reduce((sum, it) => sum + it.product.price * it.quantity, 0),
     [items],
   )
 
-  return { items, addProduct, setQuantity, setNotes, removeProduct, clear, subtotal }
+  return { items, addProduct, setQuantity, setNotes, removeProduct, clear, replace, subtotal }
 }

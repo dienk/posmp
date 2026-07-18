@@ -52,6 +52,7 @@ interface Props {
   onOrderNoteChange: (note: string) => void
   onRemove: (productId: number) => void
   onSaveDraft: () => void
+  onOpenDraft: () => void
   onPay: () => void
   onSplit: () => void
 }
@@ -450,6 +451,17 @@ export default function CartPanel(props: Props) {
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} />
                   <div className="absolute bottom-full left-0 z-20 mb-2 w-52 overflow-hidden rounded-xl border border-black/10 bg-white shadow-lg">
+                    <button
+                      type="button"
+                      disabled={props.saving}
+                      onClick={() => {
+                        setActionsOpen(false)
+                        props.onOpenDraft()
+                      }}
+                      className="flex w-full items-center gap-2 border-b border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                    >
+                      📂 Buka Draft
+                    </button>
                     <button
                       type="button"
                       disabled={empty || props.saving}

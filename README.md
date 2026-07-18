@@ -88,6 +88,7 @@ src/
 | **M33** ✅ | **Peningkatan layar Kasir**: info **Total Item** (badge + ringkasan), **pemilih pelanggan** dari master (📇 dropdown cari nama/HP → set nama + member/loyalti), **nomor invoice bisa diedit** (dipakai saat simpan via `saveOrder.invoiceNumber`), **catatan item & catatan transaksi kini tersembunyi default** dengan tombol "＋" untuk menampilkan. Dua toggle baru di Setelan › Fitur Kasir (bawaan **nonaktif**): **Kode Voucher** & **Pre-Order** — kolom terkait di kasir hanya muncul saat diaktifkan. |
 | **M34** ✅ | **Kasir — menu opsi aksi**: "Simpan Bill (Draft)" & "Split Bill" dipindah ke **menu dropdown "⋮"** di **sebelah kiri** tombol "Bayar" (tombol Bayar kini lebih dominan). Menu tutup saat memilih/klik luar; Split Bill nonaktif bila item < 2. |
 | **M35** ✅ | **Transaksi Draft** (Transaksi › Draft): daftar bill berstatus DRAFT (invoice, meja, item, total, tanggal) + detail item/catatan; aksi **Batalkan Draft** (`deleteDraft` — hapus draft + tiket dapur + kosongkan meja). Tersegar realtime `order:update`. |
+| **M36** ✅ | **Kasir — Buka Draft**: opsi "📂 Buka Draft" di menu "⋮" memuat bill DRAFT tersimpan kembali ke keranjang (item + catatan + invoice + fasilitas + member) untuk dilanjutkan. Saat disimpan/dibayar, draft lama **dihapus atomik** dalam transaksi SQL yang sama (`saveOrder.replaceDraftId`) sehingga tak duplikat & nomor invoice tetap. |
 
 ### Sinkronisasi real-time (local-first)
 

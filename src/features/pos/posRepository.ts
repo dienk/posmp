@@ -80,6 +80,8 @@ export interface SaveOrderInput {
   note?: string
   /** Nomor invoice yang disetel manual dari kasir; kosong = dibuat otomatis. */
   invoiceNumber?: string
+  /** Bila diisi, draft ini (yang sedang dibuka) dihapus dalam transaksi yang sama. */
+  replaceDraftId?: number
 }
 
 export interface SaveOrderResult {
@@ -115,6 +117,24 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
 
   db.run('BEGIN')
   try {
+    // Hapus draft yang sedang dibuka (bila ada) agar tak duplikat & invoice bebas bentrok.
+    if (input.replaceDraftId) {
+      const draftTable =
+        query<{ table_number: string | null }>(
+          "SELECT table_number FROM transactions WHERE id = ? AND status = 'DRAFT'",
+          [input.replaceDraftId],
+        )[0]?.table_number ?? null
+      db.run('DELETE FROM transaction_details WHERE transaction_id = ?', [input.replaceDraftId])
+      db.run('DELETE FROM kds_tickets WHERE transaction_id = ?', [input.replaceDraftId])
+      db.run("DELETE FROM transactions WHERE id = ? AND status = 'DRAFT'", [input.replaceDraftId])
+      // Kosongkan meja draft lama bila pesanan baru tak memakai meja yang sama.
+      if (draftTable && draftTable !== (input.tableNumber ?? null)) {
+        db.run("UPDATE dining_tables SET status = 'EMPTY' WHERE outlet_id = ? AND table_number = ?", [
+          input.outletId,
+          draftTable,
+        ])
+      }
+    }
     db.run(
       `INSERT INTO transactions
          (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
@@ -257,6 +277,63 @@ export interface OpenBill {
   total_amount: number
   note: string | null
   transaction_date: string
+}
+
+export interface DraftDetail {
+  id: number
+  invoice_number: string
+  facility_type: FacilityType
+  table_number: string | null
+  note: string | null
+  member_id: number | null
+  items: CartItem[]
+}
+
+/** Muat satu draft lengkap (header + item sebagai CartItem) untuk dibuka di kasir. */
+export function getDraftForEdit(id: number, outletId: number): DraftDetail | null {
+  const header = query<{
+    id: number
+    invoice_number: string
+    facility_type: FacilityType
+    table_number: string | null
+    note: string | null
+    member_id: number | null
+    status: string
+  }>(
+    `SELECT id, invoice_number, facility_type, table_number, note, member_id, status
+     FROM transactions WHERE id = ?`,
+    [id],
+  )[0]
+  if (!header || header.status !== 'DRAFT') return null
+
+  const rows = query<Product & { quantity: number; line_notes: string | null }>(
+    `SELECT d.quantity, d.notes AS line_notes,
+            p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path,
+            c.name AS category_name, COALESCE(os.stock, 0) AS stock
+     FROM transaction_details d
+     JOIN products p ON p.id = d.product_id
+     LEFT JOIN categories c ON c.id = p.category_id
+     LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
+     WHERE d.transaction_id = ?
+     ORDER BY d.id`,
+    [outletId, id],
+  )
+
+  const items: CartItem[] = rows.map((r) => {
+    const { quantity, line_notes, ...product } = r
+    return { product: product as Product, quantity, notes: line_notes ?? undefined }
+  })
+
+  return {
+    id: header.id,
+    invoice_number: header.invoice_number,
+    facility_type: header.facility_type,
+    table_number: header.table_number,
+    note: header.note,
+    member_id: header.member_id,
+    items,
+  }
 }
 
 /** Daftar bill terbuka (status DRAFT) pada outlet aktif — kandidat digabung. */

@@ -7,8 +7,15 @@ import { useUI } from '../../lib/UIContext'
 import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
 import ProductCard from './ProductCard'
-import { fetchCategories, fetchProducts, saveOrder, type PaymentInput } from './posRepository'
+import {
+  fetchCategories,
+  fetchProducts,
+  getDraftForEdit,
+  saveOrder,
+  type PaymentInput,
+} from './posRepository'
 import { findByBarcode } from '../products/productsRepository'
+import OpenDraftModal from './OpenDraftModal'
 import { validateVoucher, validateTenderVoucher } from '../vouchers/voucherRepository'
 import { listMembers, type Member } from '../members/membersRepository'
 import PaymentModal from './PaymentModal'
@@ -47,6 +54,8 @@ export default function PosPage() {
   const [showPayment, setShowPayment] = useState(false)
   const [showSplit, setShowSplit] = useState(false)
   const [showMerge, setShowMerge] = useState(false)
+  const [showOpenDraft, setShowOpenDraft] = useState(false)
+  const [editingDraftId, setEditingDraftId] = useState<number | null>(null)
   const mergeBillEnabled = isModuleEnabled(settings, 'module_merge_bill')
   const showVoucher = isModuleEnabled(settings, 'pos_show_voucher')
   const showPreorder = isModuleEnabled(settings, 'pos_show_preorder')
@@ -71,6 +80,25 @@ export default function PosPage() {
     setCustomerName(c.name)
     const m = customers.find((x) => x.id === c.id)
     if (m) setMember(m)
+  }
+
+  const handleOpenDraft = (draftId: number) => {
+    const draft = getDraftForEdit(draftId, outletId)
+    setShowOpenDraft(false)
+    if (!draft) {
+      showToast('Draft tidak ditemukan.')
+      return
+    }
+    cart.replace(draft.items)
+    setInvoiceNumber(draft.invoice_number)
+    setFacilityType(draft.facility_type)
+    setOrderNote(draft.note ?? '')
+    setEditingDraftId(draft.id)
+    clearVoucher()
+    const m = draft.member_id ? customers.find((x) => x.id === draft.member_id) ?? null : null
+    setMember(m)
+    setCustomerName(m?.name ?? '')
+    showToast(`Draft ${draft.invoice_number} dibuka.`)
   }
 
   useEffect(() => {
@@ -163,6 +191,7 @@ export default function PosPage() {
         payments,
         note: orderNote,
         invoiceNumber,
+        replaceDraftId: editingDraftId ?? undefined,
       })
       showToast(
         status === 'DRAFT'
@@ -188,6 +217,7 @@ export default function PosPage() {
     setIsPreorder(false)
     setPreorderDeadline('')
     setDpAmount(0)
+    setEditingDraftId(null)
     setInvoiceNumber(generateInvoiceNumber())
     refreshProducts()
   }
@@ -216,6 +246,7 @@ export default function PosPage() {
         payments: dp > 0 ? [{ method: 'CASH', amountPaid: dp, tenderedAmount: dp }] : [],
         note: orderNote,
         invoiceNumber,
+        replaceDraftId: editingDraftId ?? undefined,
       })
       showToast(`Pre-Order tersimpan · ${result.invoiceNumber} · DP ${formatRupiah(dp)}`)
       resetOrder()
@@ -252,6 +283,8 @@ export default function PosPage() {
           sendToKitchen: false,
           parentTransactionId: parentId,
           payments: [{ method: 'CASH', amountPaid: billTotalAmt, tenderedAmount: billTotalAmt }],
+          // Draft yang dibuka dihapus sekali, saat nota pertama disimpan.
+          replaceDraftId: parentId === undefined ? editingDraftId ?? undefined : undefined,
         })
         if (parentId === undefined) parentId = res.transactionId
       }
@@ -408,6 +441,7 @@ export default function PosPage() {
           onOrderNoteChange={setOrderNote}
           onRemove={cart.removeProduct}
           onSaveDraft={() => finishOrder('DRAFT')}
+          onOpenDraft={() => setShowOpenDraft(true)}
           onPay={handlePay}
           onSplit={() => setShowSplit(true)}
         />
@@ -434,6 +468,15 @@ export default function PosPage() {
           taxEnabled={taxEnabled}
           onCancel={() => setShowSplit(false)}
           onConfirm={handleSplitConfirm}
+        />
+      )}
+
+      {/* Modal buka draft */}
+      {showOpenDraft && (
+        <OpenDraftModal
+          outletId={outletId}
+          onCancel={() => setShowOpenDraft(false)}
+          onOpen={handleOpenDraft}
         />
       )}
 
