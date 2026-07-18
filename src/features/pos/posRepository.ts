@@ -362,3 +362,38 @@ export async function mergeBills(
     )[0]
   return { targetId: target, invoiceNumber: inv.invoice_number, total: inv.total_amount }
 }
+
+/**
+ * Batalkan/hapus satu bill DRAFT beserta detail & tiket dapurnya, lalu kosongkan
+ * mejanya. Hanya berlaku untuk status DRAFT (transaksi lunas tidak terhapus).
+ * Satu transaksi SQL + publish realtime.
+ */
+export async function deleteDraft(id: number, outletId: number): Promise<void> {
+  const db = getDb()
+  const row = query<{ table_number: string | null; status: string }>(
+    'SELECT table_number, status FROM transactions WHERE id = ?',
+    [id],
+  )[0]
+  if (!row || row.status !== 'DRAFT') throw new Error('Hanya transaksi draft yang bisa dibatalkan.')
+
+  db.run('BEGIN')
+  try {
+    db.run('DELETE FROM transaction_details WHERE transaction_id = ?', [id])
+    db.run('DELETE FROM kds_tickets WHERE transaction_id = ?', [id])
+    db.run("DELETE FROM transactions WHERE id = ? AND status = 'DRAFT'", [id])
+    if (row.table_number) {
+      db.run("UPDATE dining_tables SET status = 'EMPTY' WHERE outlet_id = ? AND table_number = ?", [
+        outletId,
+        row.table_number,
+      ])
+    }
+    db.run('COMMIT')
+  } catch (err) {
+    db.run('ROLLBACK')
+    throw err
+  }
+  await persist()
+  publish('order:update')
+  publish('tables:update')
+  publish('kds:update')
+}

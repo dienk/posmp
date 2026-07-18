@@ -18,6 +18,7 @@ import DashboardPage from './features/reports/DashboardPage'
 import LaporanPage from './features/reports/LaporanPage'
 import StockInPage from './features/stockin/StockInPage'
 import HistoryPage from './features/history/HistoryPage'
+import DraftsPage from './features/drafts/DraftsPage'
 import PreorderPage from './features/preorder/PreorderPage'
 import InstallmentsPage from './features/installments/InstallmentsPage'
 import SettingsPage from './features/settings/SettingsPage'
@@ -52,6 +53,7 @@ const router = createHashRouter([
       { path: 'preorder', element: <PreorderPage /> },
       { path: 'installments', element: <InstallmentsPage /> },
       { path: 'history', element: <HistoryPage /> },
+      { path: 'drafts', element: <DraftsPage /> },
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'reports', element: <LaporanPage /> },
       { path: 'products', element: <ProductsPage /> },

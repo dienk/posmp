@@ -87,6 +87,7 @@ src/
 | **M32** ✅ | **Kalimat panggilan antrean dapat diatur** (Setelan › Pengaturan › Antrean): teks TTS panggilan "Tandai Siap" kini dari `app_settings.queue_call_text` dengan placeholder `{no}` (nomor antrean, dieja per karakter) + tombol "🔊 Coba" untuk pratinjau suara. Bawaan: "Nomor antrian {no}, silakan diambil." |
 | **M33** ✅ | **Peningkatan layar Kasir**: info **Total Item** (badge + ringkasan), **pemilih pelanggan** dari master (📇 dropdown cari nama/HP → set nama + member/loyalti), **nomor invoice bisa diedit** (dipakai saat simpan via `saveOrder.invoiceNumber`), **catatan item & catatan transaksi kini tersembunyi default** dengan tombol "＋" untuk menampilkan. Dua toggle baru di Setelan › Fitur Kasir (bawaan **nonaktif**): **Kode Voucher** & **Pre-Order** — kolom terkait di kasir hanya muncul saat diaktifkan. |
 | **M34** ✅ | **Kasir — menu opsi aksi**: "Simpan Bill (Draft)" & "Split Bill" dipindah ke **menu dropdown "⋮"** di **sebelah kiri** tombol "Bayar" (tombol Bayar kini lebih dominan). Menu tutup saat memilih/klik luar; Split Bill nonaktif bila item < 2. |
+| **M35** ✅ | **Transaksi Draft** (Transaksi › Draft): daftar bill berstatus DRAFT (invoice, meja, item, total, tanggal) + detail item/catatan; aksi **Batalkan Draft** (`deleteDraft` — hapus draft + tiket dapur + kosongkan meja). Tersegar realtime `order:update`. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -115,6 +116,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/members` | Member & Loyalitas Poin |
 | `#/stockin` | Stok Masuk & Supplier |
 | `#/history` | Transaksi › Riwayat & Refund |
+| `#/drafts` | Transaksi › Draft (bill tersimpan) |
 | `#/preorder` | Transaksi › Pre-Order & Uang Muka |
 | `#/installments` | Cicilan Internal |
 | `#/vouchers` | Voucher Generator |
