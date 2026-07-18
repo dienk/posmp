@@ -4,7 +4,14 @@ import { useSettings } from '../../lib/SettingsContext'
 import { getOutlet, updateAppSettings } from '../settings/settingsRepository'
 import type { ReceiptData } from '../history/historyRepository'
 import { ReceiptView } from './ReceiptModal'
-import { getReceiptConfig, receiptConfigToSettings, type ReceiptConfig } from './receiptConfig'
+import {
+  fileToScaledDataUrl,
+  getReceiptConfig,
+  receiptConfigToSettings,
+  type ReceiptAlign,
+  type LogoPosition,
+  type ReceiptConfig,
+} from './receiptConfig'
 
 export default function ReceiptDesignPage() {
   const { settings, reloadSettings } = useSettings()
@@ -21,6 +28,17 @@ export default function ReceiptDesignPage() {
   const showToast = (m: string) => {
     setToast(m)
     window.setTimeout(() => setToast(null), 2500)
+  }
+
+  const handleLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // izinkan pilih file yang sama lagi
+    if (!file) return
+    try {
+      set('logo', await fileToScaledDataUrl(file))
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal memuat gambar')
+    }
   }
 
   const handleSave = async () => {
@@ -81,32 +99,94 @@ export default function ReceiptDesignPage() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[380px_1fr]">
         {/* Form */}
         <section className="space-y-4">
+          {/* Logo */}
+          <div className="rounded-card bg-white p-5 shadow-card">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+              Logo / Gambar
+            </h2>
+            <div className="flex items-center gap-3">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-ink-soft/40 bg-background">
+                {cfg.logo ? (
+                  <img src={cfg.logo} alt="logo" className="max-h-full max-w-full" />
+                ) : (
+                  <span className="text-2xl text-ink-soft">🖼️</span>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-2">
+                <label className="cursor-pointer rounded-lg bg-brand px-3 py-2 text-center text-sm font-semibold text-ink hover:bg-brand-strong">
+                  Pilih Gambar
+                  <input type="file" accept="image/*" className="hidden" onChange={handleLogo} />
+                </label>
+                {cfg.logo && (
+                  <button
+                    onClick={() => set('logo', '')}
+                    className="rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-status-occupied hover:bg-background"
+                  >
+                    Hapus Logo
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="mt-3">
+              <span className="mb-1 block text-xs font-medium text-ink-soft">Posisi Logo</span>
+              <div className="flex gap-2">
+                {(['top', 'bottom'] as LogoPosition[]).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => set('logoPosition', p)}
+                    className={segBtn(cfg.logoPosition === p)}
+                  >
+                    {p === 'top' ? 'Atas' : 'Bawah'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Teks (multiline) */}
           <div className="rounded-card bg-white p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Teks</h2>
             <div className="space-y-3">
-              <Field label="Tagline (di bawah nama outlet)">
-                <input
+              <Field label="Tagline (boleh beberapa baris)">
+                <textarea
+                  rows={2}
                   className={inputCls}
                   value={cfg.tagline}
                   onChange={(e) => set('tagline', e.target.value)}
                   placeholder="mis. Kopi & Dapur Nusantara"
                 />
               </Field>
-              <Field label="Ucapan Penutup">
-                <input
+              <Field label="Ucapan Penutup (boleh beberapa baris)">
+                <textarea
+                  rows={2}
                   className={inputCls}
                   value={cfg.footer}
                   onChange={(e) => set('footer', e.target.value)}
                 />
               </Field>
-              <Field label="Catatan Tambahan (kecil)">
-                <input
+              <Field label="Catatan Tambahan (kecil, boleh beberapa baris)">
+                <textarea
+                  rows={2}
                   className={inputCls}
                   value={cfg.note}
                   onChange={(e) => set('note', e.target.value)}
-                  placeholder="mis. IG @posmerahputih · WA 0812xxxx"
+                  placeholder={'mis. IG @posmerahputih\nWA 0812xxxx'}
                 />
               </Field>
+            </div>
+          </div>
+
+          {/* Perataan */}
+          <div className="rounded-card bg-white p-5 shadow-card">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+              Perataan Header & Footer
+            </h2>
+            <div className="flex gap-2">
+              {(['left', 'center', 'right'] as ReceiptAlign[]).map((a) => (
+                <button key={a} onClick={() => set('align', a)} className={segBtn(cfg.align === a)}>
+                  {a === 'left' ? '⟸ Kiri' : a === 'center' ? '☰ Tengah' : 'Kanan ⟹'}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -169,6 +249,10 @@ export default function ReceiptDesignPage() {
 
 const inputCls =
   'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+
+const segBtn = (active: boolean) =>
+  'flex-1 rounded-lg py-2 text-sm font-semibold transition ' +
+  (active ? 'bg-status-occupied text-white' : 'bg-background text-ink hover:bg-brand-soft')
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

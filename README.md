@@ -66,6 +66,7 @@ src/
 | **M11** ✅ | **Pengaturan Fasilitas** (PRD 4.7): kelola outlet, tarif pajak, rasio poin, dan **toggle modul** (KDS/Meja/Antrean/Self-Order/Marketplace) — perubahan modul langsung memperbarui menu navigasi tanpa reload. |
 | **M12** ✅ | **Struk / Receipt**: lihat & cetak ulang struk transaksi dari Riwayat (header outlet, item, pajak, pembayaran + kembalian, poin). Cetak via iframe tersembunyi. |
 | **M13** ✅ | **Desain Struk**: kustomisasi struk (tagline, catatan kaki/tambahan, tampil/sembunyi alamat/telepon/member/poin, lebar 58/80mm) dengan pratinjau langsung; tersimpan di `app_settings` & diterapkan ke struk tampil/cetak. |
+| **M14** ✅ | **Desain Struk lanjutan**: unggah **logo/gambar** (otomatis di-resize, posisi atas/bawah), **teks multiline** (tagline/penutup/catatan), dan **perataan** header/footer (kiri/tengah/kanan) — semua dengan pratinjau langsung. |
 
 ### Sinkronisasi real-time (local-first)
 

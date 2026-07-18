@@ -1,8 +1,14 @@
+export type ReceiptAlign = 'left' | 'center' | 'right'
+export type LogoPosition = 'top' | 'bottom'
+
 /** Konfigurasi tampilan struk, disimpan di app_settings dengan awalan `receipt_`. */
 export interface ReceiptConfig {
-  tagline: string // baris kecil di bawah nama outlet
-  footer: string // ucapan penutup
-  note: string // catatan tambahan (mis. sosial media / promo)
+  logo: string // data URL gambar (kosong = tanpa logo)
+  logoPosition: LogoPosition
+  align: ReceiptAlign // perataan blok header & footer
+  tagline: string // baris di bawah nama outlet (boleh multiline)
+  footer: string // ucapan penutup (boleh multiline)
+  note: string // catatan tambahan kecil (boleh multiline)
   showAddress: boolean
   showPhone: boolean
   showMember: boolean
@@ -11,6 +17,9 @@ export interface ReceiptConfig {
 }
 
 export const RECEIPT_DEFAULTS: ReceiptConfig = {
+  logo: '',
+  logoPosition: 'top',
+  align: 'center',
   tagline: '',
   footer: 'Terima kasih 🙏',
   note: '',
@@ -25,7 +34,12 @@ export const RECEIPT_DEFAULTS: ReceiptConfig = {
 export function getReceiptConfig(settings: Record<string, string>): ReceiptConfig {
   const bool = (key: string, def: boolean) =>
     settings[key] === undefined ? def : settings[key] === '1'
+  const align = settings.receipt_align
+  const logoPos = settings.receipt_logo_position
   return {
+    logo: settings.receipt_logo ?? RECEIPT_DEFAULTS.logo,
+    logoPosition: logoPos === 'bottom' ? 'bottom' : 'top',
+    align: align === 'left' || align === 'right' ? align : 'center',
     tagline: settings.receipt_tagline ?? RECEIPT_DEFAULTS.tagline,
     footer: settings.receipt_footer ?? RECEIPT_DEFAULTS.footer,
     note: settings.receipt_note ?? RECEIPT_DEFAULTS.note,
@@ -40,6 +54,9 @@ export function getReceiptConfig(settings: Record<string, string>): ReceiptConfi
 /** Ubah konfigurasi struk menjadi map app_settings untuk disimpan. */
 export function receiptConfigToSettings(c: ReceiptConfig): Record<string, string> {
   return {
+    receipt_logo: c.logo,
+    receipt_logo_position: c.logoPosition,
+    receipt_align: c.align,
     receipt_tagline: c.tagline,
     receipt_footer: c.footer,
     receipt_note: c.note,
@@ -52,3 +69,32 @@ export function receiptConfigToSettings(c: ReceiptConfig): Record<string, string
 }
 
 export const RECEIPT_WIDTH_PX: Record<58 | 80, number> = { 58: 280, 80: 380 }
+
+/**
+ * Muat file gambar, perkecil hingga lebar maksimum, kembalikan data URL PNG.
+ * Menjaga ukuran base64 tetap kecil agar hemat saat dipersist ke IndexedDB.
+ */
+export function fileToScaledDataUrl(file: File, maxWidth = 240): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(reader.error)
+    reader.onload = () => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('Gambar tidak valid.'))
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width)
+        const w = Math.round(img.width * scale)
+        const h = Math.round(img.height * scale)
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return reject(new Error('Canvas tidak didukung.'))
+        ctx.drawImage(img, 0, 0, w, h)
+        resolve(canvas.toDataURL('image/png'))
+      }
+      img.src = reader.result as string
+    }
+    reader.readAsDataURL(file)
+  })
+}
