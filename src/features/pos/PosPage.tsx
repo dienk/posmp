@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { formatRupiah, generateInvoiceNumber } from '../../lib/format'
-import { getNumberSetting } from '../../lib/settings'
+import { getNumberSetting, isModuleEnabled } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useUI } from '../../lib/UIContext'
 import type { Category, FacilityType, Product } from '../../types'
@@ -12,6 +12,7 @@ import { validateVoucher, validateTenderVoucher } from '../vouchers/voucherRepos
 import { listMembers, type Member } from '../members/membersRepository'
 import PaymentModal from './PaymentModal'
 import SplitBillModal from './SplitBillModal'
+import MergeBillModal from './MergeBillModal'
 import type { CartItem } from '../../types'
 import { useCart } from './useCart'
 
@@ -43,6 +44,8 @@ export default function PosPage() {
   const [memberQuery, setMemberQuery] = useState('')
   const [showPayment, setShowPayment] = useState(false)
   const [showSplit, setShowSplit] = useState(false)
+  const [showMerge, setShowMerge] = useState(false)
+  const mergeBillEnabled = isModuleEnabled(settings, 'module_merge_bill')
   const [isPreorder, setIsPreorder] = useState(false)
   const [preorderDeadline, setPreorderDeadline] = useState('')
   const [dpAmount, setDpAmount] = useState(0)
@@ -249,6 +252,16 @@ export default function PosPage() {
             />
           </div>
           <div className="flex items-center gap-2 text-sm font-medium text-ink">
+            {mergeBillEnabled && (
+              <button
+                onClick={() => setShowMerge(true)}
+                className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold
+                           text-ink transition hover:bg-brand-soft"
+                title="Gabungkan beberapa bill tersimpan menjadi satu"
+              >
+                ⿻ Gabung Bill
+              </button>
+            )}
             {tableNumber && (
               <span className="rounded-lg bg-status-occupied px-2.5 py-1 text-xs font-semibold text-white">
                 Meja {tableNumber}
@@ -354,6 +367,21 @@ export default function PosPage() {
           taxEnabled={taxEnabled}
           onCancel={() => setShowSplit(false)}
           onConfirm={handleSplitConfirm}
+        />
+      )}
+
+      {/* Modal merge bill */}
+      {showMerge && (
+        <MergeBillModal
+          outletId={outletId}
+          taxRate={taxRate}
+          taxEnabled={taxEnabled}
+          onCancel={() => setShowMerge(false)}
+          onMerged={(msg) => {
+            setShowMerge(false)
+            showToast(msg)
+            refreshProducts()
+          }}
         />
       )}
 

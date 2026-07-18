@@ -79,6 +79,7 @@ src/
 | **M24** ✅ | **Data Master Outlet & Kasir**: **Outlet** (CRUD cabang: nama, alamat, telepon, aktif/nonaktif; hapus dijaga bila masih ada kasir/transaksi/stok/meja), **Kasir** (CRUD titik/mesin kasir per outlet: nama, kode, lokasi, status; filter per outlet). Tabel `cashiers` (ke-23) dibuat via migrasi otomatis untuk database lama. |
 | **M25** ✅ | **Master Meja** (Data Master): CRUD meja lintas outlet (nomor/nama, area INDOOR/OUTDOOR/VIP, **kapasitas standar** & **kapasitas maksimum**) + filter per outlet. Kolom `max_capacity` ditambahkan ke `dining_tables` via migrasi otomatis (default = kapasitas saat ini). |
 | **M26** ✅ | **Catatan khusus pesanan**: catatan **per item** (mis. "tanpa sambal, level pedas") tampil di KDS (dapur) & detail Riwayat, dan catatan **per transaksi** (mis. "bungkus terpisah") tersimpan di header transaksi & tampil di detail Riwayat. Kolom `transactions.note` via migrasi otomatis; item memakai `transaction_details.notes` yang sudah ada. |
+| **M27** ✅ | **Merge Bill / Gabung Tagihan** (opsional, Setelan › Fitur Kasir, **bawaan nonaktif**): gabungkan ≥2 bill tersimpan (Draft) menjadi satu — item dipindah ke bill target (id terkecil), total & pajak dihitung ulang, catatan digabung, meja bill lain dikosongkan, header lama dihapus (satu transaksi SQL). Tombol "Gabung Bill" muncul di layar kasir saat diaktifkan. |
 
 ### Sinkronisasi real-time (local-first)
 

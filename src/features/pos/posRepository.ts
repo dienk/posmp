@@ -242,3 +242,119 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
   )[0].id
   return { transactionId, invoiceNumber, subtotal, discount, tax, total, pointsEarned }
 }
+
+// ── Merge Bill (Gabung Tagihan) ──────────────────────────────────────────────
+
+export interface OpenBill {
+  id: number
+  invoice_number: string
+  table_number: string | null
+  item_count: number
+  total_amount: number
+  note: string | null
+  transaction_date: string
+}
+
+/** Daftar bill terbuka (status DRAFT) pada outlet aktif — kandidat digabung. */
+export function listOpenBills(outletId: number): OpenBill[] {
+  return query<OpenBill>(
+    `SELECT t.id, t.invoice_number, t.table_number, t.total_amount, t.note, t.transaction_date,
+            (SELECT COUNT(*) FROM transaction_details d WHERE d.transaction_id = t.id) AS item_count
+     FROM transactions t
+     WHERE t.outlet_id = ? AND t.status = 'DRAFT'
+     ORDER BY t.id ASC`,
+    [outletId],
+  )
+}
+
+export interface MergeBillInput {
+  billIds: number[]
+  outletId: number
+  taxRate: number
+  taxEnabled: boolean
+}
+
+/**
+ * Gabungkan beberapa bill DRAFT menjadi satu (bill dengan id terkecil jadi target).
+ * Seluruh item dipindah ke target, total & pajak dihitung ulang, catatan digabung,
+ * meja bill lain dikosongkan, lalu header bill lain dihapus. Satu transaksi SQL.
+ */
+export async function mergeBills(
+  input: MergeBillInput,
+): Promise<{ targetId: number; invoiceNumber: string; total: number }> {
+  const ids = [...new Set(input.billIds)].filter((n) => Number.isInteger(n)).sort((a, b) => a - b)
+  if (ids.length < 2) throw new Error('Pilih minimal 2 bill untuk digabung.')
+  const target = ids[0]
+  const others = ids.slice(1)
+  const othersList = others.join(',')
+  const db = getDb()
+
+  db.run('BEGIN')
+  try {
+    const rows = query<{
+      id: number
+      discount_amount: number
+      note: string | null
+      table_number: string | null
+    }>(`SELECT id, discount_amount, note, table_number FROM transactions WHERE id IN (${ids.join(',')})`)
+
+    // Pindahkan seluruh item ke bill target.
+    db.run(`UPDATE transaction_details SET transaction_id = ? WHERE transaction_id IN (${othersList})`, [
+      target,
+    ])
+    // Tiket dapur bill lain dihapus; item pindahan tampil di tiket target.
+    db.run(`DELETE FROM kds_tickets WHERE transaction_id IN (${othersList})`)
+
+    // Kosongkan meja bill yang digabung (selain meja target).
+    const targetTable = rows.find((r) => r.id === target)?.table_number ?? null
+    for (const r of rows) {
+      if (r.id !== target && r.table_number && r.table_number !== targetTable) {
+        db.run(`UPDATE dining_tables SET status = 'EMPTY' WHERE outlet_id = ? AND table_number = ?`, [
+          input.outletId,
+          r.table_number,
+        ])
+      }
+    }
+
+    // Hitung ulang total target dari item gabungan.
+    const sub =
+      query<{ s: number }>(
+        `SELECT COALESCE(SUM(subtotal), 0) AS s FROM transaction_details WHERE transaction_id = ?`,
+        [target],
+      )[0]?.s ?? 0
+    const discount = Math.min(
+      rows.reduce((a, r) => a + (r.discount_amount || 0), 0),
+      sub,
+    )
+    const tax = input.taxEnabled ? Math.round((sub - discount) * input.taxRate) : 0
+    const total = sub - discount + tax
+
+    // Gabungkan catatan (urut id).
+    const notes = rows.map((r) => r.note).filter((n): n is string => !!n && n.trim().length > 0)
+    const mergedNote = notes.length ? notes.join(' | ') : null
+
+    db.run(
+      `UPDATE transactions
+       SET subtotal_amount = ?, discount_amount = ?, tax_amount = ?, total_amount = ?, note = ?
+       WHERE id = ?`,
+      [sub, discount, tax, total, mergedNote, target],
+    )
+    db.run(`DELETE FROM transactions WHERE id IN (${othersList})`)
+    db.run('COMMIT')
+  } catch (err) {
+    db.run('ROLLBACK')
+    throw err
+  }
+
+  await persist()
+  publish('order:update')
+  publish('tables:update')
+  publish('kds:update')
+
+  const inv =
+    query<{ invoice_number: string; total_amount: number }>(
+      'SELECT invoice_number, total_amount FROM transactions WHERE id = ?',
+      [target],
+    )[0]
+  return { targetId: target, invoiceNumber: inv.invoice_number, total: inv.total_amount }
+}

@@ -11,6 +11,17 @@ const MODULES: { key: string; label: string; desc: string }[] = [
   { key: 'module_marketplace', label: 'Marketplace', desc: 'Integrasi Shopee/Tokopedia/TikTok' },
 ]
 
+// Fitur opsional pada layar kasir (tidak menyembunyikan menu navigasi).
+const POS_FEATURES: { key: string; label: string; desc: string }[] = [
+  {
+    key: 'module_merge_bill',
+    label: 'Merge Bill',
+    desc: 'Gabungkan beberapa bill tersimpan (Draft) menjadi satu tagihan',
+  },
+]
+
+const ALL_TOGGLES = [...MODULES, ...POS_FEATURES]
+
 export default function SettingsPage() {
   const { settings, reloadSettings } = useSettings()
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
@@ -23,7 +34,7 @@ export default function SettingsPage() {
   const [taxEnabled, setTaxEnabled] = useState(settings.tax_enabled === '1')
   const [pointsPer, setPointsPer] = useState(getNumberSetting(settings, 'points_per_amount', 1000))
   const [modules, setModules] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(MODULES.map((m) => [m.key, settings[m.key] === '1'])),
+    Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, settings[m.key] === '1'])),
   )
   const [toast, setToast] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -40,7 +51,7 @@ export default function SettingsPage() {
         tax_rate: String(Math.max(0, taxPct) / 100),
         tax_enabled: taxEnabled ? '1' : '0',
         points_per_amount: String(Math.max(0, Math.round(pointsPer))),
-        ...Object.fromEntries(MODULES.map((m) => [m.key, modules[m.key] ? '1' : '0'])),
+        ...Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, modules[m.key] ? '1' : '0'])),
       }
       await saveSettings(next, outletId, { name, address, phone })
       reloadSettings()
@@ -153,6 +164,35 @@ export default function SettingsPage() {
           </div>
           <p className="mt-2 text-xs text-ink-soft">
             Modul yang dimatikan akan disembunyikan dari menu navigasi.
+          </p>
+        </section>
+
+        {/* Fitur Kasir (POS) */}
+        <section className="rounded-card bg-white p-5 shadow-card">
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+            Fitur Kasir
+          </h2>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {POS_FEATURES.map((m) => (
+              <label
+                key={m.key}
+                className="flex items-center justify-between rounded-xl bg-background px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-ink">{m.label}</p>
+                  <p className="text-xs text-ink-soft">{m.desc}</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={modules[m.key] ?? false}
+                  onChange={(e) => setModules((prev) => ({ ...prev, [m.key]: e.target.checked }))}
+                  className="h-5 w-5 accent-status-empty"
+                />
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-ink-soft">
+            Fitur ini muncul sebagai tombol di layar kasir saat diaktifkan. Bawaan: nonaktif.
           </p>
         </section>
       </div>
