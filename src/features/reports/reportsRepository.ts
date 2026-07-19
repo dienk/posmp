@@ -1,4 +1,5 @@
 import { query } from '../../db/database'
+import type { DateRange } from './dateRange'
 
 export interface SalesSummary {
   total_sales: number
@@ -19,23 +20,32 @@ export interface TopProduct {
   revenue: number
 }
 
-const TODAY = `date(transaction_date) = date('now','localtime')`
+/** Rentang default = hari ini (waktu lokal) bila filter tak diberikan. */
+const TODAY = `date('now','localtime')`
 
-export function todaySummary(outletId: number): SalesSummary {
+/** Klausa filter tanggal transaksi; kembalikan SQL + params (from..to inklusif). */
+function rangeClause(col: string, range?: DateRange): { sql: string; params: string[] } {
+  if (!range) return { sql: `date(${col}) = ${TODAY}`, params: [] }
+  return { sql: `date(${col}) BETWEEN ? AND ?`, params: [range.from, range.to] }
+}
+
+export function salesSummary(outletId: number, range?: DateRange): SalesSummary {
+  const r1 = rangeClause('transaction_date', range)
   const s = query<{ total_sales: number; tx_count: number; avg_ticket: number }>(
     `SELECT COALESCE(SUM(total_amount),0) AS total_sales,
             COUNT(*) AS tx_count,
             COALESCE(AVG(total_amount),0) AS avg_ticket
      FROM transactions
-     WHERE outlet_id = ? AND status = 'COMPLETED' AND ${TODAY}`,
-    [outletId],
+     WHERE outlet_id = ? AND status = 'COMPLETED' AND ${r1.sql}`,
+    [outletId, ...r1.params],
   )[0]
+  const r2 = rangeClause('t.transaction_date', range)
   const items = query<{ n: number }>(
     `SELECT COALESCE(SUM(d.quantity),0) AS n
      FROM transaction_details d
      JOIN transactions t ON t.id = d.transaction_id
-     WHERE t.outlet_id = ? AND t.status = 'COMPLETED' AND date(t.transaction_date) = date('now','localtime')`,
-    [outletId],
+     WHERE t.outlet_id = ? AND t.status = 'COMPLETED' AND ${r2.sql}`,
+    [outletId, ...r2.params],
   )[0]
   return {
     total_sales: s.total_sales,
@@ -45,18 +55,23 @@ export function todaySummary(outletId: number): SalesSummary {
   }
 }
 
-export function salesBySource(outletId: number): SourceRow[] {
+/** @deprecated pakai salesSummary(outletId, computeRange('day')). */
+export const todaySummary = (outletId: number): SalesSummary => salesSummary(outletId)
+
+export function salesBySource(outletId: number, range?: DateRange): SourceRow[] {
+  const r = rangeClause('transaction_date', range)
   return query<SourceRow>(
     `SELECT order_source, COUNT(*) AS tx_count, COALESCE(SUM(total_amount),0) AS total
      FROM transactions
-     WHERE outlet_id = ? AND status = 'COMPLETED' AND ${TODAY}
+     WHERE outlet_id = ? AND status = 'COMPLETED' AND ${r.sql}
      GROUP BY order_source
      ORDER BY total DESC`,
-    [outletId],
+    [outletId, ...r.params],
   )
 }
 
-export function topProducts(outletId: number, limit = 5): TopProduct[] {
+export function topProducts(outletId: number, range?: DateRange, limit = 5): TopProduct[] {
+  const r = rangeClause('t.transaction_date', range)
   return query<TopProduct>(
     `SELECT p.name,
             SUM(d.quantity) AS qty,
@@ -64,12 +79,11 @@ export function topProducts(outletId: number, limit = 5): TopProduct[] {
      FROM transaction_details d
      JOIN transactions t ON t.id = d.transaction_id
      JOIN products p ON p.id = d.product_id
-     WHERE t.outlet_id = ? AND t.status = 'COMPLETED'
-       AND date(t.transaction_date) = date('now','localtime')
+     WHERE t.outlet_id = ? AND t.status = 'COMPLETED' AND ${r.sql}
      GROUP BY p.id
      ORDER BY qty DESC
      LIMIT ?`,
-    [outletId, limit],
+    [outletId, ...r.params, limit],
   )
 }
 

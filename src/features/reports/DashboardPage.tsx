@@ -5,12 +5,18 @@ import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
 import {
   salesBySource,
-  todaySummary,
+  salesSummary,
   topProducts,
   type SalesSummary,
   type SourceRow,
   type TopProduct,
 } from './reportsRepository'
+import {
+  computeRange,
+  formatRangeLabel,
+  RANGE_PRESETS,
+  type RangePreset,
+} from './dateRange'
 
 const SOURCE_LABEL: Record<string, string> = {
   POS_OFFLINE: 'Kasir',
@@ -28,11 +34,21 @@ export default function DashboardPage() {
   const [sources, setSources] = useState<SourceRow[]>([])
   const [top, setTop] = useState<TopProduct[]>([])
 
+  // Filter tanggal.
+  const [preset, setPreset] = useState<RangePreset>('day')
+  const today = useMemo(() => computeRange('day').from, [])
+  const [customFrom, setCustomFrom] = useState(today)
+  const [customTo, setCustomTo] = useState(today)
+  const range = useMemo(
+    () => computeRange(preset, { from: customFrom, to: customTo }),
+    [preset, customFrom, customTo],
+  )
+
   const reload = useCallback(() => {
-    setSummary(todaySummary(outletId))
-    setSources(salesBySource(outletId))
-    setTop(topProducts(outletId))
-  }, [outletId])
+    setSummary(salesSummary(outletId, range))
+    setSources(salesBySource(outletId, range))
+    setTop(topProducts(outletId, range))
+  }, [outletId, range])
   useEffect(reload, [reload])
   useRealtime('order:update', reload)
 
@@ -43,13 +59,48 @@ export default function DashboardPage() {
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Dashboard</h1>
-        <span className="text-xs text-ink-soft">Ringkasan hari ini</span>
+        <span className="hidden text-xs text-ink-soft sm:inline">
+          Ringkasan · {formatRangeLabel(range)}
+        </span>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-ink-soft">📅 Periode</span>
+          <select
+            value={preset}
+            onChange={(e) => setPreset(e.target.value as RangePreset)}
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+          >
+            {RANGE_PRESETS.map((p) => (
+              <option key={p.key} value={p.key}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+          {preset === 'custom' && (
+            <div className="flex items-center gap-1.5">
+              <input
+                type="date"
+                value={customFrom}
+                max={customTo || undefined}
+                onChange={(e) => setCustomFrom(e.target.value)}
+                className="rounded-lg border border-black/10 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+              />
+              <span className="text-xs text-ink-soft">s/d</span>
+              <input
+                type="date"
+                value={customTo}
+                min={customFrom || undefined}
+                onChange={(e) => setCustomTo(e.target.value)}
+                className="rounded-lg border border-black/10 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+              />
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
         {/* KPI tiles */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Kpi label="Penjualan Hari Ini" value={formatRupiah(summary?.total_sales ?? 0)} accent />
+          <Kpi label="Penjualan" value={formatRupiah(summary?.total_sales ?? 0)} accent />
           <Kpi label="Transaksi" value={String(summary?.tx_count ?? 0)} />
           <Kpi label="Item Terjual" value={String(summary?.items_sold ?? 0)} />
           <Kpi label="Rata-rata / Nota" value={formatRupiah(summary?.avg_ticket ?? 0)} />
@@ -61,7 +112,9 @@ export default function DashboardPage() {
               Penjualan per Sumber
             </h2>
             {sources.length === 0 ? (
-              <p className="py-6 text-center text-sm text-ink-soft">Belum ada penjualan hari ini.</p>
+              <p className="py-6 text-center text-sm text-ink-soft">
+                Belum ada penjualan pada periode ini.
+              </p>
             ) : (
               <ul className="space-y-3">
                 {sources.map((s) => (
