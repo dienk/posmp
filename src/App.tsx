@@ -41,6 +41,7 @@ import TaxesPage from './features/taxes/TaxesPage'
 import CardDesignPage from './features/membercard/CardDesignPage'
 import DatabaseConnectionPage from './features/connection/DatabaseConnectionPage'
 import OperatingSchedulePage from './features/schedule/OperatingSchedulePage'
+import CashBalancePage from './features/cash/CashBalancePage'
 import SharedReceiptPage from './features/share/SharedReceiptPage'
 import SharedMemberPage from './features/share/SharedMemberPage'
 
@@ -63,6 +64,7 @@ const router = createHashRouter([
       { path: 'stock-opening', element: <StockOpeningPage /> },
       { path: 'preorder', element: <PreorderPage /> },
       { path: 'installments', element: <InstallmentsPage /> },
+      { path: 'cash-balance', element: <CashBalancePage /> },
       { path: 'history', element: <HistoryPage /> },
       { path: 'drafts', element: <DraftsPage /> },
       { path: 'dashboard', element: <DashboardPage /> },

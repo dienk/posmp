@@ -1,5 +1,5 @@
 -- ============================================================================
--- POSMerahPutih v1.5 — Skema Database SQLite (28 tabel)
+-- POSMerahPutih v1.5 — Skema Database SQLite (29 tabel)
 -- Local-first: dieksekusi saat inisialisasi database di browser (sql.js).
 -- ============================================================================
 
@@ -379,5 +379,22 @@ CREATE TABLE IF NOT EXISTS warehouses (
     location TEXT,
     is_default INTEGER NOT NULL DEFAULT 0,
     is_active INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+);
+
+-- 29. Saldo Kas (buka/tutup kas per toko atau per shift)
+CREATE TABLE IF NOT EXISTS cash_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    outlet_id INTEGER NOT NULL,
+    shift_name TEXT,                    -- nama shift bila memakai shift; NULL = tingkat toko
+    opened_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    opening_balance REAL NOT NULL DEFAULT 0,  -- saldo awal (modal kas)
+    closed_at DATETIME,
+    closing_balance REAL,              -- saldo fisik saat tutup
+    cash_sales REAL,                   -- penjualan tunai selama sesi (dihitung saat tutup)
+    expected_balance REAL,             -- opening + cash_sales
+    difference REAL,                   -- closing - expected (selisih)
+    note TEXT,
+    status TEXT NOT NULL DEFAULT 'OPEN', -- 'OPEN','CLOSED'
     FOREIGN KEY(outlet_id) REFERENCES outlets(id)
 );

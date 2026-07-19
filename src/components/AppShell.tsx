@@ -57,6 +57,7 @@ const TRANSAKSI_GROUP: NavGroupDef = {
   perm: 'transaksi',
   children: [
     { to: '/history', label: 'Riwayat', short: 'Riwayat', icon: '🧾' },
+    { to: '/cash-balance', label: 'Saldo Kas', short: 'Kas', icon: '💵' },
     { to: '/drafts', label: 'Draft', short: 'Draft', icon: '📝' },
     { to: '/preorder', label: 'Pre-Order', short: 'Pre-Order', icon: '📅' },
     { to: '/installments', label: 'Cicilan', short: 'Cicilan', icon: '💳' },

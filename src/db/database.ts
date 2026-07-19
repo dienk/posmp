@@ -287,6 +287,26 @@ function migrateSchema(db: Database): boolean {
     changed = true
   }
 
+  // Saldo Kas (cash_sessions) — buka/tutup kas per toko/shift.
+  if (!tableExists('cash_sessions')) {
+    db.run(`CREATE TABLE IF NOT EXISTS cash_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id INTEGER NOT NULL,
+      shift_name TEXT,
+      opened_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      opening_balance REAL NOT NULL DEFAULT 0,
+      closed_at DATETIME,
+      closing_balance REAL,
+      cash_sales REAL,
+      expected_balance REAL,
+      difference REAL,
+      note TEXT,
+      status TEXT NOT NULL DEFAULT 'OPEN',
+      FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+    )`)
+    changed = true
+  }
+
   // outlet_stocks: tambah kolom warehouse_id (rebuild karena UNIQUE berubah);
   // stok lama dipetakan ke gudang default tiap outlet.
   const osCols = columnsOf('outlet_stocks')

@@ -9,7 +9,7 @@ native (Tauri / Capacitor).
 
 ## Fitur pada foundation ini (Milestone 1)
 
-- ⚙️ Inisialisasi database SQLite lokal dengan **28 tabel** (lihat `src/db/schema.sql`),
+- ⚙️ Inisialisasi database SQLite lokal dengan **29 tabel** (lihat `src/db/schema.sql`),
   dipersist otomatis ke **IndexedDB** — data bertahan walau browser ditutup.
 - 🧩 Modularitas fitur lewat tabel `app_settings` (KDS, Table Layout, Self-Order,
   Marketplace, Queue bisa dinyalakan/dimatikan).
@@ -37,7 +37,7 @@ npm run preview
 
 ```
 src/
-  db/            # schema.sql (28 tabel), database.ts (sql.js + IndexedDB), seed.ts
+  db/            # schema.sql (29 tabel), database.ts (sql.js + IndexedDB), seed.ts
   features/
     pos/         # Layar kasir: PosPage, ProductCard, CartPanel, useCart, posRepository
     tables/      # (roadmap) Interactive Table Layout
@@ -95,6 +95,7 @@ src/
 | **M40** ✅ | **Stok Masuk & Supplier lebih lengkap** (3 tab): **Penerimaan** (form + subtotal per baris & total qty/modal), **Supplier CRUD** (nama, kontak, telepon, alamat, status aktif; jumlah pemakaian; edit/hapus dijaga bila sudah dipakai penerimaan), **Riwayat** (daftar + total modal per penerimaan → detail baris item: produk, qty, modal, subtotal, total, catatan). |
 | **M41** ✅ | **Penerimaan: input waktu + Update/Delete Riwayat**: field **Waktu Penerimaan** (datetime-local, disimpan ke `entry_date`); **Edit** memuat penerimaan ke form & **menyesuaikan stok dengan selisih** (qty baru − lama), **Hapus** mengembalikan (mengurangi) stok — keduanya dijaga agar stok tak minus (barang sudah terpakai) & dalam satu transaksi SQL + publish `order:update`. |
 | **M42** ✅ | **Menu "Saldo Awal"** (grup Stock): lembar setel **stok pembuka (baseline)** per produk — input saldo awal + selisih vs stok saat ini; simpan menyetel `outlet_stocks.stock` **langsung** ke nilai tersebut (upsert, bukan penambahan). Berbeda dari Stock Opname yang mencatat selisih sebagai mutasi. |
+| **M43t** ✅ | **Saldo Kas (Transaksi)**: **Transaksi › Saldo Kas** — buka kas (catat **saldo awal**/modal) & tutup kas (**saldo fisik**) per **toko** atau **per shift** (bila shift aktif). Sistem menghitung **penjualan tunai** selama sesi (pembayaran CASH transaksi COMPLETED), **ekspektasi kas** (= saldo awal + tunai), dan **selisih** (fisik − ekspektasi). Tabel baru `cash_sessions` (ke-29, migrasi otomatis) + riwayat sesi. |
 | **M43s** ✅ | **Jadwal Operasi (Setelan)**: menu baru **Setelan › Jadwal Operasi** (🕒) — atur **jam buka/tutup per hari** (Senin–Minggu, dukung lewat tengah malam) + opsi **Gunakan shift** (daftar shift bernama dengan jam mulai–selesai). Badge status langsung **Buka/Tutup sekarang** + shift berjalan. Disimpan di `app_settings.schedule_*` via `scheduleConfig.ts` (`getScheduleConfig`/`isOpenNow`/`currentShift`). |
 | **M43r** ✅ | **Desain Struk: banyak template**: bisa buat **lebih dari 1 template** desain struk (Baru / Duplikat / Ganti nama / Hapus) dengan **1 template aktif** yang dipakai saat mencetak. Pratinjau mengikuti template terpilih. Disimpan sebagai JSON di `app_settings.receipt_templates` + `receipt_active_template`; konfigurasi lama otomatis dimigrasikan jadi template "Struk Default". `getReceiptConfig()` mengembalikan template aktif (fallback ke kunci `receipt_*` lama). |
 | **M43q** ✅ | **Desain Struk: situs & marketplace**: bagian **Situs & Marketplace** di Desain Struk — isian **Website, Shopee, TikTok, Tokopedia** (kosong = sembunyi). Yang terisi muncul di bagian bawah struk (layar & cetak) via helper `receiptSocials()`, disimpan `app_settings.receipt_website/shopee/tiktok/tokopedia`. |
