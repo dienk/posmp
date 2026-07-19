@@ -84,19 +84,19 @@ export default function ReceiptDesignPage() {
     facility_type: 'DINE_IN',
     table_number: 'T-04',
     member_name: 'Budi Santoso',
-    subtotal_amount: 55000,
+    subtotal_amount: 135000,
     discount_amount: 5000,
-    tax_amount: 5000,
-    total_amount: 55000,
-    points_earned: 55,
+    tax_amount: 13000,
+    total_amount: 143000,
+    points_earned: 143,
     status: 'COMPLETED',
     items: [
-      { product_id: 1, name: 'Nasi Goreng Spesial', quantity: 1, unit_price: 25000, subtotal: 25000, notes: null },
-      { product_id: 2, name: 'Es Teh Manis', quantity: 2, unit_price: 5000, subtotal: 10000, notes: null },
-      { product_id: 3, name: 'Ayam Penyet', quantity: 1, unit_price: 30000, subtotal: 30000, notes: null },
+      { product_id: 1, name: 'Nasi Goreng Spesial', quantity: 1, unit_price: 25000, subtotal: 25000, notes: 'Pedas, tanpa timun', unit: null, unit_qty: null, base_unit: 'porsi' },
+      { product_id: 2, name: 'Es Teh Manis', quantity: 2, unit_price: 5000, subtotal: 10000, notes: null, unit: null, unit_qty: null, base_unit: 'gelas' },
+      { product_id: 3, name: 'Air Mineral', quantity: 24, unit_price: 4167, subtotal: 100000, notes: null, unit: 'dus', unit_qty: 1, base_unit: 'botol' },
     ],
     payments: [
-      { payment_method: 'CASH', amount_paid: 55000, tendered_amount: 100000, change_amount: 45000, qris_reference_number: null },
+      { payment_method: 'CASH', amount_paid: 143000, tendered_amount: 150000, change_amount: 7000, qris_reference_number: null },
     ],
   }
 
@@ -239,6 +239,8 @@ export default function ReceiptDesignPage() {
               <Toggle label="Telepon outlet" checked={cfg.showPhone} onChange={(v) => set('showPhone', v)} />
               <Toggle label="Nama member" checked={cfg.showMember} onChange={(v) => set('showMember', v)} />
               <Toggle label="Poin diperoleh" checked={cfg.showPoints} onChange={(v) => set('showPoints', v)} />
+              <Toggle label="Catatan item" checked={cfg.showItemNote} onChange={(v) => set('showItemNote', v)} />
+              <Toggle label="Satuan item" checked={cfg.showItemUnit} onChange={(v) => set('showItemUnit', v)} />
             </div>
           </div>
 

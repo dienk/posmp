@@ -23,6 +23,12 @@ export interface TxItem {
   unit_price: number
   subtotal: number
   notes: string | null
+  /** Satuan terpilih saat transaksi (mis. 'dus'); null = satuan dasar. */
+  unit: string | null
+  /** Jumlah dalam satuan terpilih (tampilan); null = pakai quantity. */
+  unit_qty: number | null
+  /** Satuan dasar produk (untuk menampilkan satuan pada baris satuan dasar). */
+  base_unit: string | null
 }
 
 export function listTransactions(outletId: number, limit = 40): TxSummary[] {
@@ -101,7 +107,8 @@ export function transactionPayments(transactionId: number): TxPayment[] {
 
 export function transactionItems(transactionId: number): TxItem[] {
   return query<TxItem>(
-    `SELECT d.product_id, p.name, d.quantity, d.unit_price, d.subtotal, d.notes
+    `SELECT d.product_id, p.name, d.quantity, d.unit_price, d.subtotal, d.notes,
+            d.unit, d.unit_qty, p.unit AS base_unit
      FROM transaction_details d
      JOIN products p ON p.id = d.product_id
      WHERE d.transaction_id = ?

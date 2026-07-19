@@ -13,6 +13,8 @@ export interface ReceiptConfig {
   showPhone: boolean
   showMember: boolean
   showPoints: boolean
+  showItemNote: boolean // catatan khusus per item
+  showItemUnit: boolean // satuan pada baris item (mis. "2 dus")
   paperWidth: 58 | 80 // mm
 }
 
@@ -28,6 +30,8 @@ export const RECEIPT_DEFAULTS: ReceiptConfig = {
   showPhone: true,
   showMember: true,
   showPoints: true,
+  showItemNote: true,
+  showItemUnit: true,
   paperWidth: 58,
 }
 
@@ -48,6 +52,8 @@ export function getReceiptConfig(settings: Record<string, string>): ReceiptConfi
     showPhone: bool('receipt_show_phone', RECEIPT_DEFAULTS.showPhone),
     showMember: bool('receipt_show_member', RECEIPT_DEFAULTS.showMember),
     showPoints: bool('receipt_show_points', RECEIPT_DEFAULTS.showPoints),
+    showItemNote: bool('receipt_show_item_note', RECEIPT_DEFAULTS.showItemNote),
+    showItemUnit: bool('receipt_show_item_unit', RECEIPT_DEFAULTS.showItemUnit),
     paperWidth: settings.receipt_paper_width === '80' ? 80 : 58,
   }
 }
@@ -65,6 +71,8 @@ export function receiptConfigToSettings(c: ReceiptConfig): Record<string, string
     receipt_show_phone: c.showPhone ? '1' : '0',
     receipt_show_member: c.showMember ? '1' : '0',
     receipt_show_points: c.showPoints ? '1' : '0',
+    receipt_show_item_note: c.showItemNote ? '1' : '0',
+    receipt_show_item_unit: c.showItemUnit ? '1' : '0',
     receipt_paper_width: String(c.paperWidth),
   }
 }

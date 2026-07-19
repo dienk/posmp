@@ -1,6 +1,6 @@
 import { formatRupiah } from '../../lib/format'
 import { useSettings } from '../../lib/SettingsContext'
-import type { ReceiptData } from '../history/historyRepository'
+import type { ReceiptData, TxItem } from '../history/historyRepository'
 import {
   getReceiptConfig,
   RECEIPT_WIDTH_PX,
@@ -52,15 +52,30 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;')
 }
 
+/** Tampilan baris item: jumlah & satuan terpilih, harga per satuan, judul baris. */
+function itemDisplay(it: TxItem, c: ReceiptConfig) {
+  const qty = it.unit_qty ?? it.quantity
+  const label = it.unit ?? it.base_unit
+  const perUnit = it.unit_qty && it.unit_qty > 0 ? Math.round(it.subtotal / it.unit_qty) : it.unit_price
+  const head = c.showItemUnit && label ? `${qty} ${label} ${it.name}` : `${qty}x ${it.name}`
+  const priceUnit = c.showItemUnit && label ? `${formatRupiah(perUnit)} / ${label}` : formatRupiah(perUnit)
+  return { head, priceUnit }
+}
+
 export function buildReceiptHtml(d: ReceiptData, c: ReceiptConfig): string {
   const line = (l: string, r: string) =>
     `<div style="display:flex;justify-content:space-between"><span>${escapeHtml(l)}</span><span>${escapeHtml(r)}</span></div>`
   const items = d.items
-    .map(
-      (it) =>
-        line(`${it.quantity}x ${it.name}`, formatRupiah(it.subtotal)) +
-        `<div style="color:#666;font-size:11px">@ ${formatRupiah(it.unit_price)}</div>`,
-    )
+    .map((it) => {
+      const { head, priceUnit } = itemDisplay(it, c)
+      return (
+        line(head, formatRupiah(it.subtotal)) +
+        `<div style="color:#666;font-size:11px">@ ${priceUnit}</div>` +
+        (c.showItemNote && it.notes
+          ? `<div style="color:#666;font-size:11px">✎ ${escapeHtml(it.notes)}</div>`
+          : '')
+      )
+    })
     .join('')
   const pays = d.payments
     .map((p) => line(METHOD_LABEL[p.payment_method] ?? p.payment_method, formatRupiah(p.amount_paid)))
@@ -146,12 +161,18 @@ export function ReceiptView({ data, config }: { data: ReceiptData; config: Recei
       {data.table_number && <Row l="Meja" r={data.table_number} />}
       {config.showMember && data.member_name && <Row l="Member" r={data.member_name} />}
       <Dashed />
-      {data.items.map((it, i) => (
-        <div key={i}>
-          <Row l={`${it.quantity}x ${it.name}`} r={formatRupiah(it.subtotal)} />
-          <p className="text-[11px] text-ink-soft">@ {formatRupiah(it.unit_price)}</p>
-        </div>
-      ))}
+      {data.items.map((it, i) => {
+        const { head, priceUnit } = itemDisplay(it, config)
+        return (
+          <div key={i}>
+            <Row l={head} r={formatRupiah(it.subtotal)} />
+            <p className="text-[11px] text-ink-soft">@ {priceUnit}</p>
+            {config.showItemNote && it.notes && (
+              <p className="text-[11px] text-ink-soft">✎ {it.notes}</p>
+            )}
+          </div>
+        )
+      })}
       <Dashed />
       <Row l="Subtotal" r={formatRupiah(data.subtotal_amount)} />
       {data.discount_amount > 0 && <Row l="Diskon" r={'-' + formatRupiah(data.discount_amount)} />}
