@@ -40,6 +40,8 @@ import UnitsPage from './features/units/UnitsPage'
 import TaxesPage from './features/taxes/TaxesPage'
 import CardDesignPage from './features/membercard/CardDesignPage'
 import DatabaseConnectionPage from './features/connection/DatabaseConnectionPage'
+import SharedReceiptPage from './features/share/SharedReceiptPage'
+import SharedMemberPage from './features/share/SharedMemberPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -85,6 +87,8 @@ const router = createHashRouter([
   // Tampilan tanpa shell/navigasi (layar publik & pelanggan).
   { path: '/monitor', element: <QueueMonitor /> },
   { path: '/order/:tableNumber', element: <SelfOrderPage /> },
+  { path: '/share/receipt/:payload', element: <SharedReceiptPage /> },
+  { path: '/share/member/:payload', element: <SharedMemberPage /> },
 ])
 
 type BootState =

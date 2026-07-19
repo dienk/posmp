@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { formatRupiah } from '../../lib/format'
 import { useSettings } from '../../lib/SettingsContext'
 import type { ReceiptData, TxItem } from '../history/historyRepository'
+import ShareLinkPanel from '../share/ShareLinkPanel'
+import { buildShareUrl } from '../share/shareLink'
 import {
   getReceiptConfig,
   RECEIPT_WIDTH_PX,
@@ -201,6 +204,11 @@ export function ReceiptView({ data, config }: { data: ReceiptData; config: Recei
 export default function ReceiptModal({ data, onClose }: { data: ReceiptData; onClose: () => void }) {
   const { settings } = useSettings()
   const config = getReceiptConfig(settings)
+  const [showShare, setShowShare] = useState(false)
+  const shareUrl = buildShareUrl('receipt', data)
+  const shareMsg = `Struk ${data.invoice_number} · ${data.outlet.name} · Total ${formatRupiah(
+    data.total_amount,
+  )}. Terima kasih 🙏`
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
       <div className="flex max-h-[85vh] w-full max-w-xs flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
@@ -213,13 +221,29 @@ export default function ReceiptModal({ data, onClose }: { data: ReceiptData; onC
         <div className="min-h-0 flex-1 overflow-y-auto p-5">
           <ReceiptView data={data} config={config} />
         </div>
-        <div className="border-t border-black/5 p-3">
-          <button
-            onClick={() => printReceipt(buildReceiptHtml(data, config))}
-            className="w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-          >
-            🖨️ Cetak Struk
-          </button>
+        <div className="space-y-3 border-t border-black/5 p-3">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => printReceipt(buildReceiptHtml(data, config))}
+              className="rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
+            >
+              🖨️ Cetak
+            </button>
+            <button
+              onClick={() => setShowShare((v) => !v)}
+              className={
+                'rounded-xl py-2.5 text-sm font-bold transition ' +
+                (showShare
+                  ? 'bg-brand text-ink'
+                  : 'border border-black/10 text-ink hover:bg-background')
+              }
+            >
+              🔗 Kirim Link
+            </button>
+          </div>
+          {showShare && (
+            <ShareLinkPanel url={shareUrl} message={shareMsg} subject={`Struk ${data.invoice_number}`} />
+          )}
         </div>
       </div>
     </div>

@@ -3,6 +3,8 @@ import { formatRupiah } from '../../lib/format'
 import { useSettings } from '../../lib/SettingsContext'
 import { MemberCardModal } from '../membercard/MemberCard'
 import { getCardConfig } from '../membercard/cardConfig'
+import ShareLinkPanel from '../share/ShareLinkPanel'
+import { buildShareUrl } from '../share/shareLink'
 import {
   createMember,
   deleteMember,
@@ -255,6 +257,15 @@ function MemberDetail({
   onDelete: () => void
   onCard: () => void
 }) {
+  const [showShare, setShowShare] = useState(false)
+  const shareUrl = buildShareUrl('member', {
+    name: m.name,
+    member_number: m.member_number,
+    tier: m.tier,
+    expiry_date: m.expiry_date,
+    points: m.points,
+  })
+  const shareMsg = `Kartu member ${m.name} · ${m.tier} · ${m.points} poin`
   return (
     <div className="space-y-4">
       <div className="rounded-card bg-white p-5 shadow-card">
@@ -299,6 +310,15 @@ function MemberDetail({
             🪪 Kartu ID
           </button>
           <button
+            onClick={() => setShowShare((v) => !v)}
+            className={
+              'rounded-xl px-5 py-2.5 text-sm font-bold transition ' +
+              (showShare ? 'bg-brand text-ink' : 'border border-black/10 text-ink hover:bg-background')
+            }
+          >
+            🔗 Kirim Link
+          </button>
+          <button
             onClick={onEdit}
             className="rounded-xl bg-status-occupied px-5 py-2.5 text-sm font-bold text-white hover:brightness-95"
           >
@@ -311,6 +331,16 @@ function MemberDetail({
             Hapus
           </button>
         </div>
+        {showShare && (
+          <div className="mt-3">
+            <ShareLinkPanel
+              url={shareUrl}
+              message={shareMsg}
+              subject={`Kartu Member ${m.name}`}
+              initialPhone={m.phone}
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
