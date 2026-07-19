@@ -5,12 +5,14 @@ import { useSettings } from '../../lib/SettingsContext'
 import {
   createStockEntry,
   createSupplier,
+  deleteStockEntry,
   deleteSupplier,
   listProductsForStock,
   listStockEntries,
   listSuppliers,
   listSuppliersWithUsage,
   stockEntryDetail,
+  updateStockEntry,
   updateSupplier,
   type StockEntryDetail,
   type StockEntrySummary,
@@ -18,6 +20,22 @@ import {
   type Supplier,
   type SupplierWithUsage,
 } from './stockInRepository'
+
+/** Waktu sekarang dalam format input datetime-local (YYYY-MM-DDTHH:MM). */
+function nowLocalInput(): string {
+  const d = new Date()
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}
+/** datetime-local → "YYYY-MM-DD HH:MM:SS" untuk SQLite. */
+function toSqlDatetime(v: string): string {
+  const s = v.replace('T', ' ')
+  return s.length === 16 ? `${s}:00` : s
+}
+/** "YYYY-MM-DD HH:MM:SS" → datetime-local (YYYY-MM-DDTHH:MM). */
+function sqlToLocalInput(v: string): string {
+  return v.slice(0, 16).replace(' ', 'T')
+}
 
 interface Line {
   productId: number
@@ -46,7 +64,9 @@ export default function StockInPage() {
   // Form penerimaan
   const [supplierId, setSupplierId] = useState<number | ''>('')
   const [notes, setNotes] = useState('')
+  const [entryDate, setEntryDate] = useState(nowLocalInput)
   const [lines, setLines] = useState<Line[]>([])
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null)
 
   // Supplier CRUD
   const [supMode, setSupMode] = useState<SupMode>(null)
@@ -88,22 +108,64 @@ export default function StockInPage() {
   const totalCost = lines.reduce((s, l) => s + l.quantity * l.costPrice, 0)
   const totalQty = lines.reduce((s, l) => s + l.quantity, 0)
 
+  const resetForm = () => {
+    setLines([])
+    setNotes('')
+    setSupplierId('')
+    setEntryDate(nowLocalInput())
+    setEditingEntryId(null)
+  }
+
   const handleSubmit = async () => {
     if (lines.length === 0) return showToast('Tambahkan minimal satu item.')
+    const payloadLines = lines.map((l) => ({
+      productId: l.productId,
+      quantity: l.quantity,
+      costPrice: l.costPrice,
+    }))
     try {
-      const ref = await createStockEntry(
-        outletId,
-        supplierId === '' ? null : supplierId,
-        notes,
-        lines.map((l) => ({ productId: l.productId, quantity: l.quantity, costPrice: l.costPrice })),
-      )
-      setLines([])
-      setNotes('')
-      setSupplierId('')
+      if (editingEntryId) {
+        await updateStockEntry(editingEntryId, outletId, {
+          supplierId: supplierId === '' ? null : supplierId,
+          notes,
+          entryDate: toSqlDatetime(entryDate),
+          lines: payloadLines,
+        })
+        showToast('Penerimaan diperbarui.')
+      } else {
+        const ref = await createStockEntry(
+          outletId,
+          supplierId === '' ? null : supplierId,
+          notes,
+          payloadLines,
+          toSqlDatetime(entryDate),
+        )
+        showToast(`Stok masuk tercatat · ${ref}`)
+      }
+      resetForm()
       reloadRefs()
-      showToast(`Stok masuk tercatat · ${ref}`)
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Gagal menyimpan')
+    }
+  }
+
+  const startEditEntry = (d: StockEntryDetail) => {
+    setSupplierId('') // supplier_id tak tersedia di detail; pilih ulang bila perlu
+    setNotes(d.notes ?? '')
+    setEntryDate(sqlToLocalInput(d.entry_date))
+    setLines(d.lines.map((l) => ({ productId: l.product_id, quantity: l.quantity, costPrice: l.cost_price ?? 0 })))
+    setEditingEntryId(d.id)
+    setTab('penerimaan')
+  }
+
+  const handleDeleteEntry = async (d: StockEntryDetail) => {
+    try {
+      await deleteStockEntry(d.id, outletId)
+      setSelectedEntry(null)
+      reloadRefs()
+      showToast(`Penerimaan ${d.reference_number} dihapus.`)
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal menghapus')
     }
   }
 
@@ -177,11 +239,21 @@ export default function StockInPage() {
         {/* ============ PENERIMAAN ============ */}
         {tab === 'penerimaan' && (
           <section className="mx-auto max-w-3xl rounded-card bg-white p-5 shadow-card">
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
-              Penerimaan Barang
-            </h2>
-            <div className="mb-3 flex flex-wrap gap-3">
-              <label className="block flex-1">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
+                {editingEntryId ? 'Edit Penerimaan Barang' : 'Penerimaan Barang'}
+              </h2>
+              {editingEntryId && (
+                <button
+                  onClick={resetForm}
+                  className="rounded-lg border border-black/10 px-3 py-1 text-xs font-semibold text-ink hover:bg-background"
+                >
+                  Batal Edit
+                </button>
+              )}
+            </div>
+            <div className="mb-3 grid gap-3 sm:grid-cols-3">
+              <label className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-soft">Supplier</span>
                 <select
                   className={inputCls}
@@ -196,7 +268,18 @@ export default function StockInPage() {
                   ))}
                 </select>
               </label>
-              <label className="block flex-1">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">
+                  Waktu Penerimaan
+                </span>
+                <input
+                  type="datetime-local"
+                  className={inputCls}
+                  value={entryDate}
+                  onChange={(e) => setEntryDate(e.target.value)}
+                />
+              </label>
+              <label className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-soft">Catatan</span>
                 <input
                   className={inputCls}
@@ -284,7 +367,7 @@ export default function StockInPage() {
                 disabled={lines.length === 0}
                 className="rounded-xl bg-status-occupied px-5 py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-40"
               >
-                Simpan Penerimaan
+                {editingEntryId ? 'Perbarui Penerimaan' : 'Simpan Penerimaan'}
               </button>
             </div>
           </section>
@@ -513,6 +596,23 @@ export default function StockInPage() {
                       <p className="text-sm text-ink">{detail.notes}</p>
                     </div>
                   )}
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={() => startEditEntry(detail)}
+                      className="flex-1 rounded-xl border border-brand-strong bg-brand py-2.5 text-sm font-semibold text-ink hover:bg-brand-strong"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteEntry(detail)}
+                      className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                  <p className="mt-2 text-center text-xs text-ink-soft">
+                    Edit/Hapus akan menyesuaikan kembali stok produk terkait.
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-card bg-white p-5 text-center text-sm text-ink-soft shadow-card">

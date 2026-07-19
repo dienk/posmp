@@ -1,4 +1,5 @@
 import { execute, getDb, persist, query } from '../../db/database'
+import { publish } from '../../lib/realtime'
 
 export interface Supplier {
   id: number
@@ -40,6 +41,7 @@ export interface StockEntrySummary {
 }
 
 export interface StockEntryLine {
+  product_id: number
   product_name: string
   sku: string | null
   quantity: number
@@ -144,6 +146,7 @@ export async function createStockEntry(
   supplierId: number | null,
   notes: string,
   lines: StockLineInput[],
+  entryDate?: string, // "YYYY-MM-DD HH:MM:SS"; kosong = waktu saat ini
 ): Promise<string> {
   const valid = lines.filter((l) => l.quantity > 0)
   if (valid.length === 0) throw new Error('Tidak ada item untuk diterima.')
@@ -152,11 +155,19 @@ export async function createStockEntry(
   const reference = referenceNumber(new Date())
   db.run('BEGIN')
   try {
-    db.run(
-      `INSERT INTO stock_entries (outlet_id, supplier_id, reference_number, notes, status)
-       VALUES (?, ?, ?, ?, 'COMPLETED')`,
-      [outletId, supplierId, reference, notes.trim() || null],
-    )
+    if (entryDate) {
+      db.run(
+        `INSERT INTO stock_entries (outlet_id, supplier_id, reference_number, notes, status, entry_date)
+         VALUES (?, ?, ?, ?, 'COMPLETED', ?)`,
+        [outletId, supplierId, reference, notes.trim() || null, entryDate],
+      )
+    } else {
+      db.run(
+        `INSERT INTO stock_entries (outlet_id, supplier_id, reference_number, notes, status)
+         VALUES (?, ?, ?, ?, 'COMPLETED')`,
+        [outletId, supplierId, reference, notes.trim() || null],
+      )
+    }
     const entryId = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
 
     for (const l of valid) {
@@ -165,7 +176,6 @@ export async function createStockEntry(
          VALUES (?, ?, ?, ?)`,
         [entryId, l.productId, l.quantity, l.costPrice || null],
       )
-      // Upsert stok outlet.
       db.run(
         `INSERT INTO outlet_stocks (outlet_id, product_id, stock) VALUES (?, ?, ?)
          ON CONFLICT(outlet_id, product_id) DO UPDATE SET stock = stock + excluded.stock`,
@@ -178,7 +188,131 @@ export async function createStockEntry(
     throw err
   }
   await persist()
+  publish('order:update')
   return reference
+}
+
+export interface StockEntryUpdate {
+  supplierId: number | null
+  notes: string
+  entryDate: string
+  lines: StockLineInput[]
+}
+
+/**
+ * Perbarui satu penerimaan: setel header + ganti baris item, dan sesuaikan
+ * stok outlet dengan **selisih** (qty baru − qty lama) per produk. Ditolak bila
+ * pengurangan membuat stok minus (barang sudah terpakai). Satu transaksi SQL.
+ */
+export async function updateStockEntry(
+  id: number,
+  outletId: number,
+  input: StockEntryUpdate,
+): Promise<void> {
+  const valid = input.lines.filter((l) => l.quantity > 0)
+  if (valid.length === 0) throw new Error('Tidak ada item untuk diterima.')
+
+  const db = getDb()
+  const oldMap = new Map<number, number>()
+  for (const r of query<{ product_id: number; quantity: number }>(
+    'SELECT product_id, quantity FROM stock_entry_details WHERE stock_entry_id = ?',
+    [id],
+  )) {
+    oldMap.set(r.product_id, (oldMap.get(r.product_id) ?? 0) + r.quantity)
+  }
+  const newMap = new Map<number, number>()
+  for (const l of valid) newMap.set(l.productId, (newMap.get(l.productId) ?? 0) + l.quantity)
+
+  const productIds = new Set([...oldMap.keys(), ...newMap.keys()])
+  for (const pid of productIds) {
+    const delta = (newMap.get(pid) ?? 0) - (oldMap.get(pid) ?? 0)
+    if (delta < 0) {
+      const cur =
+        query<{ s: number }>(
+          'SELECT COALESCE(stock, 0) AS s FROM outlet_stocks WHERE outlet_id = ? AND product_id = ?',
+          [outletId, pid],
+        )[0]?.s ?? 0
+      if (cur + delta < 0)
+        throw new Error('Perubahan membuat stok minus — sebagian barang sudah terpakai.')
+    }
+  }
+
+  db.run('BEGIN')
+  try {
+    db.run('UPDATE stock_entries SET supplier_id = ?, notes = ?, entry_date = ? WHERE id = ?', [
+      input.supplierId,
+      input.notes.trim() || null,
+      input.entryDate,
+      id,
+    ])
+    db.run('DELETE FROM stock_entry_details WHERE stock_entry_id = ?', [id])
+    for (const l of valid) {
+      db.run(
+        `INSERT INTO stock_entry_details (stock_entry_id, product_id, quantity, cost_price)
+         VALUES (?, ?, ?, ?)`,
+        [id, l.productId, l.quantity, l.costPrice || null],
+      )
+    }
+    for (const pid of productIds) {
+      const delta = (newMap.get(pid) ?? 0) - (oldMap.get(pid) ?? 0)
+      if (delta !== 0) {
+        db.run(
+          `INSERT INTO outlet_stocks (outlet_id, product_id, stock) VALUES (?, ?, ?)
+           ON CONFLICT(outlet_id, product_id) DO UPDATE SET stock = stock + excluded.stock`,
+          [outletId, pid, delta],
+        )
+      }
+    }
+    db.run('COMMIT')
+  } catch (err) {
+    db.run('ROLLBACK')
+    throw err
+  }
+  await persist()
+  publish('order:update')
+}
+
+/**
+ * Hapus penerimaan + kembalikan (kurangi) stok yang pernah ditambahkan.
+ * Ditolak bila pengembalian membuat stok minus. Satu transaksi SQL.
+ */
+export async function deleteStockEntry(id: number, outletId: number): Promise<void> {
+  const db = getDb()
+  const map = new Map<number, number>()
+  for (const r of query<{ product_id: number; quantity: number }>(
+    'SELECT product_id, quantity FROM stock_entry_details WHERE stock_entry_id = ?',
+    [id],
+  )) {
+    map.set(r.product_id, (map.get(r.product_id) ?? 0) + r.quantity)
+  }
+  for (const [pid, qty] of map) {
+    const cur =
+      query<{ s: number }>(
+        'SELECT COALESCE(stock, 0) AS s FROM outlet_stocks WHERE outlet_id = ? AND product_id = ?',
+        [outletId, pid],
+      )[0]?.s ?? 0
+    if (cur - qty < 0)
+      throw new Error('Tidak bisa dihapus — sebagian barang sudah terpakai (stok akan minus).')
+  }
+
+  db.run('BEGIN')
+  try {
+    for (const [pid, qty] of map) {
+      db.run('UPDATE outlet_stocks SET stock = stock - ? WHERE outlet_id = ? AND product_id = ?', [
+        qty,
+        outletId,
+        pid,
+      ])
+    }
+    db.run('DELETE FROM stock_entry_details WHERE stock_entry_id = ?', [id])
+    db.run('DELETE FROM stock_entries WHERE id = ?', [id])
+    db.run('COMMIT')
+  } catch (err) {
+    db.run('ROLLBACK')
+    throw err
+  }
+  await persist()
+  publish('order:update')
 }
 
 export function listStockEntries(outletId: number, limit = 30): StockEntrySummary[] {
@@ -217,7 +351,7 @@ export function stockEntryDetail(id: number): StockEntryDetail | null {
   if (!head) return null
 
   const lines = query<StockEntryLine>(
-    `SELECT p.name AS product_name, p.sku, d.quantity, d.cost_price,
+    `SELECT d.product_id, p.name AS product_name, p.sku, d.quantity, d.cost_price,
             (d.quantity * COALESCE(d.cost_price, 0)) AS subtotal
      FROM stock_entry_details d
      JOIN products p ON p.id = d.product_id
