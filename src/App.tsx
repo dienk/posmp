@@ -40,6 +40,7 @@ import UnitsPage from './features/units/UnitsPage'
 import TaxesPage from './features/taxes/TaxesPage'
 import CardDesignPage from './features/membercard/CardDesignPage'
 import DatabaseConnectionPage from './features/connection/DatabaseConnectionPage'
+import OperatingSchedulePage from './features/schedule/OperatingSchedulePage'
 import SharedReceiptPage from './features/share/SharedReceiptPage'
 import SharedMemberPage from './features/share/SharedMemberPage'
 
@@ -82,6 +83,7 @@ const router = createHashRouter([
       { path: 'receipt-design', element: <ReceiptDesignPage /> },
       { path: 'card-design', element: <CardDesignPage /> },
       { path: 'database', element: <DatabaseConnectionPage /> },
+      { path: 'schedule', element: <OperatingSchedulePage /> },
     ],
   },
   // Tampilan tanpa shell/navigasi (layar publik & pelanggan).

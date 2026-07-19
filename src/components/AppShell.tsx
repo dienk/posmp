@@ -96,6 +96,7 @@ const SETTINGS_GROUP: NavGroupDef = {
   icon: '⚙️',
   children: [
     { to: '/settings', label: 'Pengaturan', short: 'Setelan', icon: '🛠️' },
+    { to: '/schedule', label: 'Jadwal Operasi', short: 'Jadwal', icon: '🕒' },
     { to: '/personas', label: 'Persona', short: 'Persona', icon: '🧑‍💼' },
     { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: '🔑' },
     { to: '/theme', label: 'Tema', short: 'Tema', icon: '🎨' },
