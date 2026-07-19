@@ -79,6 +79,17 @@ const STOCK_GROUP: NavGroupDef = {
   ],
 }
 
+// Grup "Program Loyalitas Pelanggan" (Member & Voucher). Tanpa perm grup —
+// tiap anak di-gate sendiri (grup tersembunyi bila tak ada anak yang tampil).
+const LOYALTY_GROUP: NavGroupDef = {
+  label: 'Program Loyalitas Pelanggan',
+  icon: '🎁',
+  children: [
+    { to: '/members', label: 'Member', short: 'Member', icon: '⭐', perm: 'members' },
+    { to: '/vouchers', label: 'Voucher', short: 'Voucher', icon: '🎟️', perm: 'vouchers' },
+  ],
+}
+
 // Grup "Setelan" (selalu tampil agar pengaturan tidak terkunci).
 const SETTINGS_GROUP: NavGroupDef = {
   label: 'Setelan',
@@ -98,9 +109,8 @@ const SIDEBAR: NavEntry[] = [
   { kind: 'link', item: { to: '/', label: 'Kasir', icon: '🧾', perm: 'kasir' } },
   { kind: 'group', group: DATA_MASTER_GROUP },
   { kind: 'group', group: TRANSAKSI_GROUP },
-  { kind: 'link', item: { to: '/members', label: 'Member', icon: '⭐', perm: 'members' } },
+  { kind: 'group', group: LOYALTY_GROUP },
   { kind: 'group', group: STOCK_GROUP },
-  { kind: 'link', item: { to: '/vouchers', label: 'Voucher', icon: '🎟️', perm: 'vouchers' } },
   { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace', perm: 'marketplace' } },
   { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: '📊', perm: 'reports' } },
   { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📋', perm: 'reports' } },
