@@ -360,6 +360,19 @@ export function exportDatabase(): Uint8Array {
 }
 
 /**
+ * Kompakkan database (VACUUM) untuk merapikan ruang kosong setelah banyak
+ * hapus/ubah, lalu persist. Mengembalikan ukuran (byte) sebelum & sesudah.
+ */
+export async function vacuumDatabase(): Promise<{ before: number; after: number }> {
+  const db = getDb()
+  const before = db.export().length
+  db.run('VACUUM')
+  const after = db.export().length
+  await persist()
+  return { before, after }
+}
+
+/**
  * Pulihkan database dari byte file .sqlite (mis. hasil unduhan cadangan).
  * Memvalidasi header SQLite, mengganti instance in-memory, menjalankan migrasi,
  * lalu mempersist ke IndexedDB. Melempar error bila file bukan database SQLite.

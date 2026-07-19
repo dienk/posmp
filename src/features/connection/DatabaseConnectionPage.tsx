@@ -5,6 +5,7 @@ import {
   exportDatabase,
   importDatabase,
   resetDatabase,
+  vacuumDatabase,
   type DbStats,
 } from '../../db/database'
 import {
@@ -14,6 +15,8 @@ import {
   type RelayConfig,
   type RelayStatus,
 } from '../../lib/realtime'
+import { useSettings } from '../../lib/SettingsContext'
+import { updateAppSettings } from '../settings/settingsRepository'
 
 const inputCls =
   'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
@@ -30,20 +33,45 @@ const STATUS_META: Record<RelayStatus, { label: string; cls: string }> = {
   disconnected: { label: 'Terputus', cls: 'bg-status-occupied/15 text-status-occupied' },
 }
 
+interface StorageInfo {
+  persisted: boolean
+  usage: number
+  quota: number
+}
+
 export default function DatabaseConnectionPage() {
+  const { settings, reloadSettings } = useSettings()
   const [stats, setStats] = useState<DbStats | null>(null)
   const [relay, setRelay] = useState<RelayConfig>(() => getRelayConfig())
   const [status, setStatus] = useState<RelayStatus>('disconnected')
+  const [dbLabel, setDbLabel] = useState(settings.db_label ?? '')
+  const [storage, setStorage] = useState<StorageInfo | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
+  const refreshStats = () => {
     try {
       setStats(databaseStats())
     } catch {
       /* DB belum siap */
     }
+  }
+
+  const loadStorage = async () => {
+    if (typeof navigator === 'undefined' || !navigator.storage?.estimate) return
+    try {
+      const est = await navigator.storage.estimate()
+      const persisted = navigator.storage.persisted ? await navigator.storage.persisted() : false
+      setStorage({ persisted, usage: est.usage ?? 0, quota: est.quota ?? 0 })
+    } catch {
+      /* abaikan */
+    }
+  }
+
+  useEffect(() => {
+    refreshStats()
+    loadStorage()
     return subscribeRelayStatus(setStatus)
   }, [])
 
@@ -65,6 +93,53 @@ export default function DatabaseConnectionPage() {
     showToast('Pengaturan koneksi relay disimpan.')
   }
 
+  const saveLabel = async () => {
+    try {
+      await updateAppSettings({ db_label: dbLabel.trim() })
+      reloadSettings()
+      showToast('Label database disimpan.')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal menyimpan label')
+    }
+  }
+
+  const requestPersist = async () => {
+    if (typeof navigator === 'undefined' || !navigator.storage?.persist) {
+      showToast('Peramban tidak mendukung penyimpanan persisten.')
+      return
+    }
+    try {
+      const ok = await navigator.storage.persist()
+      await loadStorage()
+      showToast(
+        ok
+          ? 'Penyimpanan persisten aktif — data aman dari pembersihan otomatis.'
+          : 'Permintaan ditolak peramban. Coba tambahkan situs ini sebagai favorit/PWA.',
+      )
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal meminta penyimpanan persisten')
+    }
+  }
+
+  const handleVacuum = async () => {
+    setBusy(true)
+    try {
+      const { before, after } = await vacuumDatabase()
+      refreshStats()
+      loadStorage()
+      const saved = before - after
+      showToast(
+        saved > 0
+          ? `Database dikompakkan · hemat ${formatBytes(saved)} (${formatBytes(before)} → ${formatBytes(after)}).`
+          : 'Database sudah rapi — tidak ada ruang untuk dikompakkan.',
+      )
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal mengompakkan database')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const handleBackup = () => {
     try {
       const bytes = exportDatabase()
@@ -76,8 +151,11 @@ export default function DatabaseConnectionPage() {
       const a = document.createElement('a')
       const d = new Date()
       const p = (n: number) => String(n).padStart(2, '0')
+      const slug =
+        (dbLabel.trim() || 'posmp').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') ||
+        'posmp'
       a.href = url
-      a.download = `posmp-backup-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.sqlite`
+      a.download = `${slug}-backup-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.sqlite`
       a.click()
       URL.revokeObjectURL(url)
       showToast('Cadangan diunduh.')
@@ -153,6 +231,95 @@ export default function DatabaseConnectionPage() {
                 value="Local-first — data tersimpan di perangkat ini, berfungsi penuh tanpa internet."
               />
             </div>
+          </div>
+        </section>
+
+        {/* Pengaturan database lokal */}
+        <section className="rounded-card bg-white p-5 shadow-card">
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+            Pengaturan Database Lokal
+          </h2>
+
+          {/* Label / identitas database */}
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="block min-w-0 flex-1">
+              <span className="mb-1 block text-xs font-medium text-ink-soft">
+                Label Database (identitas perangkat; dipakai pada nama file cadangan)
+              </span>
+              <input
+                className={inputCls}
+                value={dbLabel}
+                onChange={(e) => setDbLabel(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && saveLabel()}
+                placeholder="mis. Kasir Depan / Cabang Bekasi"
+              />
+            </label>
+            <button
+              onClick={saveLabel}
+              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-ink hover:bg-brand-strong"
+            >
+              Simpan Label
+            </button>
+          </div>
+
+          {/* Persistensi penyimpanan */}
+          <div className="mt-4 rounded-xl bg-background p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-ink">Persistensi Penyimpanan</span>
+              {storage && (
+                <span
+                  className={
+                    'rounded-full px-2.5 py-0.5 text-xs font-semibold ' +
+                    (storage.persisted
+                      ? 'bg-status-empty/15 text-status-empty'
+                      : 'bg-status-waiting/20 text-status-waiting')
+                  }
+                >
+                  {storage.persisted ? '● Persisten' : '● Belum persisten'}
+                </span>
+              )}
+              {!storage?.persisted && (
+                <button
+                  onClick={requestPersist}
+                  className="ml-auto rounded-lg bg-status-occupied px-3 py-1.5 text-sm font-semibold text-white hover:brightness-95"
+                >
+                  Minta Penyimpanan Persisten
+                </button>
+              )}
+            </div>
+            {storage && storage.quota > 0 && (
+              <>
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-black/10">
+                  <div
+                    className="h-full rounded-full bg-brand-strong"
+                    style={{ width: `${Math.min(100, (storage.usage / storage.quota) * 100)}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-ink-soft">
+                  Terpakai {formatBytes(storage.usage)} dari {formatBytes(storage.quota)} (
+                  {((storage.usage / storage.quota) * 100).toFixed(1)}%) kuota peramban untuk situs
+                  ini.
+                </p>
+              </>
+            )}
+            <p className="mt-2 text-xs text-ink-soft">
+              Saat persisten, peramban tidak akan menghapus database lokal secara otomatis meski
+              penyimpanan menipis. Disarankan untuk perangkat kasir utama.
+            </p>
+          </div>
+
+          {/* Kompak / VACUUM */}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              onClick={handleVacuum}
+              disabled={busy}
+              className="rounded-lg border border-black/10 px-4 py-2 text-sm font-semibold text-ink hover:bg-background disabled:opacity-40"
+            >
+              🧹 Kompakkan Database (VACUUM)
+            </button>
+            <p className="text-xs text-ink-soft">
+              Merapikan ruang kosong setelah banyak penghapusan agar file lebih kecil.
+            </p>
           </div>
         </section>
 
