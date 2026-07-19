@@ -47,7 +47,7 @@ const DATA_MASTER_GROUP: NavGroupDef = {
   ],
 }
 
-// Grup "Transaksi" (Riwayat & Pre-Order).
+// Grup "Transaksi" (Riwayat, Draft, Pre-Order, Cicilan).
 const TRANSAKSI_GROUP: NavGroupDef = {
   label: 'Transaksi',
   icon: '💰',
@@ -56,6 +56,7 @@ const TRANSAKSI_GROUP: NavGroupDef = {
     { to: '/history', label: 'Riwayat', short: 'Riwayat', icon: '🧾' },
     { to: '/drafts', label: 'Draft', short: 'Draft', icon: '📝' },
     { to: '/preorder', label: 'Pre-Order', short: 'Pre-Order', icon: '📅' },
+    { to: '/installments', label: 'Cicilan', short: 'Cicilan', icon: '💳' },
   ],
 }
 
@@ -95,7 +96,6 @@ const SIDEBAR: NavEntry[] = [
   { kind: 'link', item: { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue', perm: 'queue' } },
   { kind: 'link', item: { to: '/members', label: 'Member', icon: '⭐', perm: 'members' } },
   { kind: 'group', group: STOCK_GROUP },
-  { kind: 'link', item: { to: '/installments', label: 'Cicilan', icon: '💳', perm: 'installments' } },
   { kind: 'link', item: { to: '/vouchers', label: 'Voucher', icon: '🎟️', perm: 'vouchers' } },
   { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace', perm: 'marketplace' } },
   { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: '📊', perm: 'reports' } },

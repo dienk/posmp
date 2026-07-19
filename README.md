@@ -128,7 +128,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/history` | Transaksi › Riwayat & Refund |
 | `#/drafts` | Transaksi › Draft (bill tersimpan) |
 | `#/preorder` | Transaksi › Pre-Order & Uang Muka |
-| `#/installments` | Cicilan Internal |
+| `#/installments` | Transaksi › Cicilan Internal |
 | `#/vouchers` | Voucher Generator |
 | `#/marketplace` | Integrasi Marketplace (config) |
 | `#/dashboard` | Dashboard manajer (KPI, penjualan per sumber, produk terlaris) |
