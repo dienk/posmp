@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     down_payment_received REAL DEFAULT 0,
     subtotal_amount REAL NOT NULL,
     discount_amount REAL DEFAULT 0,
+    service_charge_amount REAL DEFAULT 0, -- biaya layanan (F&B), dihitung sebelum pajak
     tax_amount REAL DEFAULT 0,
     points_redeemed INTEGER DEFAULT 0,
     points_earned INTEGER DEFAULT 0,

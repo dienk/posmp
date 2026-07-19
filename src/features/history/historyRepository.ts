@@ -55,6 +55,7 @@ export interface ReceiptData {
   member_name: string | null
   subtotal_amount: number
   discount_amount: number
+  service_charge_amount: number
   tax_amount: number
   total_amount: number
   points_earned: number
@@ -69,7 +70,9 @@ export function getReceipt(transactionId: number): ReceiptData | undefined {
     Omit<ReceiptData, 'outlet' | 'items' | 'payments'> & { outlet_id: number }
   >(
     `SELECT t.outlet_id, t.invoice_number, t.transaction_date, t.order_source, t.facility_type,
-            t.table_number, t.subtotal_amount, t.discount_amount, t.tax_amount, t.total_amount,
+            t.table_number, t.subtotal_amount, t.discount_amount,
+            COALESCE(t.service_charge_amount, 0) AS service_charge_amount,
+            t.tax_amount, t.total_amount,
             t.points_earned, t.status, m.name AS member_name
      FROM transactions t
      LEFT JOIN members m ON m.id = t.member_id

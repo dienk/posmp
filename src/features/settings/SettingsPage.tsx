@@ -58,6 +58,10 @@ export default function SettingsPage() {
   const taxRatePct = getNumberSetting(settings, 'tax_rate', 0.1) * 100
   const activeTax = useMemo(() => defaultTax(), [])
   const [taxEnabled, setTaxEnabled] = useState(settings.tax_enabled === '1')
+  const [serviceEnabled, setServiceEnabled] = useState(settings.service_charge_enabled === '1')
+  const [serviceRatePct, setServiceRatePct] = useState(
+    getNumberSetting(settings, 'service_charge_rate', 0.05) * 100,
+  )
   const [loyalty, setLoyalty] = useState<LoyaltyConfig>(() => getLoyaltyConfig(settings))
   const setLoy = <K extends keyof LoyaltyConfig>(key: K, value: LoyaltyConfig[K]) =>
     setLoyalty((prev) => ({ ...prev, [key]: value }))
@@ -105,6 +109,8 @@ export default function SettingsPage() {
     try {
       const next: Record<string, string> = {
         tax_enabled: taxEnabled ? '1' : '0',
+        service_charge_enabled: serviceEnabled ? '1' : '0',
+        service_charge_rate: String(Math.max(0, serviceRatePct) / 100),
         queue_call_text: callText.trim() || DEFAULT_QUEUE_CALL_TEXT,
         payment_methods: serializePaymentMethods(payMethods),
         ...loyaltyToSettings(loyalty),
@@ -187,7 +193,34 @@ export default function SettingsPage() {
                 </Link>
               </div>
             </div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={serviceEnabled}
+                onChange={(e) => setServiceEnabled(e.target.checked)}
+                className="h-4 w-4 accent-status-occupied"
+              />
+              <span className="text-sm text-ink">Service charge aktif</span>
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-ink-soft">
+                Tarif Service Charge (%)
+              </span>
+              <input
+                type="number"
+                min={0}
+                step={0.5}
+                disabled={!serviceEnabled}
+                className={inputCls + (serviceEnabled ? '' : ' opacity-50')}
+                value={serviceRatePct}
+                onChange={(e) => setServiceRatePct(Number(e.target.value))}
+              />
+            </label>
           </div>
+          <p className="mt-2 text-xs text-ink-soft">
+            Service charge (biaya layanan) dihitung dari subtotal setelah diskon; pajak dihitung di
+            atas subtotal + service charge. Muncul di kasir, transaksi, & struk.
+          </p>
         </section>
 
         {/* Program Loyalitas (Poin) */}

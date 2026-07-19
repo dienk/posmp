@@ -64,6 +64,9 @@ export interface SaveOrderInput {
   queueNumber?: string
   taxRate: number
   taxEnabled: boolean
+  /** Tarif biaya layanan (desimal, mis. 0.05 = 5%). */
+  serviceRate?: number
+  serviceEnabled?: boolean
   status: 'DRAFT' | 'COMPLETED' | 'PREPARING'
   discountAmount?: number
   voucherId?: number
@@ -95,6 +98,7 @@ export interface SaveOrderResult {
   invoiceNumber: string
   subtotal: number
   discount: number
+  serviceCharge: number
   tax: number
   total: number
   pointsEarned: number
@@ -111,8 +115,11 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
   const subtotal = input.items.reduce((sum, it) => sum + lineTotal(it), 0)
   const discount = Math.min(input.discountAmount ?? 0, subtotal)
   const taxable = subtotal - discount
-  const tax = input.taxEnabled ? Math.round(taxable * input.taxRate) : 0
-  const total = taxable + tax
+  // Biaya layanan dihitung dari nilai setelah diskon; pajak dihitung di atas
+  // (subtotal − diskon + service charge) sesuai praktik F&B (PB1 atas service).
+  const serviceCharge = input.serviceEnabled ? Math.round(taxable * (input.serviceRate ?? 0)) : 0
+  const tax = input.taxEnabled ? Math.round((taxable + serviceCharge) * input.taxRate) : 0
+  const total = taxable + serviceCharge + tax
   // Nomor invoice bisa disetel dari kasir (bisa diedit); jika kosong, dibuat otomatis.
   const invoiceNumber = input.invoiceNumber?.trim() || generateInvoiceNumber()
   const orderSource = input.orderSource ?? 'POS_OFFLINE'
@@ -154,9 +161,9 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
       `INSERT INTO transactions
          (outlet_id, invoice_number, facility_type, order_source, table_number, queue_number,
           voucher_id, member_id, parent_transaction_id, subtotal_amount, discount_amount,
-          tax_amount, points_earned, total_amount, status, is_preorder, preorder_deadline,
-          down_payment_received, note)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          service_charge_amount, tax_amount, points_earned, total_amount, status, is_preorder,
+          preorder_deadline, down_payment_received, note)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.outletId,
         invoiceNumber,
@@ -169,6 +176,7 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
         input.parentTransactionId ?? null,
         subtotal,
         discount,
+        serviceCharge,
         tax,
         pointsEarned,
         total,
@@ -287,7 +295,7 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
     'SELECT id FROM transactions WHERE invoice_number = ?',
     [invoiceNumber],
   )[0].id
-  return { transactionId, invoiceNumber, subtotal, discount, tax, total, pointsEarned }
+  return { transactionId, invoiceNumber, subtotal, discount, serviceCharge, tax, total, pointsEarned }
 }
 
 // ── Merge Bill (Gabung Tagihan) ──────────────────────────────────────────────
@@ -396,6 +404,8 @@ export interface MergeBillInput {
   outletId: number
   taxRate: number
   taxEnabled: boolean
+  serviceRate?: number
+  serviceEnabled?: boolean
 }
 
 /**
@@ -450,8 +460,9 @@ export async function mergeBills(
       rows.reduce((a, r) => a + (r.discount_amount || 0), 0),
       sub,
     )
-    const tax = input.taxEnabled ? Math.round((sub - discount) * input.taxRate) : 0
-    const total = sub - discount + tax
+    const service = input.serviceEnabled ? Math.round((sub - discount) * (input.serviceRate ?? 0)) : 0
+    const tax = input.taxEnabled ? Math.round((sub - discount + service) * input.taxRate) : 0
+    const total = sub - discount + service + tax
 
     // Gabungkan catatan (urut id).
     const notes = rows.map((r) => r.note).filter((n): n is string => !!n && n.trim().length > 0)
@@ -459,9 +470,10 @@ export async function mergeBills(
 
     db.run(
       `UPDATE transactions
-       SET subtotal_amount = ?, discount_amount = ?, tax_amount = ?, total_amount = ?, note = ?
+       SET subtotal_amount = ?, discount_amount = ?, service_charge_amount = ?, tax_amount = ?,
+           total_amount = ?, note = ?
        WHERE id = ?`,
-      [sub, discount, tax, total, mergedNote, target],
+      [sub, discount, service, tax, total, mergedNote, target],
     )
     db.run(`DELETE FROM transactions WHERE id IN (${othersList})`)
     db.run('COMMIT')

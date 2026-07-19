@@ -122,6 +122,7 @@ export function buildReceiptHtml(d: ReceiptData, c: ReceiptConfig): string {
     <hr>
     ${line('Subtotal', formatRupiah(d.subtotal_amount))}
     ${d.discount_amount > 0 ? line('Diskon', '-' + formatRupiah(d.discount_amount)) : ''}
+    ${d.service_charge_amount > 0 ? line('Service Charge', formatRupiah(d.service_charge_amount)) : ''}
     ${d.tax_amount > 0 ? line('Pajak', formatRupiah(d.tax_amount)) : ''}
     <div class="b">${line('TOTAL', formatRupiah(d.total_amount))}</div>
     <hr>
@@ -179,6 +180,9 @@ export function ReceiptView({ data, config }: { data: ReceiptData; config: Recei
       <Dashed />
       <Row l="Subtotal" r={formatRupiah(data.subtotal_amount)} />
       {data.discount_amount > 0 && <Row l="Diskon" r={'-' + formatRupiah(data.discount_amount)} />}
+      {data.service_charge_amount > 0 && (
+        <Row l="Service Charge" r={formatRupiah(data.service_charge_amount)} />
+      )}
       {data.tax_amount > 0 && <Row l="Pajak" r={formatRupiah(data.tax_amount)} />}
       <div className="font-bold">
         <Row l="TOTAL" r={formatRupiah(data.total_amount)} />

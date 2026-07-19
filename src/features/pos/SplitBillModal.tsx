@@ -7,16 +7,34 @@ interface Props {
   items: CartItem[]
   taxRate: number
   taxEnabled: boolean
+  serviceRate: number
+  serviceEnabled: boolean
   onCancel: () => void
   onConfirm: (bills: CartItem[][]) => void
 }
 
-function billTotal(items: CartItem[], taxRate: number, taxEnabled: boolean): number {
+function billTotal(
+  items: CartItem[],
+  taxRate: number,
+  taxEnabled: boolean,
+  serviceRate: number,
+  serviceEnabled: boolean,
+): number {
   const sub = items.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
-  return sub + (taxEnabled ? Math.round(sub * taxRate) : 0)
+  const service = serviceEnabled ? Math.round(sub * serviceRate) : 0
+  const tax = taxEnabled ? Math.round((sub + service) * taxRate) : 0
+  return sub + service + tax
 }
 
-export default function SplitBillModal({ items, taxRate, taxEnabled, onCancel, onConfirm }: Props) {
+export default function SplitBillModal({
+  items,
+  taxRate,
+  taxEnabled,
+  serviceRate,
+  serviceEnabled,
+  onCancel,
+  onConfirm,
+}: Props) {
   const [billCount, setBillCount] = useState(2)
   // Indeks nota untuk setiap item keranjang (default semua di Nota 1).
   const [assign, setAssign] = useState<number[]>(() => items.map(() => 0))
@@ -95,7 +113,7 @@ export default function SplitBillModal({ items, taxRate, taxEnabled, onCancel, o
                   Nota {i + 1} <span className="text-ink-soft">({b.length} item)</span>
                 </span>
                 <span className="font-bold text-ink">
-                  {formatRupiah(billTotal(b, taxRate, taxEnabled))}
+                  {formatRupiah(billTotal(b, taxRate, taxEnabled, serviceRate, serviceEnabled))}
                 </span>
               </div>
             ))}

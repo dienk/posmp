@@ -33,6 +33,8 @@ export default function PosPage() {
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
   const taxRate = getNumberSetting(settings, 'tax_rate', 0.1)
   const taxEnabled = settings.tax_enabled === '1'
+  const serviceRate = getNumberSetting(settings, 'service_charge_rate', 0)
+  const serviceEnabled = settings.service_charge_enabled === '1'
 
   const cart = useCart()
   const [categories, setCategories] = useState<Category[]>([])
@@ -69,8 +71,10 @@ export default function PosPage() {
   const loyalty = useMemo(() => getLoyaltyConfig(settings), [settings])
 
   // Total tagihan berjalan (untuk modal pembayaran).
-  const orderTax = taxEnabled ? Math.round((cart.subtotal - discount) * taxRate) : 0
-  const orderTotal = cart.subtotal - Math.min(discount, cart.subtotal) + orderTax
+  const orderTaxable = cart.subtotal - Math.min(discount, cart.subtotal)
+  const orderService = serviceEnabled ? Math.round(orderTaxable * serviceRate) : 0
+  const orderTax = taxEnabled ? Math.round((orderTaxable + orderService) * taxRate) : 0
+  const orderTotal = orderTaxable + orderService + orderTax
 
   useEffect(() => {
     setCategories(fetchCategories())
@@ -184,6 +188,8 @@ export default function PosPage() {
         tableNumber,
         taxRate,
         taxEnabled,
+        serviceRate,
+        serviceEnabled,
         status,
         discountAmount: discount,
         voucherId,
@@ -236,6 +242,8 @@ export default function PosPage() {
         tableNumber,
         taxRate,
         taxEnabled,
+        serviceRate,
+        serviceEnabled,
         status: 'PREPARING',
         discountAmount: discount,
         voucherId,
@@ -271,8 +279,9 @@ export default function PosPage() {
       let parentId: number | undefined
       for (const billItems of bills) {
         const sub = billItems.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
-        const billTax = taxEnabled ? Math.round(sub * taxRate) : 0
-        const billTotalAmt = sub + billTax
+        const billService = serviceEnabled ? Math.round(sub * serviceRate) : 0
+        const billTax = taxEnabled ? Math.round((sub + billService) * taxRate) : 0
+        const billTotalAmt = sub + billService + billTax
         const res = await saveOrder({
           outletId,
           items: billItems,
@@ -280,6 +289,8 @@ export default function PosPage() {
           tableNumber,
           taxRate,
           taxEnabled,
+          serviceRate,
+          serviceEnabled,
           status: 'COMPLETED',
           sendToKitchen: false,
           parentTransactionId: parentId,
@@ -414,6 +425,8 @@ export default function PosPage() {
           facilityType={facilityType}
           taxEnabled={taxEnabled}
           taxRate={taxRate}
+          serviceEnabled={serviceEnabled}
+          serviceRate={serviceRate}
           saving={saving}
           showVoucher={showVoucher}
           showPreorder={showPreorder}
@@ -478,6 +491,8 @@ export default function PosPage() {
           items={cart.items}
           taxRate={taxRate}
           taxEnabled={taxEnabled}
+          serviceRate={serviceRate}
+          serviceEnabled={serviceEnabled}
           onCancel={() => setShowSplit(false)}
           onConfirm={handleSplitConfirm}
         />
@@ -498,6 +513,8 @@ export default function PosPage() {
           outletId={outletId}
           taxRate={taxRate}
           taxEnabled={taxEnabled}
+          serviceRate={serviceRate}
+          serviceEnabled={serviceEnabled}
           onCancel={() => setShowMerge(false)}
           onMerged={(msg) => {
             setShowMerge(false)

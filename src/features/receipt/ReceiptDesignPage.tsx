@@ -86,6 +86,7 @@ export default function ReceiptDesignPage() {
     member_name: 'Budi Santoso',
     subtotal_amount: 135000,
     discount_amount: 5000,
+    service_charge_amount: 6500,
     tax_amount: 13000,
     total_amount: 143000,
     points_earned: 143,

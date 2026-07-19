@@ -6,11 +6,21 @@ interface Props {
   outletId: number
   taxRate: number
   taxEnabled: boolean
+  serviceRate: number
+  serviceEnabled: boolean
   onCancel: () => void
   onMerged: (msg: string) => void
 }
 
-export default function MergeBillModal({ outletId, taxRate, taxEnabled, onCancel, onMerged }: Props) {
+export default function MergeBillModal({
+  outletId,
+  taxRate,
+  taxEnabled,
+  serviceRate,
+  serviceEnabled,
+  onCancel,
+  onMerged,
+}: Props) {
   const [bills, setBills] = useState<OpenBill[]>([])
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [busy, setBusy] = useState(false)
@@ -43,6 +53,8 @@ export default function MergeBillModal({ outletId, taxRate, taxEnabled, onCancel
     setError(null)
     try {
       const res = await mergeBills({
+        serviceRate,
+        serviceEnabled,
         billIds: [...selected],
         outletId,
         taxRate,

@@ -164,6 +164,11 @@ function migrateSchema(db: Database): boolean {
     db.run('ALTER TABLE transactions ADD COLUMN note TEXT')
     changed = true
   }
+  // Kolom biaya layanan (service charge) pada header transaksi.
+  if (!txCols.has('service_charge_amount')) {
+    db.run('ALTER TABLE transactions ADD COLUMN service_charge_amount REAL DEFAULT 0')
+    changed = true
+  }
 
   // Kolom satuan terpilih pada detail transaksi (multi-satuan di kasir).
   // quantity tetap dalam satuan dasar; unit/unit_qty hanya untuk tampilan.

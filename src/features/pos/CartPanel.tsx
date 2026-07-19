@@ -26,6 +26,8 @@ interface Props {
   facilityType: FacilityType
   taxEnabled: boolean
   taxRate: number
+  serviceEnabled: boolean
+  serviceRate: number
   saving: boolean
   showVoucher: boolean
   showPreorder: boolean
@@ -63,8 +65,9 @@ interface Props {
 export default function CartPanel(props: Props) {
   const subtotal = props.items.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
   const discount = props.showVoucher ? Math.min(props.discount, subtotal) : 0
-  const tax = props.taxEnabled ? Math.round((subtotal - discount) * props.taxRate) : 0
-  const total = subtotal - discount + tax
+  const service = props.serviceEnabled ? Math.round((subtotal - discount) * props.serviceRate) : 0
+  const tax = props.taxEnabled ? Math.round((subtotal - discount + service) * props.taxRate) : 0
+  const total = subtotal - discount + service + tax
   const empty = props.items.length === 0
   const totalItems = props.items.reduce((s, it) => s + it.quantity, 0)
 
@@ -432,6 +435,12 @@ export default function CartPanel(props: Props) {
             <div className="flex justify-between text-status-empty">
               <dt>Diskon</dt>
               <dd>−{formatRupiah(discount)}</dd>
+            </div>
+          )}
+          {props.serviceEnabled && service > 0 && (
+            <div className="flex justify-between text-ink-soft">
+              <dt>Service ({Math.round(props.serviceRate * 100)}%)</dt>
+              <dd>{formatRupiah(service)}</dd>
             </div>
           )}
           {props.taxEnabled && (
