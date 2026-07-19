@@ -26,8 +26,17 @@ export function getOpenSession(outletId: number): CashSession | null {
   )
 }
 
-/** Penjualan tunai (pembayaran CASH pada transaksi COMPLETED) sejak `openedAt`. */
-export function cashSalesSince(outletId: number, openedAt: string): number {
+/**
+ * Penjualan tunai (pembayaran CASH transaksi COMPLETED) antara `from` dan `to`
+ * (inklusif). `to` opsional (tak dibatasi = hingga sekarang).
+ */
+export function cashSalesBetween(outletId: number, from: string, to?: string | null): number {
+  const params: (string | number)[] = [outletId, from]
+  let clause = ''
+  if (to) {
+    clause = 'AND t.transaction_date <= ?'
+    params.push(to)
+  }
   return (
     query<{ s: number }>(
       `SELECT COALESCE(SUM(tp.amount_paid), 0) AS s
@@ -35,10 +44,15 @@ export function cashSalesSince(outletId: number, openedAt: string): number {
        JOIN transactions t ON t.id = tp.transaction_id
        WHERE t.outlet_id = ? AND t.status = 'COMPLETED'
          AND tp.payment_method = 'CASH'
-         AND t.transaction_date >= ?`,
-      [outletId, openedAt],
+         AND t.transaction_date >= ? ${clause}`,
+      params,
     )[0]?.s ?? 0
   )
+}
+
+/** Penjualan tunai sejak `openedAt` (hingga sekarang). */
+export function cashSalesSince(outletId: number, openedAt: string): number {
+  return cashSalesBetween(outletId, openedAt)
 }
 
 /** Buka kas (catat saldo awal). Ditolak bila masih ada sesi terbuka. */
@@ -47,15 +61,22 @@ export async function openCash(
   openingBalance: number,
   shiftName?: string | null,
   note?: string | null,
+  openedAt?: string | null, // 'YYYY-MM-DD HH:MM:SS' (UTC); kosong = sekarang
 ): Promise<number> {
   if (getOpenSession(outletId)) {
     throw new Error('Masih ada sesi kas yang terbuka. Tutup kas dahulu.')
   }
-  const id = await execute(
-    `INSERT INTO cash_sessions (outlet_id, shift_name, opening_balance, note, status)
-     VALUES (?, ?, ?, ?, 'OPEN')`,
-    [outletId, shiftName?.trim() || null, Math.max(0, openingBalance), note?.trim() || null],
-  )
+  const id = openedAt
+    ? await execute(
+        `INSERT INTO cash_sessions (outlet_id, shift_name, opening_balance, note, opened_at, status)
+         VALUES (?, ?, ?, ?, ?, 'OPEN')`,
+        [outletId, shiftName?.trim() || null, Math.max(0, openingBalance), note?.trim() || null, openedAt],
+      )
+    : await execute(
+        `INSERT INTO cash_sessions (outlet_id, shift_name, opening_balance, note, status)
+         VALUES (?, ?, ?, ?, 'OPEN')`,
+        [outletId, shiftName?.trim() || null, Math.max(0, openingBalance), note?.trim() || null],
+      )
   publish('order:update')
   return id
 }
@@ -71,22 +92,69 @@ export async function closeCash(
   sessionId: number,
   closingBalance: number,
   note?: string | null,
+  closedAt?: string | null, // 'YYYY-MM-DD HH:MM:SS' (UTC); kosong = sekarang
 ): Promise<CloseResult> {
   const s = query<CashSession>('SELECT * FROM cash_sessions WHERE id = ?', [sessionId])[0]
   if (!s) throw new Error('Sesi kas tidak ditemukan.')
   if (s.status === 'CLOSED') throw new Error('Sesi kas sudah ditutup.')
-  const cashSales = cashSalesSince(s.outlet_id, s.opened_at)
+  const cashSales = cashSalesBetween(s.outlet_id, s.opened_at, closedAt)
   const expected = s.opening_balance + cashSales
   const difference = closingBalance - expected
   await execute(
     `UPDATE cash_sessions
-     SET status = 'CLOSED', closed_at = CURRENT_TIMESTAMP, closing_balance = ?,
+     SET status = 'CLOSED', closed_at = COALESCE(?, CURRENT_TIMESTAMP), closing_balance = ?,
          cash_sales = ?, expected_balance = ?, difference = ?, note = COALESCE(?, note)
      WHERE id = ?`,
-    [closingBalance, cashSales, expected, difference, note?.trim() || null, sessionId],
+    [closedAt || null, closingBalance, cashSales, expected, difference, note?.trim() || null, sessionId],
   )
   publish('order:update')
   return { cashSales, expected, difference }
+}
+
+export interface UpdateSessionInput {
+  shiftName?: string | null
+  openingBalance?: number
+  openedAt?: string | null
+  closingBalance?: number
+  closedAt?: string | null
+  note?: string | null
+}
+
+/** Ubah satu sesi kas (mis. koreksi entri terakhir). Menghitung ulang selisih. */
+export async function updateSession(id: number, input: UpdateSessionInput): Promise<void> {
+  const s = query<CashSession>('SELECT * FROM cash_sessions WHERE id = ?', [id])[0]
+  if (!s) throw new Error('Sesi kas tidak ditemukan.')
+  const openedAt = input.openedAt || s.opened_at
+  const shiftName = input.shiftName !== undefined ? input.shiftName?.trim() || null : s.shift_name
+  const opening = input.openingBalance ?? s.opening_balance
+  const note = input.note !== undefined ? input.note?.trim() || null : s.note
+
+  if (s.status === 'CLOSED') {
+    const closedAt = input.closedAt || s.closed_at
+    const closing = input.closingBalance ?? s.closing_balance ?? 0
+    const cashSales = cashSalesBetween(s.outlet_id, openedAt, closedAt)
+    const expected = opening + cashSales
+    const difference = closing - expected
+    await execute(
+      `UPDATE cash_sessions
+       SET shift_name = ?, opened_at = ?, opening_balance = ?, closed_at = ?, closing_balance = ?,
+           cash_sales = ?, expected_balance = ?, difference = ?, note = ?
+       WHERE id = ?`,
+      [shiftName, openedAt, opening, closedAt, closing, cashSales, expected, difference, note, id],
+    )
+  } else {
+    await execute(
+      'UPDATE cash_sessions SET shift_name = ?, opened_at = ?, opening_balance = ?, note = ? WHERE id = ?',
+      [shiftName, openedAt, opening, note, id],
+    )
+  }
+  publish('order:update')
+}
+
+/** Hapus satu sesi kas. */
+export async function deleteSession(id: number): Promise<void> {
+  await execute('DELETE FROM cash_sessions WHERE id = ?', [id])
+  publish('order:update')
 }
 
 /** Riwayat sesi kas outlet (terbaru dulu). */
