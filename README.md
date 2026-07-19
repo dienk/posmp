@@ -94,6 +94,7 @@ src/
 | **M39** ✅ | **Menu "Stock" + Kartu Stock**: menu stok kini grup **Stock** (Stok Masuk · Stock Opname · **Kartu Stock**). Kartu Stock = kardex mutasi stok per produk: gabungan stok masuk (+), penjualan (−), refund (+), penyesuaian opname (±) urut kronologis dengan **saldo berjalan** (saldo awal dihitung mundur dari stok saat ini) + ringkasan saldo awal/masuk/keluar/stok kini. |
 | **M40** ✅ | **Stok Masuk & Supplier lebih lengkap** (3 tab): **Penerimaan** (form + subtotal per baris & total qty/modal), **Supplier CRUD** (nama, kontak, telepon, alamat, status aktif; jumlah pemakaian; edit/hapus dijaga bila sudah dipakai penerimaan), **Riwayat** (daftar + total modal per penerimaan → detail baris item: produk, qty, modal, subtotal, total, catatan). |
 | **M41** ✅ | **Penerimaan: input waktu + Update/Delete Riwayat**: field **Waktu Penerimaan** (datetime-local, disimpan ke `entry_date`); **Edit** memuat penerimaan ke form & **menyesuaikan stok dengan selisih** (qty baru − lama), **Hapus** mengembalikan (mengurangi) stok — keduanya dijaga agar stok tak minus (barang sudah terpakai) & dalam satu transaksi SQL + publish `order:update`. |
+| **M42** ✅ | **Menu "Saldo Awal"** (grup Stock): lembar setel **stok pembuka (baseline)** per produk — input saldo awal + selisih vs stok saat ini; simpan menyetel `outlet_stocks.stock` **langsung** ke nilai tersebut (upsert, bukan penambahan). Berbeda dari Stock Opname yang mencatat selisih sebagai mutasi. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -122,6 +123,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/members` | Member & Loyalitas Poin |
 | `#/stockin` | Stock › Stok Masuk & Supplier |
 | `#/stock-opname` | Stock › Stock Opname (hitung stok fisik + scan barcode) |
+| `#/stock-opening` | Stock › Saldo Awal (setel stok pembuka/baseline) |
 | `#/stock-card` | Stock › Kartu Stock (kardex mutasi stok per produk) |
 | `#/history` | Transaksi › Riwayat & Refund |
 | `#/drafts` | Transaksi › Draft (bill tersimpan) |

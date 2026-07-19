@@ -1,0 +1,59 @@
+import { getDb, persist, query } from '../../db/database'
+import { publish } from '../../lib/realtime'
+
+export interface OpeningProduct {
+  id: number
+  name: string
+  sku: string | null
+  unit: string | null
+  system_stock: number
+}
+
+/** Produk aktif + stok saat ini pada outlet, untuk lembar saldo awal. */
+export function listOpeningProducts(outletId: number): OpeningProduct[] {
+  return query<OpeningProduct>(
+    `SELECT p.id, p.name, p.sku, p.unit, COALESCE(os.stock, 0) AS system_stock
+     FROM products p
+     LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
+     WHERE p.is_active = 1
+     ORDER BY p.name`,
+    [outletId],
+  )
+}
+
+export interface OpeningBalance {
+  productId: number
+  qty: number
+}
+
+/**
+ * Setel saldo awal (stok pembuka) produk pada outlet: `outlet_stocks.stock`
+ * di-set langsung ke nilai yang diisi (bukan penambahan). Menjadi baseline
+ * stok; berbeda dari Stock Opname yang mencatat selisih. Satu transaksi SQL.
+ */
+export async function applyOpeningBalances(
+  outletId: number,
+  balances: OpeningBalance[],
+): Promise<number> {
+  const items = balances.filter((b) => Number.isFinite(b.qty) && b.qty >= 0)
+  if (items.length === 0) throw new Error('Belum ada saldo awal yang diisi.')
+
+  const db = getDb()
+  db.run('BEGIN')
+  try {
+    for (const b of items) {
+      db.run(
+        `INSERT INTO outlet_stocks (outlet_id, product_id, stock) VALUES (?, ?, ?)
+         ON CONFLICT(outlet_id, product_id) DO UPDATE SET stock = excluded.stock`,
+        [outletId, b.productId, b.qty],
+      )
+    }
+    db.run('COMMIT')
+  } catch (err) {
+    db.run('ROLLBACK')
+    throw err
+  }
+  await persist()
+  publish('order:update')
+  return items.length
+}

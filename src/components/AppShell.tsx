@@ -65,6 +65,7 @@ const STOCK_GROUP: NavGroupDef = {
   icon: '📦',
   perm: 'stockin',
   children: [
+    { to: '/stock-opening', label: 'Saldo Awal', short: 'Saldo', icon: '🏁' },
     { to: '/stockin', label: 'Stok Masuk', short: 'Masuk', icon: '📥' },
     { to: '/stock-opname', label: 'Stock Opname', short: 'Opname', icon: '📋' },
     { to: '/stock-card', label: 'Kartu Stock', short: 'Kartu', icon: '🗃️' },

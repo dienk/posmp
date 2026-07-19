@@ -19,6 +19,7 @@ import LaporanPage from './features/reports/LaporanPage'
 import StockInPage from './features/stockin/StockInPage'
 import StockOpnamePage from './features/stockopname/StockOpnamePage'
 import StockCardPage from './features/stockcard/StockCardPage'
+import StockOpeningPage from './features/stockopening/StockOpeningPage'
 import HistoryPage from './features/history/HistoryPage'
 import DraftsPage from './features/drafts/DraftsPage'
 import PreorderPage from './features/preorder/PreorderPage'
@@ -54,6 +55,7 @@ const router = createHashRouter([
       { path: 'stockin', element: <StockInPage /> },
       { path: 'stock-opname', element: <StockOpnamePage /> },
       { path: 'stock-card', element: <StockCardPage /> },
+      { path: 'stock-opening', element: <StockOpeningPage /> },
       { path: 'preorder', element: <PreorderPage /> },
       { path: 'installments', element: <InstallmentsPage /> },
       { path: 'history', element: <HistoryPage /> },
