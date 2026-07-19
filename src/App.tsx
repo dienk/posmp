@@ -39,6 +39,7 @@ import WarehousesPage from './features/warehouses/WarehousesPage'
 import UnitsPage from './features/units/UnitsPage'
 import TaxesPage from './features/taxes/TaxesPage'
 import CardDesignPage from './features/membercard/CardDesignPage'
+import DatabaseConnectionPage from './features/connection/DatabaseConnectionPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
@@ -78,6 +79,7 @@ const router = createHashRouter([
       { path: 'theme', element: <ThemePage /> },
       { path: 'receipt-design', element: <ReceiptDesignPage /> },
       { path: 'card-design', element: <CardDesignPage /> },
+      { path: 'database', element: <DatabaseConnectionPage /> },
     ],
   },
   // Tampilan tanpa shell/navigasi (layar publik & pelanggan).

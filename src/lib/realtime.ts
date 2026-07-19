@@ -20,10 +20,49 @@ export type RealtimeEvent =
 export type RelayStatus = 'connecting' | 'connected' | 'disconnected'
 
 const CHANNEL_NAME = 'posmerahputih'
-const RELAY_PORT = 7071
+const DEFAULT_RELAY_PORT = 7071
+const RELAY_CONFIG_KEY = 'posmp_relay_config'
 
 let channel: BroadcastChannel | null = null
 const localListeners = new Map<RealtimeEvent, Set<() => void>>()
+
+// --- Konfigurasi relay LAN (disimpan di localStorage, sinkron saat boot) -----
+export interface RelayConfig {
+  enabled: boolean
+  /** Host relay; kosong = pakai hostname halaman saat ini (auto). */
+  host: string
+  port: number
+}
+
+const DEFAULT_RELAY_CONFIG: RelayConfig = { enabled: true, host: '', port: DEFAULT_RELAY_PORT }
+
+/** Baca konfigurasi relay dari localStorage (fallback ke default). */
+export function getRelayConfig(): RelayConfig {
+  if (typeof localStorage === 'undefined') return { ...DEFAULT_RELAY_CONFIG }
+  try {
+    const raw = localStorage.getItem(RELAY_CONFIG_KEY)
+    if (!raw) return { ...DEFAULT_RELAY_CONFIG }
+    const c = JSON.parse(raw)
+    return {
+      enabled: c.enabled !== false,
+      host: typeof c.host === 'string' ? c.host.trim() : '',
+      port: Number.isFinite(c.port) && c.port > 0 ? Math.floor(c.port) : DEFAULT_RELAY_PORT,
+    }
+  } catch {
+    return { ...DEFAULT_RELAY_CONFIG }
+  }
+}
+
+/** Simpan konfigurasi relay lalu sambungkan ulang dengan pengaturan baru. */
+export function setRelayConfig(cfg: RelayConfig): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(
+      RELAY_CONFIG_KEY,
+      JSON.stringify({ enabled: cfg.enabled, host: cfg.host.trim(), port: cfg.port }),
+    )
+  }
+  reconnectRelay()
+}
 
 // --- WebSocket relay LAN -----------------------------------------------------
 let ws: WebSocket | null = null
@@ -31,11 +70,14 @@ let relayStatus: RelayStatus = 'disconnected'
 let reconnectTimer: number | null = null
 const statusListeners = new Set<(s: RelayStatus) => void>()
 
-function relayUrl(): string | null {
+/** URL relay efektif berdasarkan konfigurasi; null bila relay dinonaktifkan. */
+export function relayUrl(): string | null {
   if (typeof window === 'undefined') return null
+  const cfg = getRelayConfig()
+  if (!cfg.enabled) return null
   const proto = location.protocol === 'https:' ? 'wss' : 'ws'
-  const host = location.hostname || 'localhost'
-  return `${proto}://${host}:${RELAY_PORT}`
+  const host = cfg.host || location.hostname || 'localhost'
+  return `${proto}://${host}:${cfg.port}`
 }
 
 function setRelayStatus(s: RelayStatus): void {
@@ -46,7 +88,10 @@ function setRelayStatus(s: RelayStatus): void {
 
 function connectRelay(): void {
   const url = relayUrl()
-  if (!url || typeof WebSocket === 'undefined') return
+  if (!url || typeof WebSocket === 'undefined') {
+    setRelayStatus('disconnected')
+    return
+  }
   try {
     setRelayStatus('connecting')
     ws = new WebSocket(url)
@@ -73,11 +118,34 @@ function connectRelay(): void {
 
 function scheduleReconnect(): void {
   if (reconnectTimer != null || typeof window === 'undefined') return
+  // Jangan jadwalkan bila relay dinonaktifkan lewat konfigurasi.
+  if (!getRelayConfig().enabled) return
   // Coba sambung ulang berkala; relay bisa dinyalakan kapan saja.
   reconnectTimer = window.setTimeout(() => {
     reconnectTimer = null
     connectRelay()
   }, 4000)
+}
+
+/** Putuskan koneksi relay saat ini lalu sambungkan ulang dengan konfigurasi terbaru. */
+export function reconnectRelay(): void {
+  if (reconnectTimer != null) {
+    clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
+  if (ws) {
+    // Cegah onclose menjadwalkan reconnect ganda; tutup manual lalu sambung ulang.
+    ws.onclose = null
+    ws.onerror = null
+    try {
+      ws.close()
+    } catch {
+      /* abaikan */
+    }
+    ws = null
+  }
+  setRelayStatus('disconnected')
+  connectRelay()
 }
 
 export function getRelayStatus(): RelayStatus {

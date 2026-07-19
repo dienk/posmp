@@ -85,6 +85,7 @@ const SETTINGS_GROUP: NavGroupDef = {
     { to: '/theme', label: 'Tema', short: 'Tema', icon: '🎨' },
     { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: '🖨️' },
     { to: '/card-design', label: 'Desain Kartu', short: 'Kartu', icon: '🪪' },
+    { to: '/database', label: 'Koneksi Database', short: 'Database', icon: '🗄️' },
   ],
 }
 

@@ -97,6 +97,13 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
   menyimpan tampilan satuan terpilih di `unit`/`unit_qty`, dan `unit_price` per satuan
   dasar (= subtotal ÷ qty dasar) agar refund/laporan faithful. Modul stok (Saldo Awal,
   Stok Masuk, Opname) mengonversi di level halaman; repo-nya tetap satuan dasar.
+- **Koneksi Database (Setelan › Koneksi Database).** DB lokal = SQLite (sql.js)
+  di IndexedDB `posmerahputih`. Cadangan/pulihkan/reset lewat `exportDatabase`/
+  `importDatabase`/`resetDatabase` (database.ts); pulihkan & reset **memuat ulang
+  halaman** (`location.reload`) agar seluruh cache in-memory (SettingsContext, dll)
+  ikut segar. **Konfigurasi relay** (`realtime.ts`) disimpan di **localStorage**
+  (bukan app_settings) karena `realtime.ts` tersambung saat modul dimuat, sebelum
+  DB siap; ubah via `setRelayConfig()` (memicu `reconnectRelay()`).
 - **Stok dilacak per gudang.** `outlet_stocks` berkunci `(outlet_id, warehouse_id,
   product_id)`. Tampilan stok produk (kasir/katalog) = **SUM lintas gudang** —
   jangan `LEFT JOIN outlet_stocks` (duplikat baris); pakai subquery SUM. Kasir,

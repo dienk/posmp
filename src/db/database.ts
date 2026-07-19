@@ -331,6 +331,65 @@ export async function persist(): Promise<void> {
   await writePersisted(dbInstance.export())
 }
 
+/** Nama & lokasi penyimpanan database lokal (untuk info di layar Koneksi DB). */
+export const DB_STORAGE = { engine: 'SQLite (sql.js WASM)', idbName: IDB_NAME, idbKey: IDB_KEY }
+
+export interface DbStats {
+  sizeBytes: number
+  tableCount: number
+  pageSize: number
+  sqliteVersion: string
+}
+
+/** Statistik ringkas database saat ini (ukuran snapshot, jumlah tabel, dll). */
+export function databaseStats(): DbStats {
+  const db = getDb()
+  const sizeBytes = db.export().length
+  const tableCount =
+    query<{ n: number }>(
+      "SELECT COUNT(*) AS n FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+    )[0]?.n ?? 0
+  const pageSize = query<{ page_size: number }>('PRAGMA page_size')[0]?.page_size ?? 0
+  const sqliteVersion = query<{ v: string }>('SELECT sqlite_version() AS v')[0]?.v ?? '-'
+  return { sizeBytes, tableCount, pageSize, sqliteVersion }
+}
+
+/** Ekspor seluruh database sebagai byte file .sqlite (untuk cadangan/unduh). */
+export function exportDatabase(): Uint8Array {
+  return getDb().export()
+}
+
+/**
+ * Pulihkan database dari byte file .sqlite (mis. hasil unduhan cadangan).
+ * Memvalidasi header SQLite, mengganti instance in-memory, menjalankan migrasi,
+ * lalu mempersist ke IndexedDB. Melempar error bila file bukan database SQLite.
+ */
+export async function importDatabase(bytes: Uint8Array): Promise<void> {
+  if (!sqlEngine) await initDatabase()
+  const header = new TextDecoder().decode(bytes.slice(0, 15))
+  if (!header.startsWith('SQLite format 3')) {
+    throw new Error('File bukan database SQLite yang valid.')
+  }
+  const next = new sqlEngine!.Database(bytes)
+  next.run('PRAGMA foreign_keys = ON;')
+  dbInstance?.close()
+  dbInstance = next
+  migrateSchema(dbInstance)
+  await persist()
+}
+
+/** Reset database ke skema + data awal (seed). Menghapus seluruh data transaksi. */
+export async function resetDatabase(): Promise<void> {
+  if (!sqlEngine) await initDatabase()
+  dbInstance?.close()
+  dbInstance = new sqlEngine!.Database()
+  dbInstance.run(schemaSql)
+  seedDatabase(dbInstance)
+  migrateSchema(dbInstance)
+  dbInstance.run('PRAGMA foreign_keys = ON;')
+  await persist()
+}
+
 /** Jalankan SELECT dan kembalikan array objek baris bertipe. */
 export function query<T = Record<string, SqlValue>>(
   sql: string,
