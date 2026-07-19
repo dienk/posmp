@@ -175,6 +175,7 @@ function migrateSchema(db: Database): boolean {
     ['description', 'TEXT'],
     ['is_active', 'INTEGER NOT NULL DEFAULT 1'],
     ['images', 'TEXT'],
+    ['unit_conversions', 'TEXT'],
   ]
   for (const [name, def] of productAdds) {
     if (!productCols.has(name)) {

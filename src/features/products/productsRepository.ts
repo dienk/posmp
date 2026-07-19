@@ -44,7 +44,7 @@ export async function deleteCategory(id: number): Promise<void> {
 }
 
 const PRODUCT_COLS = `p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
-            p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.images`
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.images, p.unit_conversions`
 
 // Stok total produk pada outlet = jumlah stok lintas gudang.
 const STOCK_SUM = `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
@@ -95,6 +95,35 @@ export interface ProductInput {
   description: string | null
   isActive: number
   images: string[]
+  unitConversions: UnitConversion[]
+}
+
+/** Satuan turunan: 1 `unit` = `conversion` satuan dasar; `price` = harga jual (0 = pakai harga dasar). */
+export interface UnitConversion {
+  unit: string
+  conversion: number
+  price: number
+}
+
+function cleanConversions(list: UnitConversion[]): string | null {
+  const valid = list
+    .filter((c) => c.unit.trim() && c.conversion > 0)
+    .map((c) => ({ unit: c.unit.trim(), conversion: c.conversion, price: Math.max(0, c.price) }))
+  return valid.length ? JSON.stringify(valid) : null
+}
+
+/** Parse kolom `unit_conversions` (JSON) → array. */
+export function parseUnitConversions(json: string | null): UnitConversion[] {
+  if (!json) return []
+  try {
+    const arr = JSON.parse(json)
+    if (!Array.isArray(arr)) return []
+    return arr
+      .filter((c) => c && typeof c.unit === 'string' && Number(c.conversion) > 0)
+      .map((c) => ({ unit: c.unit, conversion: Number(c.conversion), price: Number(c.price) || 0 }))
+  } catch {
+    return []
+  }
 }
 
 /** Gambar utama = gambar pertama; JSON semua gambar disimpan di kolom images. */
@@ -115,8 +144,8 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
   try {
     db.run(
       `INSERT INTO products
-         (category_id, name, sku, barcode, price, cost_price, unit, min_stock, description, is_active, image_path, images)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (category_id, name, sku, barcode, price, cost_price, unit, min_stock, description, is_active, image_path, images, unit_conversions)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.categoryId,
         input.name.trim(),
@@ -130,6 +159,7 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
         input.isActive,
         imagePath,
         imagesJson,
+        cleanConversions(input.unitConversions),
       ],
     )
     id = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
@@ -152,7 +182,8 @@ export async function updateProduct(id: number, input: ProductInput): Promise<vo
   await execute(
     `UPDATE products
      SET category_id = ?, name = ?, sku = ?, barcode = ?, price = ?, cost_price = ?,
-         unit = ?, min_stock = ?, description = ?, is_active = ?, image_path = ?, images = ?
+         unit = ?, min_stock = ?, description = ?, is_active = ?, image_path = ?, images = ?,
+         unit_conversions = ?
      WHERE id = ?`,
     [
       input.categoryId,
@@ -167,6 +198,7 @@ export async function updateProduct(id: number, input: ProductInput): Promise<vo
       input.isActive,
       imagePath,
       imagesJson,
+      cleanConversions(input.unitConversions),
       id,
     ],
   )

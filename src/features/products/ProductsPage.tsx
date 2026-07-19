@@ -11,6 +11,7 @@ import {
   listCategories,
   listProducts,
   parseImages,
+  parseUnitConversions,
   updateProduct,
   type ProductInput,
 } from './productsRepository'
@@ -29,6 +30,7 @@ const EMPTY: ProductInput = {
   description: '',
   isActive: 1,
   images: [],
+  unitConversions: [],
 }
 
 
@@ -85,6 +87,7 @@ export default function ProductsPage() {
       description: p.description ?? '',
       isActive: p.is_active ?? 1,
       images: parseImages(p.images, p.image_path),
+      unitConversions: parseUnitConversions(p.unit_conversions),
     })
     setEditingId(p.id)
   }
@@ -121,6 +124,16 @@ export default function ProductsPage() {
       showToast('Gagal memuat gambar.')
     }
   }
+
+  const addConversion = () =>
+    setForm((f) => ({ ...f, unitConversions: [...f.unitConversions, { unit: '', conversion: 1, price: 0 }] }))
+  const updateConversion = (idx: number, patch: Partial<{ unit: string; conversion: number; price: number }>) =>
+    setForm((f) => ({
+      ...f,
+      unitConversions: f.unitConversions.map((c, i) => (i === idx ? { ...c, ...patch } : c)),
+    }))
+  const removeConversion = (idx: number) =>
+    setForm((f) => ({ ...f, unitConversions: f.unitConversions.filter((_, i) => i !== idx) }))
 
   const removeImage = (idx: number) =>
     setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }))
@@ -408,6 +421,72 @@ export default function ProductsPage() {
                     />
                   </label>
                 </div>
+
+                {/* Multi-satuan & konversi */}
+                <div className="rounded-lg border border-black/10 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-ink-soft">Satuan Turunan & Konversi</span>
+                    <button
+                      type="button"
+                      onClick={addConversion}
+                      className="rounded-lg border border-dashed border-brand-strong px-2 py-1 text-[11px] font-semibold text-ink hover:bg-brand-soft"
+                    >
+                      + Satuan
+                    </button>
+                  </div>
+                  <p className="mb-2 text-[11px] text-ink-soft">
+                    Satuan dasar: <b>{form.unit || 'pcs'}</b>. Tambah satuan lain + jumlah setaranya
+                    (mis. 1 box = 12 {form.unit || 'pcs'}).
+                  </p>
+                  {form.unitConversions.length === 0 ? (
+                    <p className="text-[11px] text-ink-soft">Belum ada satuan turunan.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {form.unitConversions.map((c, idx) => (
+                        <div key={idx} className="flex items-center gap-1.5">
+                          <input
+                            list="unit-options"
+                            placeholder="satuan"
+                            value={c.unit}
+                            onChange={(e) => updateConversion(idx, { unit: e.target.value })}
+                            className="w-24 rounded-lg border border-black/10 px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                          />
+                          <span className="text-xs text-ink-soft">=</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={c.conversion}
+                            onChange={(e) => updateConversion(idx, { conversion: Number(e.target.value) || 0 })}
+                            className="w-16 rounded-lg border border-black/10 px-2 py-1.5 text-right text-sm outline-none focus:border-brand-strong"
+                          />
+                          <span className="shrink-0 text-xs text-ink-soft">{form.unit || 'pcs'}</span>
+                          <div className="relative flex-1">
+                            <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[11px] text-ink-soft">
+                              Rp
+                            </span>
+                            <input
+                              type="number"
+                              min={0}
+                              placeholder="harga (opsional)"
+                              value={c.price || ''}
+                              onChange={(e) => updateConversion(idx, { price: Number(e.target.value) || 0 })}
+                              className="w-full rounded-lg border border-black/10 py-1.5 pl-7 pr-2 text-right text-sm outline-none focus:border-brand-strong"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeConversion(idx)}
+                            aria-label="Hapus satuan"
+                            className="px-1 text-status-occupied hover:opacity-70"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <label className="block">
                   <span className="mb-1 block text-xs font-medium text-ink-soft">Deskripsi</span>
                   <textarea

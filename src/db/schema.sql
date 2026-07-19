@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS products (
     is_active INTEGER NOT NULL DEFAULT 1,
     image_path TEXT,                  -- gambar utama (= gambar pertama), untuk kartu/kasir
     images TEXT,                      -- JSON array data URL semua gambar produk
+    unit_conversions TEXT,            -- JSON [{unit, conversion, price}] satuan turunan (dasar = unit)
     FOREIGN KEY(category_id) REFERENCES categories(id)
 );
 
