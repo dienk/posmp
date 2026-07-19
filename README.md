@@ -91,6 +91,7 @@ src/
 | **M36** ✅ | **Kasir — Buka Draft**: opsi "📂 Buka Draft" di menu "⋮" memuat bill DRAFT tersimpan kembali ke keranjang (item + catatan + invoice + fasilitas + member) untuk dilanjutkan. Saat disimpan/dibayar, draft lama **dihapus atomik** dalam transaksi SQL yang sama (`saveOrder.replaceDraftId`) sehingga tak duplikat & nomor invoice tetap. |
 | **M37** ✅ | **Setelan Tema lebih detail**: tiap preset kini menampilkan **rincian palet** (7 swatch peran warna + hex). Ditambah **editor Tema Kustom**: color picker per peran (brand/soft/strong, latar, permukaan, teks utama/sekunder) dengan pratinjau langsung & hex; simpan ke `app_settings` (`theme='custom'`, palet JSON di `theme_custom`) dan diterapkan seluruh aplikasi via `ThemeApplier`. |
 | **M38** ✅ | **Modul Stock Opname** (menu Stock Opname): lembar hitung stok fisik vs sistem dengan **mode scan barcode** (scan/ketik barcode + Enter → tambah hitungan fisik) + input/±  manual & selisih per produk; **Simpan Opname** menyetel `outlet_stocks.stock` ke jumlah fisik dan mencatat audit (`stock_opnames` 26 + `stock_opname_details` 27, via migrasi otomatis). Menampilkan opname terakhir. |
+| **M39** ✅ | **Menu "Stock" + Kartu Stock**: menu stok kini grup **Stock** (Stok Masuk · Stock Opname · **Kartu Stock**). Kartu Stock = kardex mutasi stok per produk: gabungan stok masuk (+), penjualan (−), refund (+), penyesuaian opname (±) urut kronologis dengan **saldo berjalan** (saldo awal dihitung mundur dari stok saat ini) + ringkasan saldo awal/masuk/keluar/stok kini. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -117,8 +118,9 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/kds` | Kitchen Display System (dapur) |
 | `#/queue` | Sistem Antrean (operator) |
 | `#/members` | Member & Loyalitas Poin |
-| `#/stockin` | Stok Masuk & Supplier |
-| `#/stock-opname` | Stock Opname (hitung stok fisik + scan barcode) |
+| `#/stockin` | Stock › Stok Masuk & Supplier |
+| `#/stock-opname` | Stock › Stock Opname (hitung stok fisik + scan barcode) |
+| `#/stock-card` | Stock › Kartu Stock (kardex mutasi stok per produk) |
 | `#/history` | Transaksi › Riwayat & Refund |
 | `#/drafts` | Transaksi › Draft (bill tersimpan) |
 | `#/preorder` | Transaksi › Pre-Order & Uang Muka |
