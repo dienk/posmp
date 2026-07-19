@@ -64,7 +64,13 @@ export default function ContactsPage() {
         await createMember({ name, phone, email: extra || null })
         setMembers(listMembers())
       } else if (tab === 'pemasok') {
-        await createSupplier(name, extra || null, phone || null)
+        await createSupplier({
+          name,
+          contactName: extra || null,
+          phone: phone || null,
+          address: null,
+          isActive: 1,
+        })
         setSuppliers(listSuppliers())
       } else if (tab === 'karyawan') {
         const next = [

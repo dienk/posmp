@@ -16,13 +16,40 @@ export interface StockProduct {
   stock: number
 }
 
+export interface SupplierWithUsage extends Supplier {
+  entry_count: number
+}
+
+export interface SupplierInput {
+  name: string
+  contactName: string | null
+  phone: string | null
+  address: string | null
+  isActive: number
+}
+
 export interface StockEntrySummary {
   id: number
   reference_number: string
   supplier_name: string | null
   entry_date: string
+  notes: string | null
   total_qty: number
   line_count: number
+  total_cost: number
+}
+
+export interface StockEntryLine {
+  product_name: string
+  sku: string | null
+  quantity: number
+  cost_price: number | null
+  subtotal: number
+}
+
+export interface StockEntryDetail extends StockEntrySummary {
+  status: string
+  lines: StockEntryLine[]
 }
 
 export interface StockLineInput {
@@ -31,21 +58,58 @@ export interface StockLineInput {
   costPrice: number
 }
 
-// --- Supplier ---------------------------------------------------------------
+// --- Supplier (CRUD) --------------------------------------------------------
 
+/** Supplier aktif saja (untuk pemilihan di form penerimaan). */
 export function listSuppliers(): Supplier[] {
   return query<Supplier>('SELECT * FROM suppliers WHERE is_active = 1 ORDER BY name')
 }
 
-export async function createSupplier(
-  name: string,
-  contactName: string | null,
-  phone: string | null,
-): Promise<number> {
-  return execute(
-    'INSERT INTO suppliers (name, contact_name, phone, is_active) VALUES (?, ?, ?, 1)',
-    [name.trim(), contactName?.trim() || null, phone?.trim() || null],
+/** Semua supplier + jumlah penerimaan yang memakainya (untuk pengelolaan). */
+export function listSuppliersWithUsage(): SupplierWithUsage[] {
+  return query<SupplierWithUsage>(
+    `SELECT s.*, (SELECT COUNT(*) FROM stock_entries e WHERE e.supplier_id = s.id) AS entry_count
+     FROM suppliers s
+     ORDER BY s.is_active DESC, s.name`,
   )
+}
+
+export async function createSupplier(input: SupplierInput): Promise<number> {
+  return execute(
+    'INSERT INTO suppliers (name, contact_name, phone, address, is_active) VALUES (?, ?, ?, ?, ?)',
+    [
+      input.name.trim(),
+      input.contactName?.trim() || null,
+      input.phone?.trim() || null,
+      input.address?.trim() || null,
+      input.isActive,
+    ],
+  )
+}
+
+export async function updateSupplier(id: number, input: SupplierInput): Promise<void> {
+  await execute(
+    'UPDATE suppliers SET name = ?, contact_name = ?, phone = ?, address = ?, is_active = ? WHERE id = ?',
+    [
+      input.name.trim(),
+      input.contactName?.trim() || null,
+      input.phone?.trim() || null,
+      input.address?.trim() || null,
+      input.isActive,
+      id,
+    ],
+  )
+}
+
+/** Hapus supplier; ditolak bila sudah dipakai di penerimaan (sarankan nonaktifkan). */
+export async function deleteSupplier(id: number): Promise<void> {
+  const used = query<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM stock_entries WHERE supplier_id = ?',
+    [id],
+  )[0].n
+  if (used > 0)
+    throw new Error('Supplier dipakai di penerimaan — nonaktifkan saja, tidak bisa dihapus.')
+  await execute('DELETE FROM suppliers WHERE id = ?', [id])
 }
 
 // --- Produk untuk pemilihan --------------------------------------------------
@@ -117,12 +181,13 @@ export async function createStockEntry(
   return reference
 }
 
-export function listStockEntries(outletId: number, limit = 20): StockEntrySummary[] {
+export function listStockEntries(outletId: number, limit = 30): StockEntrySummary[] {
   return query<StockEntrySummary>(
-    `SELECT e.id, e.reference_number, e.entry_date,
+    `SELECT e.id, e.reference_number, e.entry_date, e.notes,
             s.name AS supplier_name,
             COALESCE(SUM(d.quantity), 0) AS total_qty,
-            COUNT(d.id) AS line_count
+            COUNT(d.id) AS line_count,
+            COALESCE(SUM(d.quantity * COALESCE(d.cost_price, 0)), 0) AS total_cost
      FROM stock_entries e
      LEFT JOIN suppliers s ON s.id = e.supplier_id
      LEFT JOIN stock_entry_details d ON d.stock_entry_id = e.id
@@ -132,4 +197,33 @@ export function listStockEntries(outletId: number, limit = 20): StockEntrySummar
      LIMIT ?`,
     [outletId, limit],
   )
+}
+
+/** Detail satu penerimaan: header + baris item (produk, qty, modal, subtotal). */
+export function stockEntryDetail(id: number): StockEntryDetail | null {
+  const head = query<StockEntrySummary & { status: string }>(
+    `SELECT e.id, e.reference_number, e.entry_date, e.notes, e.status,
+            s.name AS supplier_name,
+            COALESCE(SUM(d.quantity), 0) AS total_qty,
+            COUNT(d.id) AS line_count,
+            COALESCE(SUM(d.quantity * COALESCE(d.cost_price, 0)), 0) AS total_cost
+     FROM stock_entries e
+     LEFT JOIN suppliers s ON s.id = e.supplier_id
+     LEFT JOIN stock_entry_details d ON d.stock_entry_id = e.id
+     WHERE e.id = ?
+     GROUP BY e.id`,
+    [id],
+  )[0]
+  if (!head) return null
+
+  const lines = query<StockEntryLine>(
+    `SELECT p.name AS product_name, p.sku, d.quantity, d.cost_price,
+            (d.quantity * COALESCE(d.cost_price, 0)) AS subtotal
+     FROM stock_entry_details d
+     JOIN products p ON p.id = d.product_id
+     WHERE d.stock_entry_id = ?
+     ORDER BY d.id`,
+    [id],
+  )
+  return { ...head, lines }
 }
