@@ -217,6 +217,50 @@ export default function ReceiptDesignPage() {
             </div>
           </div>
 
+          {/* Situs & Marketplace */}
+          <div className="rounded-card bg-white p-5 shadow-card">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+              Situs &amp; Marketplace
+            </h2>
+            <div className="space-y-3">
+              <Field label="🌐 Website">
+                <input
+                  className={inputCls}
+                  value={cfg.website}
+                  onChange={(e) => set('website', e.target.value)}
+                  placeholder="mis. www.posmerahputih.id"
+                />
+              </Field>
+              <Field label="🛍️ Shopee">
+                <input
+                  className={inputCls}
+                  value={cfg.shopee}
+                  onChange={(e) => set('shopee', e.target.value)}
+                  placeholder="mis. shopee.co.id/posmerahputih"
+                />
+              </Field>
+              <Field label="🎵 TikTok">
+                <input
+                  className={inputCls}
+                  value={cfg.tiktok}
+                  onChange={(e) => set('tiktok', e.target.value)}
+                  placeholder="mis. @posmerahputih"
+                />
+              </Field>
+              <Field label="🛒 Tokopedia">
+                <input
+                  className={inputCls}
+                  value={cfg.tokopedia}
+                  onChange={(e) => set('tokopedia', e.target.value)}
+                  placeholder="mis. tokopedia.com/posmerahputih"
+                />
+              </Field>
+            </div>
+            <p className="mt-2 text-[11px] text-ink-soft">
+              Kosongkan bila tak ingin ditampilkan. Yang terisi muncul di bagian bawah struk.
+            </p>
+          </div>
+
           {/* Perataan */}
           <div className="rounded-card bg-white p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">

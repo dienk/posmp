@@ -9,6 +9,10 @@ export interface ReceiptConfig {
   tagline: string // baris di bawah nama outlet (boleh multiline)
   footer: string // ucapan penutup (boleh multiline)
   note: string // catatan tambahan kecil (boleh multiline)
+  website: string // alamat situs (kosong = sembunyi)
+  shopee: string // nama/tautan toko Shopee
+  tiktok: string // akun/tautan TikTok
+  tokopedia: string // nama/tautan toko Tokopedia
   showAddress: boolean
   showPhone: boolean
   showMember: boolean
@@ -26,6 +30,10 @@ export const RECEIPT_DEFAULTS: ReceiptConfig = {
   tagline: '',
   footer: 'Terima kasih 🙏',
   note: '',
+  website: '',
+  shopee: '',
+  tiktok: '',
+  tokopedia: '',
   showAddress: true,
   showPhone: true,
   showMember: true,
@@ -48,6 +56,10 @@ export function getReceiptConfig(settings: Record<string, string>): ReceiptConfi
     tagline: settings.receipt_tagline ?? RECEIPT_DEFAULTS.tagline,
     footer: settings.receipt_footer ?? RECEIPT_DEFAULTS.footer,
     note: settings.receipt_note ?? RECEIPT_DEFAULTS.note,
+    website: settings.receipt_website ?? RECEIPT_DEFAULTS.website,
+    shopee: settings.receipt_shopee ?? RECEIPT_DEFAULTS.shopee,
+    tiktok: settings.receipt_tiktok ?? RECEIPT_DEFAULTS.tiktok,
+    tokopedia: settings.receipt_tokopedia ?? RECEIPT_DEFAULTS.tokopedia,
     showAddress: bool('receipt_show_address', RECEIPT_DEFAULTS.showAddress),
     showPhone: bool('receipt_show_phone', RECEIPT_DEFAULTS.showPhone),
     showMember: bool('receipt_show_member', RECEIPT_DEFAULTS.showMember),
@@ -67,6 +79,10 @@ export function receiptConfigToSettings(c: ReceiptConfig): Record<string, string
     receipt_tagline: c.tagline,
     receipt_footer: c.footer,
     receipt_note: c.note,
+    receipt_website: c.website,
+    receipt_shopee: c.shopee,
+    receipt_tiktok: c.tiktok,
+    receipt_tokopedia: c.tokopedia,
     receipt_show_address: c.showAddress ? '1' : '0',
     receipt_show_phone: c.showPhone ? '1' : '0',
     receipt_show_member: c.showMember ? '1' : '0',
@@ -75,6 +91,17 @@ export function receiptConfigToSettings(c: ReceiptConfig): Record<string, string
     receipt_show_item_unit: c.showItemUnit ? '1' : '0',
     receipt_paper_width: String(c.paperWidth),
   }
+}
+
+/** Baris situs & marketplace untuk footer struk (hanya yang terisi). */
+export function receiptSocials(c: ReceiptConfig): string[] {
+  const out: string[] = []
+  const v = (s: string | undefined) => (s ?? '').trim()
+  if (v(c.website)) out.push(`🌐 ${v(c.website)}`)
+  if (v(c.shopee)) out.push(`🛍️ Shopee: ${v(c.shopee)}`)
+  if (v(c.tiktok)) out.push(`🎵 TikTok: ${v(c.tiktok)}`)
+  if (v(c.tokopedia)) out.push(`🛒 Tokopedia: ${v(c.tokopedia)}`)
+  return out
 }
 
 export const RECEIPT_WIDTH_PX: Record<58 | 80, number> = { 58: 280, 80: 380 }

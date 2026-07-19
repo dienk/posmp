@@ -6,6 +6,7 @@ import ShareLinkPanel from '../share/ShareLinkPanel'
 import { buildShareUrl } from '../share/shareLink'
 import {
   getReceiptConfig,
+  receiptSocials,
   RECEIPT_WIDTH_PX,
   type ReceiptAlign,
   type ReceiptConfig,
@@ -99,9 +100,13 @@ export function buildReceiptHtml(d: ReceiptData, c: ReceiptConfig): string {
         (c.showAddress && d.outlet.address ? `<div style="font-size:11px">${escapeHtml(d.outlet.address)}</div>` : '') +
         (c.showPhone && d.outlet.phone ? `<div style="font-size:11px">${escapeHtml(d.outlet.phone)}</div>` : ''),
     )
+  const socialHtml = receiptSocials(c)
+    .map((s) => `<div style="font-size:10px">${escapeHtml(s)}</div>`)
+    .join('')
   const footer = block(
     `<div>${escapeHtml(c.footer)}</div>` +
-      (c.note ? `<div style="font-size:10px;color:#666">${escapeHtml(c.note)}</div>` : ''),
+      (c.note ? `<div style="font-size:10px;color:#666">${escapeHtml(c.note)}</div>` : '') +
+      socialHtml,
   )
   return `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(d.invoice_number)}</title>
     <style>
@@ -199,6 +204,11 @@ export function ReceiptView({ data, config }: { data: ReceiptData; config: Recei
       <div className={`${alignCls} whitespace-pre-line`}>
         <p>{config.footer}</p>
         {config.note && <p className="text-[10px] text-ink-soft">{config.note}</p>}
+        {receiptSocials(config).map((s, i) => (
+          <p key={i} className="text-[10px]">
+            {s}
+          </p>
+        ))}
       </div>
       {config.logoPosition === 'bottom' && <div className="mt-2">{logo}</div>}
     </div>
