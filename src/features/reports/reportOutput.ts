@@ -1,4 +1,5 @@
 import { formatRupiah } from '../../lib/format'
+import { computeRange, type RangePreset } from './dateRange'
 import type { ReportColumn, ReportDef } from './reportDefs'
 
 export type PaperSize = 'A4' | 'Letter' | 'Legal' | 'F4'
@@ -71,6 +72,47 @@ export function displayCell(v: unknown, type?: string): string {
 }
 
 type Row = Record<string, unknown>
+
+// ── Filter ───────────────────────────────────────────────────────────────────
+export interface ReportFilter {
+  preset: RangePreset | 'all'
+  from: string // 'YYYY-MM-DD' (kustom)
+  to: string
+  keyword: string
+}
+
+export const DEFAULT_FILTER: ReportFilter = { preset: 'all', from: '', to: '', keyword: '' }
+
+/** Terapkan filter (rentang tanggal + kata kunci) pada baris laporan. */
+export function applyReportFilter(def: ReportDef, rows: Row[], filter: ReportFilter): Row[] {
+  let out = rows
+  if (def.dateField && filter.preset !== 'all') {
+    const range =
+      filter.preset === 'custom'
+        ? { from: filter.from, to: filter.to }
+        : computeRange(filter.preset)
+    if (range.from && range.to) {
+      out = out.filter((r) => {
+        const v = r[def.dateField as string]
+        if (v == null) return false
+        const d = String(v).slice(0, 10)
+        return d >= range.from && d <= range.to
+      })
+    }
+  }
+  const k = filter.keyword.trim().toLowerCase()
+  if (k) {
+    out = out.filter((r) =>
+      def.columns.some((c) => displayCell(r[c.key], c.type).toLowerCase().includes(k)),
+    )
+  }
+  return out
+}
+
+/** true bila filter mengubah hasil (untuk indikator "aktif"). */
+export function isFilterActive(filter: ReportFilter): boolean {
+  return filter.preset !== 'all' || filter.keyword.trim().length > 0
+}
 
 // ── CSV ───────────────────────────────────────────────────────────────────
 export function toCSV(def: ReportDef, rows: Row[], tpl: ReportTemplate): string {

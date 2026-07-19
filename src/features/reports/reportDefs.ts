@@ -14,6 +14,8 @@ export interface ReportDef {
   group: string
   desc: string
   columns: ReportColumn[]
+  /** Kolom tanggal untuk filter rentang (kosong = tanpa filter tanggal). */
+  dateField?: string
   fetch: (outletId: number) => Row[]
 }
 
@@ -40,6 +42,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Transaksi Penjualan',
     group: 'Penjualan',
     desc: 'Daftar nota penjualan (subtotal, diskon, service, pajak, total).',
+    dateField: 'transaction_date',
     columns: [
       { key: 'invoice_number', label: 'Invoice' },
       { key: 'transaction_date', label: 'Tanggal', type: 'date' },
@@ -71,6 +74,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Item Terjual',
     group: 'Penjualan',
     desc: 'Rincian item per nota (produk, qty, harga, subtotal).',
+    dateField: 'transaction_date',
     columns: [
       { key: 'transaction_date', label: 'Tanggal', type: 'date' },
       { key: 'invoice_number', label: 'Invoice' },
@@ -224,6 +228,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Penerimaan Stok',
     group: 'Produk & Stok',
     desc: 'Riwayat penerimaan barang dari supplier.',
+    dateField: 'entry_date',
     columns: [
       { key: 'reference_number', label: 'No. Referensi' },
       { key: 'entry_date', label: 'Tanggal', type: 'date' },
@@ -250,6 +255,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Riwayat Opname',
     group: 'Produk & Stok',
     desc: 'Sesi stock opname (jumlah item disesuaikan).',
+    dateField: 'opname_date',
     columns: [
       { key: 'reference_number', label: 'No. Referensi' },
       { key: 'opname_date', label: 'Tanggal', type: 'date' },
@@ -292,6 +298,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Log Poin',
     group: 'Pelanggan & Loyalitas',
     desc: 'Riwayat perolehan/penukaran poin member.',
+    dateField: 'logged_at',
     columns: [
       { key: 'logged_at', label: 'Waktu', type: 'date' },
       { key: 'member', label: 'Member' },
@@ -331,6 +338,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Saldo Kas',
     group: 'Keuangan',
     desc: 'Sesi buka/tutup kas & selisih.',
+    dateField: 'opened_at',
     columns: [
       { key: 'opened_at', label: 'Buka', type: 'date' },
       { key: 'closed_at', label: 'Tutup', type: 'date' },
@@ -355,6 +363,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Refund',
     group: 'Keuangan',
     desc: 'Riwayat pengembalian dana.',
+    dateField: 'refunded_at',
     columns: [
       { key: 'refund_invoice_number', label: 'No. Refund' },
       { key: 'refunded_at', label: 'Tanggal', type: 'date' },
@@ -376,6 +385,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Cicilan',
     group: 'Keuangan',
     desc: 'Rencana cicilan member & sisa tagihan.',
+    dateField: 'due_date',
     columns: [
       { key: 'member', label: 'Member' },
       { key: 'monthly_installment', label: 'Angsuran/bln', type: 'money' },
@@ -396,6 +406,7 @@ export const REPORTS: ReportDef[] = [
     label: 'Pre-Order',
     group: 'Keuangan',
     desc: 'Pesanan di muka & uang muka.',
+    dateField: 'transaction_date',
     columns: [
       { key: 'invoice_number', label: 'Invoice' },
       { key: 'transaction_date', label: 'Tanggal', type: 'date' },

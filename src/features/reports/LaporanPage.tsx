@@ -3,12 +3,16 @@ import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
 import { getOutlet, updateAppSettings } from '../settings/settingsRepository'
+import { RANGE_PRESETS } from './dateRange'
 import { getReport, REPORT_GROUPS, REPORTS } from './reportDefs'
 import {
+  applyReportFilter,
   buildReportHtml,
+  DEFAULT_FILTER,
   displayCell,
   downloadText,
   getReportTemplate,
+  isFilterActive,
   PAPER_MM,
   printReportHtml,
   reportTemplateToSettings,
@@ -17,6 +21,7 @@ import {
   visibleColumns,
   type Orientation,
   type PaperSize,
+  type ReportFilter,
   type ReportTemplate,
 } from './reportOutput'
 
@@ -37,8 +42,12 @@ export default function LaporanPage() {
   )
   const [toast, setToast] = useState<string | null>(null)
   const [showTemplate, setShowTemplate] = useState(false)
+  const [filter, setFilter] = useState<ReportFilter>(DEFAULT_FILTER)
+  const [showFilter, setShowFilter] = useState(false)
 
   const def = getReport(selectedKey) ?? REPORTS[0]
+  const filteredRows = useMemo(() => applyReportFilter(def, rows, filter), [def, rows, filter])
+  const filterOn = isFilterActive(filter)
 
   const reload = useCallback(() => {
     const d = getReport(selectedKey)
@@ -53,9 +62,10 @@ export default function LaporanPage() {
   useEffect(reload, [reload])
   useRealtime('order:update', reload)
 
-  // Muat template saat ganti laporan.
+  // Muat template & reset filter saat ganti laporan.
   useEffect(() => {
     setTpl(getReportTemplate(settings, def, outletName))
+    setFilter(DEFAULT_FILTER)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedKey])
 
@@ -122,10 +132,22 @@ export default function LaporanPage() {
           <div className="min-w-0">
             <h2 className="truncate text-base font-bold text-ink">{tpl.title}</h2>
             <p className="text-xs text-ink-soft">
-              {def.desc} · {rows.length} baris
+              {def.desc} ·{' '}
+              {filterOn ? `${filteredRows.length} dari ${rows.length} baris` : `${rows.length} baris`}
             </p>
           </div>
           <div className="ml-auto flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setShowFilter(true)}
+              className={
+                'rounded-lg px-3 py-2 text-sm font-semibold transition ' +
+                (filterOn
+                  ? 'bg-status-occupied text-white'
+                  : 'border border-black/10 text-ink hover:bg-background')
+              }
+            >
+              🔎 Filter{filterOn ? ' •' : ''}
+            </button>
             <button
               onClick={() => setShowTemplate((v) => !v)}
               className={
@@ -138,21 +160,21 @@ export default function LaporanPage() {
               ✎ Template
             </button>
             <button
-              onClick={() => downloadText(`${fileBase}.csv`, toCSV(def, rows, tpl), 'text/csv')}
+              onClick={() => downloadText(`${fileBase}.csv`, toCSV(def, filteredRows, tpl), 'text/csv')}
               className="rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
             >
               ⬇ CSV
             </button>
             <button
               onClick={() =>
-                downloadText(`${fileBase}.json`, toJSON(def, rows, tpl), 'application/json')
+                downloadText(`${fileBase}.json`, toJSON(def, filteredRows, tpl), 'application/json')
               }
               className="rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
             >
               ⬇ JSON
             </button>
             <button
-              onClick={() => printReportHtml(buildReportHtml(def, rows, tpl))}
+              onClick={() => printReportHtml(buildReportHtml(def, filteredRows, tpl))}
               className="rounded-lg bg-status-occupied px-3 py-2 text-sm font-bold text-white hover:brightness-95"
             >
               🖨️ Cetak / PDF
@@ -270,7 +292,7 @@ export default function LaporanPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r, i) => (
+                  {filteredRows.map((r, i) => (
                     <tr key={i} className="border-b border-black/5 hover:bg-background">
                       {cols.map((c) => (
                         <td
@@ -287,13 +309,15 @@ export default function LaporanPage() {
                       ))}
                     </tr>
                   ))}
-                  {rows.length === 0 && (
+                  {filteredRows.length === 0 && (
                     <tr>
                       <td
                         colSpan={cols.length}
                         className="px-4 py-10 text-center text-sm text-ink-soft"
                       >
-                        Belum ada data untuk laporan ini.
+                        {filterOn
+                          ? 'Tidak ada baris yang cocok dengan filter.'
+                          : 'Belum ada data untuk laporan ini.'}
                       </td>
                     </tr>
                   )}
@@ -303,6 +327,106 @@ export default function LaporanPage() {
           </section>
         </div>
       </div>
+
+      {/* Dialog filter */}
+      {showFilter && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
+          onClick={() => setShowFilter(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-sm font-bold text-ink">Filter Laporan · {def.label}</p>
+              <button
+                onClick={() => setShowFilter(false)}
+                className="text-xl leading-none text-ink-soft hover:text-ink"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {def.dateField ? (
+                <>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">Periode</span>
+                    <select
+                      className={inputCls}
+                      value={filter.preset}
+                      onChange={(e) =>
+                        setFilter((f) => ({ ...f, preset: e.target.value as ReportFilter['preset'] }))
+                      }
+                    >
+                      <option value="all">Semua Waktu</option>
+                      {RANGE_PRESETS.map((p) => (
+                        <option key={p.key} value={p.key}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {filter.preset === 'custom' && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={filter.from}
+                        max={filter.to || undefined}
+                        onChange={(e) => setFilter((f) => ({ ...f, from: e.target.value }))}
+                        className={inputCls}
+                      />
+                      <span className="text-xs text-ink-soft">s/d</span>
+                      <input
+                        type="date"
+                        value={filter.to}
+                        min={filter.from || undefined}
+                        onChange={(e) => setFilter((f) => ({ ...f, to: e.target.value }))}
+                        className={inputCls}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="rounded-lg bg-background px-3 py-2 text-xs text-ink-soft">
+                  Laporan ini tak punya kolom tanggal — gunakan pencarian kata kunci.
+                </p>
+              )}
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">Kata Kunci</span>
+                <input
+                  value={filter.keyword}
+                  onChange={(e) => setFilter((f) => ({ ...f, keyword: e.target.value }))}
+                  placeholder="cari di semua kolom…"
+                  className={inputCls}
+                />
+              </label>
+
+              <p className="text-xs text-ink-soft">
+                Menampilkan <b className="text-ink">{filteredRows.length}</b> dari {rows.length} baris.
+                Filter juga diterapkan pada unduhan & cetak.
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setFilter(DEFAULT_FILTER)}
+                className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+              >
+                Reset
+              </button>
+              <button
+                onClick={() => setShowFilter(false)}
+                className="rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
+              >
+                Terapkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-white shadow-lg">
