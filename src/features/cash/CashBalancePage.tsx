@@ -3,6 +3,7 @@ import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
+import { effectivePerms } from '../access/accessRepository'
 import { currentShift, getScheduleConfig } from '../schedule/scheduleConfig'
 import {
   cashSalesSince,
@@ -26,6 +27,13 @@ export default function CashBalancePage() {
   const [history, setHistory] = useState<CashSession[]>([])
   const [toast, setToast] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  // Otoritas membuka riwayat kas (persona/peran). null = tanpa pembatasan.
+  const canViewHistory = useMemo(() => {
+    const perms = effectivePerms(settings)
+    return !perms || perms.has('cash_history')
+  }, [settings])
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   // Form buka kas
   const [openingBalance, setOpeningBalance] = useState(0)
@@ -230,11 +238,41 @@ export default function CashBalancePage() {
           </section>
         )}
 
-        {/* Riwayat sesi kas */}
+        {/* Riwayat sesi kas — di balik otoritas */}
         <section className="overflow-hidden rounded-card bg-white shadow-card">
-          <h2 className="border-b border-black/5 px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
-            Riwayat Kas
-          </h2>
+          <div className="flex items-center justify-between border-b border-black/5 px-5 py-3">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Riwayat Kas</h2>
+            {canViewHistory ? (
+              <button
+                onClick={() => setHistoryOpen((v) => !v)}
+                className={
+                  'rounded-lg px-3 py-1.5 text-sm font-semibold transition ' +
+                  (historyOpen
+                    ? 'border border-black/10 text-ink hover:bg-background'
+                    : 'bg-status-occupied text-white hover:brightness-95')
+                }
+              >
+                {historyOpen ? 'Sembunyikan' : '🔓 Buka Riwayat Kas'}
+              </button>
+            ) : (
+              <span className="rounded-full bg-status-occupied/10 px-3 py-1 text-xs font-semibold text-status-occupied">
+                🔒 Perlu otoritas
+              </span>
+            )}
+          </div>
+
+          {!canViewHistory ? (
+            <div className="px-5 py-10 text-center text-sm text-ink-soft">
+              🔒 Anda tidak memiliki otoritas untuk membuka riwayat kas.
+              <br />
+              Hubungi supervisor/pemilik untuk hak akses <b>“Buka Riwayat Kas”</b>.
+            </div>
+          ) : !historyOpen ? (
+            <div className="px-5 py-10 text-center text-sm text-ink-soft">
+              Riwayat kas tersembunyi. Klik <b>“Buka Riwayat Kas”</b> untuk menampilkan{' '}
+              {history.length} catatan.
+            </div>
+          ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -301,6 +339,7 @@ export default function CashBalancePage() {
               </tbody>
             </table>
           </div>
+          )}
         </section>
       </div>
 
