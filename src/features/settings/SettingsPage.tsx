@@ -5,6 +5,11 @@ import { useSettings } from '../../lib/SettingsContext'
 import { getOutlet, saveSettings } from './settingsRepository'
 import { defaultTax } from '../taxes/taxesRepository'
 import { callQueueNumber, DEFAULT_QUEUE_CALL_TEXT } from '../../lib/tts'
+import {
+  getPaymentMethods,
+  serializePaymentMethods,
+  type PayMethod,
+} from './paymentMethods'
 
 const MODULES: { key: string; label: string; desc: string }[] = [
   { key: 'module_table_layout', label: 'Tata Letak Meja', desc: 'Denah meja & status (F&B)' },
@@ -51,8 +56,30 @@ export default function SettingsPage() {
   const [modules, setModules] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, settings[m.key] === '1'])),
   )
+  const [payMethods, setPayMethods] = useState<PayMethod[]>(() => getPaymentMethods(settings))
+  const [newLabel, setNewLabel] = useState('')
+  const [newIcon, setNewIcon] = useState('💰')
   const [toast, setToast] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  const toggleMethod = (key: string) =>
+    setPayMethods((prev) => prev.map((m) => (m.key === key ? { ...m, enabled: !m.enabled } : m)))
+  const removeMethod = (key: string) =>
+    setPayMethods((prev) => prev.filter((m) => m.key !== key))
+  const addMethod = () => {
+    const label = newLabel.trim()
+    if (!label) return
+    if (payMethods.some((m) => m.label.toLowerCase() === label.toLowerCase())) {
+      showToast('Metode dengan nama itu sudah ada.')
+      return
+    }
+    setPayMethods((prev) => [
+      ...prev,
+      { key: label, label, icon: newIcon.trim() || '💰', enabled: true, builtin: false },
+    ])
+    setNewLabel('')
+    setNewIcon('💰')
+  }
 
   const showToast = (m: string) => {
     setToast(m)
@@ -66,6 +93,7 @@ export default function SettingsPage() {
         tax_enabled: taxEnabled ? '1' : '0',
         points_per_amount: String(Math.max(0, Math.round(pointsPer))),
         queue_call_text: callText.trim() || DEFAULT_QUEUE_CALL_TEXT,
+        payment_methods: serializePaymentMethods(payMethods),
         ...Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, modules[m.key] ? '1' : '0'])),
       }
       await saveSettings(next, outletId, { name, address, phone })
@@ -244,6 +272,82 @@ export default function SettingsPage() {
           </div>
           <p className="mt-2 text-xs text-ink-soft">
             Fitur ini muncul sebagai tombol di layar kasir saat diaktifkan. Bawaan: nonaktif.
+          </p>
+        </section>
+
+        {/* Metode Pembayaran */}
+        <section className="rounded-card bg-white p-5 shadow-card">
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+            Metode Pembayaran
+          </h2>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {payMethods.map((m) => (
+              <div
+                key={m.key}
+                className="flex items-center justify-between rounded-xl bg-background px-4 py-3"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="text-lg leading-none">{m.icon}</span>
+                  <span className="truncate text-sm font-semibold text-ink">{m.label}</span>
+                  {m.builtin ? (
+                    <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-medium text-ink-soft">
+                      Bawaan
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => removeMethod(m.key)}
+                      className="text-xs font-semibold text-status-occupied hover:opacity-70"
+                      title="Hapus metode"
+                    >
+                      Hapus
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="checkbox"
+                  checked={m.enabled}
+                  onChange={() => toggleMethod(m.key)}
+                  className="h-5 w-5 accent-status-empty"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Tambah metode kustom */}
+          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-black/5 pt-3">
+            <label className="block w-16">
+              <span className="mb-1 block text-xs font-medium text-ink-soft">Ikon</span>
+              <input
+                className={inputCls + ' text-center'}
+                value={newIcon}
+                onChange={(e) => setNewIcon(e.target.value)}
+                maxLength={2}
+                placeholder="💰"
+              />
+            </label>
+            <label className="block min-w-0 flex-1">
+              <span className="mb-1 block text-xs font-medium text-ink-soft">
+                Metode baru (mis. GoPay, OVO, Transfer BCA)
+              </span>
+              <input
+                className={inputCls}
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addMethod()}
+                placeholder="Nama metode pembayaran"
+              />
+            </label>
+            <button
+              onClick={addMethod}
+              disabled={!newLabel.trim()}
+              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+            >
+              + Tambah
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-ink-soft">
+            Metode aktif muncul di layar bayar kasir. Metode kustom cukup mencatat nominal
+            (tanpa uang pas/QRIS/gift card). Nama metode kustom tampil apa adanya di struk.
           </p>
         </section>
       </div>

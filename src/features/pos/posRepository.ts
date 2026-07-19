@@ -4,12 +4,14 @@ import { publish } from '../../lib/realtime'
 import type { CartItem, Category, FacilityType, Product } from '../../types'
 import { defaultWarehouseId } from '../warehouses/warehousesRepository'
 
+// Metode bawaan; metode kustom (dari Pengaturan) memakai label sebagai nilai.
 export type PaymentMethod =
   | 'CASH'
   | 'DEBIT_CARD'
   | 'CREDIT_CARD'
   | 'QRIS'
   | 'VOUCHER'
+  | (string & {})
 
 export interface PaymentInput {
   method: PaymentMethod

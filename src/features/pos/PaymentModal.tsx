@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
-import type { PaymentInput, PaymentMethod } from './posRepository'
+import { useSettings } from '../../lib/SettingsContext'
+import { enabledPaymentMethods } from '../settings/paymentMethods'
+import type { PaymentInput } from './posRepository'
 
 export interface TenderVoucherCheck {
   ok: boolean
@@ -9,16 +11,8 @@ export interface TenderVoucherCheck {
   value?: number
 }
 
-const METHODS: { value: PaymentMethod; label: string; icon: string }[] = [
-  { value: 'CASH', label: 'Tunai', icon: '💵' },
-  { value: 'QRIS', label: 'QRIS', icon: '📱' },
-  { value: 'DEBIT_CARD', label: 'Debit', icon: '💳' },
-  { value: 'CREDIT_CARD', label: 'Kredit', icon: '💳' },
-  { value: 'VOUCHER', label: 'Voucher', icon: '🎟️' },
-]
-
 interface Row {
-  method: PaymentMethod
+  method: string
   amount: number
   qrisRef: string
   voucherCode?: string
@@ -37,14 +31,17 @@ interface Props {
 const QUICK_CASH = [0, 50000, 100000, 150000, 200000]
 
 export default function PaymentModal({ total, onCancel, onConfirm, onCheckVoucher }: Props) {
-  const [rows, setRows] = useState<Row[]>([{ method: 'CASH', amount: total, qrisRef: '' }])
+  const { settings } = useSettings()
+  const methods = useMemo(() => enabledPaymentMethods(settings), [settings])
+  const firstMethod = methods[0]?.key ?? 'CASH'
+  const [rows, setRows] = useState<Row[]>([{ method: firstMethod, amount: total, qrisRef: '' }])
 
   const paid = useMemo(() => rows.reduce((s, r) => s + (r.amount || 0), 0), [rows])
   const remaining = Math.max(0, total - paid)
   const change = Math.max(0, paid - total)
   const canConfirm = paid >= total && total > 0
 
-  const addRow = (method: PaymentMethod) =>
+  const addRow = (method: string) =>
     setRows((prev) => [...prev, { method, amount: method === 'VOUCHER' ? 0 : remaining, qrisRef: '' }])
   const updateRow = (idx: number, patch: Partial<Row>) =>
     setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)))
@@ -87,7 +84,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
     onConfirm(payments)
   }
 
-  const labelOf = (m: PaymentMethod) => METHODS.find((x) => x.value === m)?.label ?? m
+  const labelOf = (m: string) => methods.find((x) => x.key === m)?.label ?? m
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
@@ -105,10 +102,10 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
         <div className="max-h-[60vh] space-y-4 overflow-y-auto p-5">
           {/* Metode pembayaran */}
           <div className="flex flex-wrap gap-2">
-            {METHODS.map((m) => (
+            {methods.map((m) => (
               <button
-                key={m.value}
-                onClick={() => addRow(m.value)}
+                key={m.key}
+                onClick={() => addRow(m.key)}
                 className="rounded-lg border border-black/10 px-3 py-1.5 text-sm font-medium text-ink hover:bg-background"
               >
                 {m.icon} {m.label}
