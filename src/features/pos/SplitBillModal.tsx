@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
 import type { CartItem } from '../../types'
+import { itemUnitPrice } from './useCart'
 
 interface Props {
   items: CartItem[]
@@ -11,7 +12,7 @@ interface Props {
 }
 
 function billTotal(items: CartItem[], taxRate: number, taxEnabled: boolean): number {
-  const sub = items.reduce((s, it) => s + it.product.price * it.quantity, 0)
+  const sub = items.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
   return sub + (taxEnabled ? Math.round(sub * taxRate) : 0)
 }
 

@@ -112,6 +112,34 @@ function cleanConversions(list: UnitConversion[]): string | null {
   return valid.length ? JSON.stringify(valid) : null
 }
 
+/** Opsi satuan siap pakai untuk item transaksi (kasir/stok). */
+export interface UnitOption {
+  unit: string
+  factor: number // banyak satuan dasar per 1 satuan ini (dasar = 1)
+  price: number // harga jual per 1 satuan ini (dasar = harga produk)
+  isBase: boolean
+}
+
+/**
+ * Bangun daftar opsi satuan sebuah produk: satuan dasar (`unit`) + seluruh
+ * satuan turunan dari `unit_conversions`. Harga turunan = harga khusus bila
+ * diisi (>0), selain itu harga dasar × faktor.
+ */
+export function buildUnitOptions(
+  baseUnit: string | null,
+  basePrice: number,
+  conversionsJson: string | null,
+): UnitOption[] {
+  const base: UnitOption = { unit: baseUnit || 'pcs', factor: 1, price: basePrice, isBase: true }
+  const derived = parseUnitConversions(conversionsJson).map((c) => ({
+    unit: c.unit,
+    factor: c.conversion,
+    price: c.price > 0 ? c.price : basePrice * c.conversion,
+    isBase: false,
+  }))
+  return [base, ...derived]
+}
+
 /** Parse kolom `unit_conversions` (JSON) → array. */
 export function parseUnitConversions(json: string | null): UnitConversion[] {
   if (!json) return []

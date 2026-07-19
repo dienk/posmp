@@ -7,10 +7,11 @@ export interface OpnameProduct {
   sku: string | null
   barcode: string | null
   unit: string | null
+  unit_conversions: string | null
   system_stock: number
 }
 
-const SELECT_COLS = `p.id, p.name, p.sku, p.barcode, p.unit,
+const SELECT_COLS = `p.id, p.name, p.sku, p.barcode, p.unit, p.unit_conversions,
        COALESCE((SELECT stock FROM outlet_stocks os
                  WHERE os.product_id = p.id AND os.outlet_id = ? AND os.warehouse_id = ?), 0) AS system_stock`
 

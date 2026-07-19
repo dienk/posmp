@@ -14,7 +14,7 @@ import {
   saveOrder,
   type PaymentInput,
 } from './posRepository'
-import { findByBarcode } from '../products/productsRepository'
+import { buildUnitOptions, findByBarcode } from '../products/productsRepository'
 import OpenDraftModal from './OpenDraftModal'
 import { validateVoucher, validateTenderVoucher } from '../vouchers/voucherRepository'
 import { listMembers, type Member } from '../members/membersRepository'
@@ -22,7 +22,7 @@ import PaymentModal from './PaymentModal'
 import SplitBillModal from './SplitBillModal'
 import MergeBillModal from './MergeBillModal'
 import type { CartItem } from '../../types'
-import { useCart } from './useCart'
+import { itemUnitPrice, useCart } from './useCart'
 
 export default function PosPage() {
   const { settings } = useSettings()
@@ -269,7 +269,7 @@ export default function PosPage() {
     try {
       let parentId: number | undefined
       for (const billItems of bills) {
-        const sub = billItems.reduce((s, it) => s + it.product.price * it.quantity, 0)
+        const sub = billItems.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
         const billTax = taxEnabled ? Math.round(sub * taxRate) : 0
         const billTotalAmt = sub + billTax
         const res = await saveOrder({
@@ -436,6 +436,17 @@ export default function PosPage() {
           onCustomerNameChange={setCustomerName}
           onFacilityChange={setFacilityType}
           onQuantityChange={cart.setQuantity}
+          onUnitChange={(productId, unit) => {
+            const item = cart.items.find((it) => it.product.id === productId)
+            if (!item) return
+            const opts = buildUnitOptions(
+              item.product.unit,
+              item.product.price,
+              item.product.unit_conversions,
+            )
+            const opt = opts.find((o) => o.unit === unit)
+            if (opt) cart.setUnit(productId, opt)
+          }}
           onNotesChange={cart.setNotes}
           orderNote={orderNote}
           onOrderNoteChange={setOrderNote}

@@ -68,6 +68,13 @@ export interface DiningTable {
 
 export interface CartItem {
   product: Product
+  /** Jumlah dalam satuan terpilih (mis. 2 dus). */
   quantity: number
   notes?: string
+  /** Satuan terpilih; kosong = satuan dasar produk. */
+  unit?: string
+  /** Banyak satuan dasar per 1 satuan terpilih (dasar = 1). */
+  unitFactor?: number
+  /** Harga jual per 1 satuan terpilih (dasar = product.price). */
+  unitPrice?: number
 }

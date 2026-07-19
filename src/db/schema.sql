@@ -156,9 +156,11 @@ CREATE TABLE IF NOT EXISTS transaction_details (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     transaction_id INTEGER NOT NULL,
     product_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL,
-    unit_price REAL NOT NULL,
+    quantity INTEGER NOT NULL,          -- selalu dalam satuan DASAR (untuk stok/laporan)
+    unit_price REAL NOT NULL,           -- harga per satuan DASAR
     subtotal REAL NOT NULL,
+    unit TEXT,                          -- label satuan terpilih (mis. 'dus'); NULL = satuan dasar
+    unit_qty REAL,                      -- jumlah dalam satuan terpilih (tampilan); NULL = pakai quantity
     notes TEXT,
     cooking_status TEXT DEFAULT 'PENDING', -- 'PENDING','COOKING','COOKED','SERVED'
     FOREIGN KEY(transaction_id) REFERENCES transactions(id),

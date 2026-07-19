@@ -89,6 +89,14 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
 - **IndexedDB ter-scope per origin termasuk PORT.** Saat verifikasi dengan
   `npm run preview` di port berbeda, database mulai kosong (seed ulang) — ini
   ekspektasi, bukan bug.
+- **Satuan transaksi disimpan dalam satuan DASAR.** Produk bisa punya satuan
+  turunan (`products.unit_conversions`). Di kasir/stok, item boleh dipilih satuannya
+  (`buildUnitOptions()` di `productsRepository`), tapi `transaction_details.quantity`
+  & `outlet_stocks.stock` **selalu** satuan dasar (qty × faktor) agar stok, refund,
+  pre-order, laporan, & kartu stok tetap konsisten tanpa perubahan. `transaction_details`
+  menyimpan tampilan satuan terpilih di `unit`/`unit_qty`, dan `unit_price` per satuan
+  dasar (= subtotal ÷ qty dasar) agar refund/laporan faithful. Modul stok (Saldo Awal,
+  Stok Masuk, Opname) mengonversi di level halaman; repo-nya tetap satuan dasar.
 - **Stok dilacak per gudang.** `outlet_stocks` berkunci `(outlet_id, warehouse_id,
   product_id)`. Tampilan stok produk (kasir/katalog) = **SUM lintas gudang** —
   jangan `LEFT JOIN outlet_stocks` (duplikat baris); pakai subquery SUM. Kasir,

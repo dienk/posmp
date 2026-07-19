@@ -10,6 +10,7 @@ import {
   type OpnameSummary,
 } from './stockOpnameRepository'
 import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
+import { buildUnitOptions } from '../products/productsRepository'
 
 export default function StockOpnamePage() {
   const { settings } = useSettings()
@@ -19,6 +20,8 @@ export default function StockOpnamePage() {
   const [warehouseId, setWarehouseId] = useState<number>(0)
   const [products, setProducts] = useState<OpnameProduct[]>([])
   const [counts, setCounts] = useState<Record<number, number>>({})
+  // Satuan input terpilih per produk (kosong = satuan dasar).
+  const [units, setUnits] = useState<Record<number, string>>({})
   const [keyword, setKeyword] = useState('')
   const [scanMode, setScanMode] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -92,21 +95,31 @@ export default function StockOpnamePage() {
   }, [products, keyword, scanMode])
 
   const countedIds = Object.keys(counts)
+
+  // Faktor konversi satuan terpilih (dasar = 1). Count × faktor → satuan dasar.
+  const factorOf = (p: OpnameProduct): number => {
+    const opts = buildUnitOptions(p.unit, 0, p.unit_conversions)
+    return opts.find((o) => o.unit === units[p.id])?.factor ?? 1
+  }
+
   const totalDiff = useMemo(
     () =>
       products.reduce((s, p) => {
         const c = counts[p.id]
-        return c == null ? s : s + (c - p.system_stock)
+        if (c == null) return s
+        const opts = buildUnitOptions(p.unit, 0, p.unit_conversions)
+        const factor = opts.find((o) => o.unit === units[p.id])?.factor ?? 1
+        return s + (c * factor - p.system_stock)
       }, 0),
-    [products, counts],
+    [products, counts, units],
   )
 
   const save = async () => {
     if (saving) return
-    const items = Object.entries(counts).map(([id, physical]) => ({
-      productId: Number(id),
-      physical,
-    }))
+    const items = Object.entries(counts).map(([id, physical]) => {
+      const p = products.find((x) => x.id === Number(id))
+      return { productId: Number(id), physical: physical * (p ? factorOf(p) : 1) }
+    })
     if (items.length === 0) {
       showToast('Belum ada item yang dihitung.')
       return
@@ -190,7 +203,10 @@ export default function StockOpnamePage() {
               {visible.map((p) => {
                 const c = counts[p.id]
                 const counted = c != null
-                const diff = counted ? c - p.system_stock : null
+                const opts = buildUnitOptions(p.unit, 0, p.unit_conversions)
+                const factor = opts.find((o) => o.unit === units[p.id])?.factor ?? 1
+                const baseQty = counted ? c * factor : null
+                const diff = baseQty != null ? baseQty - p.system_stock : null
                 return (
                   <tr
                     key={p.id}
@@ -227,7 +243,29 @@ export default function StockOpnamePage() {
                         >
                           +
                         </button>
+                        {opts.length > 1 && (
+                          <select
+                            value={units[p.id] ?? opts[0].unit}
+                            onChange={(e) =>
+                              setUnits((prev) => ({ ...prev, [p.id]: e.target.value }))
+                            }
+                            title="Satuan input"
+                            className="rounded-lg border border-black/10 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
+                          >
+                            {opts.map((o) => (
+                              <option key={o.unit} value={o.unit}>
+                                {o.unit}
+                                {o.isBase ? '' : ` (×${o.factor})`}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </div>
+                      {factor > 1 && baseQty != null && (
+                        <p className="mt-1 text-center text-[11px] text-ink-soft">
+                          = {baseQty} {p.unit ?? 'pcs'}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold">
                       {diff == null ? (

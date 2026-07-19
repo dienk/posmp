@@ -165,6 +165,19 @@ function migrateSchema(db: Database): boolean {
     changed = true
   }
 
+  // Kolom satuan terpilih pada detail transaksi (multi-satuan di kasir).
+  // quantity tetap dalam satuan dasar; unit/unit_qty hanya untuk tampilan.
+  const tdCols = columnsOf('transaction_details')
+  for (const [name, def] of [
+    ['unit', 'TEXT'],
+    ['unit_qty', 'REAL'],
+  ] as [string, string][]) {
+    if (!tdCols.has(name)) {
+      db.run(`ALTER TABLE transaction_details ADD COLUMN ${name} ${def}`)
+      changed = true
+    }
+  }
+
   // Kolom detail tambahan pada master produk.
   const productCols = columnsOf('products')
   const productAdds: [string, string][] = [

@@ -7,6 +7,7 @@ import {
   type OpeningProduct,
 } from './stockOpeningRepository'
 import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
+import { buildUnitOptions } from '../products/productsRepository'
 
 export default function StockOpeningPage() {
   const { settings } = useSettings()
@@ -16,6 +17,8 @@ export default function StockOpeningPage() {
   const [warehouseId, setWarehouseId] = useState<number>(0)
   const [products, setProducts] = useState<OpeningProduct[]>([])
   const [balances, setBalances] = useState<Record<number, number>>({})
+  // Satuan input terpilih per produk (kosong = satuan dasar).
+  const [units, setUnits] = useState<Record<number, string>>({})
   const [keyword, setKeyword] = useState('')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -54,9 +57,18 @@ export default function StockOpeningPage() {
 
   const countedIds = Object.keys(balances)
 
+  // Faktor konversi satuan terpilih (dasar = 1). Input dikali faktor → satuan dasar.
+  const factorOf = (p: OpeningProduct): number => {
+    const opts = buildUnitOptions(p.unit, 0, p.unit_conversions)
+    return opts.find((o) => o.unit === units[p.id])?.factor ?? 1
+  }
+
   const save = async () => {
     if (saving) return
-    const items = Object.entries(balances).map(([id, qty]) => ({ productId: Number(id), qty }))
+    const items = Object.entries(balances).map(([id, qty]) => {
+      const p = products.find((x) => x.id === Number(id))
+      return { productId: Number(id), qty: qty * (p ? factorOf(p) : 1) }
+    })
     if (items.length === 0) return showToast('Belum ada saldo awal yang diisi.')
     setSaving(true)
     try {
@@ -114,7 +126,10 @@ export default function StockOpeningPage() {
               {visible.map((p) => {
                 const b = balances[p.id]
                 const set = b != null
-                const diff = set ? b - p.system_stock : null
+                const opts = buildUnitOptions(p.unit, 0, p.unit_conversions)
+                const factor = opts.find((o) => o.unit === units[p.id])?.factor ?? 1
+                const baseQty = set ? b * factor : null
+                const diff = baseQty != null ? baseQty - p.system_stock : null
                 return (
                   <tr
                     key={p.id}
@@ -128,7 +143,7 @@ export default function StockOpeningPage() {
                     </td>
                     <td className="px-4 py-3 text-right text-ink-soft">{p.system_stock}</td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-center">
+                      <div className="flex items-center justify-center gap-1.5">
                         <input
                           type="number"
                           min={0}
@@ -137,7 +152,29 @@ export default function StockOpeningPage() {
                           placeholder={String(p.system_stock)}
                           className="w-24 rounded-lg border border-black/10 px-2 py-1.5 text-center text-sm outline-none focus:border-brand-strong"
                         />
+                        {opts.length > 1 && (
+                          <select
+                            value={units[p.id] ?? opts[0].unit}
+                            onChange={(e) =>
+                              setUnits((prev) => ({ ...prev, [p.id]: e.target.value }))
+                            }
+                            title="Satuan input"
+                            className="rounded-lg border border-black/10 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
+                          >
+                            {opts.map((o) => (
+                              <option key={o.unit} value={o.unit}>
+                                {o.unit}
+                                {o.isBase ? '' : ` (×${o.factor})`}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </div>
+                      {factor > 1 && baseQty != null && (
+                        <p className="mt-1 text-center text-[11px] text-ink-soft">
+                          = {baseQty} {p.unit ?? 'pcs'}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold">
                       {diff == null ? (

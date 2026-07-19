@@ -6,13 +6,14 @@ export interface OpeningProduct {
   name: string
   sku: string | null
   unit: string | null
+  unit_conversions: string | null
   system_stock: number
 }
 
 /** Produk aktif + stok saat ini pada gudang, untuk lembar saldo awal. */
 export function listOpeningProducts(outletId: number, warehouseId: number): OpeningProduct[] {
   return query<OpeningProduct>(
-    `SELECT p.id, p.name, p.sku, p.unit,
+    `SELECT p.id, p.name, p.sku, p.unit, p.unit_conversions,
             COALESCE((SELECT stock FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ? AND os.warehouse_id = ?), 0) AS system_stock
      FROM products p

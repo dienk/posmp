@@ -15,6 +15,8 @@ export interface StockProduct {
   id: number
   name: string
   sku: string | null
+  unit: string | null
+  unit_conversions: string | null
   stock: number
 }
 
@@ -121,7 +123,7 @@ export async function deleteSupplier(id: number): Promise<void> {
 
 export function listProductsForStock(outletId: number): StockProduct[] {
   return query<StockProduct>(
-    `SELECT p.id, p.name, p.sku,
+    `SELECT p.id, p.name, p.sku, p.unit, p.unit_conversions,
             COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock
      FROM products p

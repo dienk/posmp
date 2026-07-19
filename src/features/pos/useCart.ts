@@ -1,5 +1,9 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { CartItem, Product } from '../../types'
+import type { UnitOption } from '../products/productsRepository'
+
+/** Harga efektif per 1 satuan terpilih (fallback ke harga dasar produk). */
+export const itemUnitPrice = (it: CartItem): number => it.unitPrice ?? it.product.price
 
 /** State keranjang dengan penggabungan item otomatis (In-Cart Item Merging). */
 export function useCart() {
@@ -25,6 +29,22 @@ export function useCart() {
     )
   }, [])
 
+  /** Ganti satuan sebuah item (mis. dari 'botol' ke 'dus'); harga ikut satuan. */
+  const setUnit = useCallback((productId: number, opt: UnitOption) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.product.id === productId
+          ? {
+              ...it,
+              unit: opt.isBase ? undefined : opt.unit,
+              unitFactor: opt.isBase ? undefined : opt.factor,
+              unitPrice: opt.isBase ? undefined : opt.price,
+            }
+          : it,
+      ),
+    )
+  }, [])
+
   const setNotes = useCallback((productId: number, notes: string) => {
     setItems((prev) =>
       prev.map((it) =>
@@ -43,9 +63,9 @@ export function useCart() {
   const replace = useCallback((next: CartItem[]) => setItems(next), [])
 
   const subtotal = useMemo(
-    () => items.reduce((sum, it) => sum + it.product.price * it.quantity, 0),
+    () => items.reduce((sum, it) => sum + itemUnitPrice(it) * it.quantity, 0),
     [items],
   )
 
-  return { items, addProduct, setQuantity, setNotes, removeProduct, clear, replace, subtotal }
+  return { items, addProduct, setQuantity, setUnit, setNotes, removeProduct, clear, replace, subtotal }
 }

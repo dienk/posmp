@@ -39,7 +39,7 @@ export function fetchProducts(outletId: number, categoryId?: number, keyword?: s
   const whereSql = where.length ? `AND ${where.join(' AND ')}` : ''
   return query<Product>(
     `SELECT p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
-            p.unit, p.min_stock, p.description, p.is_active, p.image_path,
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.unit_conversions,
             c.name AS category_name,
             COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock
@@ -101,7 +101,9 @@ export interface SaveOrderResult {
  */
 export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult> {
   const db = getDb()
-  const subtotal = input.items.reduce((sum, it) => sum + it.product.price * it.quantity, 0)
+  // Harga efektif per satuan terpilih (fallback ke harga dasar produk).
+  const lineTotal = (it: CartItem) => (it.unitPrice ?? it.product.price) * it.quantity
+  const subtotal = input.items.reduce((sum, it) => sum + lineTotal(it), 0)
   const discount = Math.min(input.discountAmount ?? 0, subtotal)
   const taxable = subtotal - discount
   const tax = input.taxEnabled ? Math.round(taxable * input.taxRate) : 0
@@ -170,16 +172,23 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
     // Pesanan yang dikirim ke dapur menandai item sebagai COOKING.
     const initialCookStatus = sendToKitchen ? 'COOKING' : 'PENDING'
     for (const it of input.items) {
+      // Satuan terpilih → simpan quantity dalam satuan DASAR (stok/laporan tetap konsisten).
+      const factor = it.unitFactor && it.unitFactor > 0 ? it.unitFactor : 1
+      const baseQty = it.quantity * factor
+      const line = lineTotal(it)
+      const basePrice = baseQty ? line / baseQty : it.unitPrice ?? it.product.price
       db.run(
         `INSERT INTO transaction_details
-           (transaction_id, product_id, quantity, unit_price, subtotal, notes, cooking_status)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+           (transaction_id, product_id, quantity, unit_price, subtotal, unit, unit_qty, notes, cooking_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           transactionId,
           it.product.id,
-          it.quantity,
-          it.product.price,
-          it.product.price * it.quantity,
+          baseQty,
+          basePrice,
+          line,
+          it.unit ?? null,
+          it.unit ? it.quantity : null,
           it.notes ?? null,
           initialCookStatus,
         ],
@@ -190,7 +199,7 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
         db.run(
           `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
            ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock - ?`,
-          [input.outletId, whId, it.product.id, -it.quantity, it.quantity],
+          [input.outletId, whId, it.product.id, -baseQty, baseQty],
         )
       }
     }
@@ -308,10 +317,18 @@ export function getDraftForEdit(id: number, outletId: number): DraftDetail | nul
   )[0]
   if (!header || header.status !== 'DRAFT') return null
 
-  const rows = query<Product & { quantity: number; line_notes: string | null }>(
-    `SELECT d.quantity, d.notes AS line_notes,
+  const rows = query<
+    Product & {
+      quantity: number
+      unit_sel: string | null
+      unit_qty: number | null
+      line_subtotal: number
+      line_notes: string | null
+    }
+  >(
+    `SELECT d.quantity, d.unit AS unit_sel, d.unit_qty, d.subtotal AS line_subtotal, d.notes AS line_notes,
             p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
-            p.unit, p.min_stock, p.description, p.is_active, p.image_path,
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.unit_conversions,
             c.name AS category_name,
             COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock
@@ -324,7 +341,18 @@ export function getDraftForEdit(id: number, outletId: number): DraftDetail | nul
   )
 
   const items: CartItem[] = rows.map((r) => {
-    const { quantity, line_notes, ...product } = r
+    const { quantity, unit_sel, unit_qty, line_subtotal, line_notes, ...product } = r
+    // Bila item disimpan dalam satuan turunan, pulihkan tampilan satuan terpilih.
+    if (unit_sel && unit_qty && unit_qty > 0) {
+      return {
+        product: product as Product,
+        quantity: unit_qty,
+        notes: line_notes ?? undefined,
+        unit: unit_sel,
+        unitFactor: quantity / unit_qty,
+        unitPrice: line_subtotal / unit_qty,
+      }
+    }
     return { product: product as Product, quantity, notes: line_notes ?? undefined }
   })
 

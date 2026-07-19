@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
 import type { CartItem, FacilityType } from '../../types'
+import { buildUnitOptions } from '../products/productsRepository'
+import { itemUnitPrice } from './useCart'
 
 const FACILITIES: { value: FacilityType; label: string }[] = [
   { value: 'DINE_IN', label: 'Dine In' },
@@ -47,6 +49,7 @@ interface Props {
   onCustomerNameChange: (name: string) => void
   onFacilityChange: (facility: FacilityType) => void
   onQuantityChange: (productId: number, quantity: number) => void
+  onUnitChange: (productId: number, unit: string) => void
   onNotesChange: (productId: number, notes: string) => void
   orderNote: string
   onOrderNoteChange: (note: string) => void
@@ -58,7 +61,7 @@ interface Props {
 }
 
 export default function CartPanel(props: Props) {
-  const subtotal = props.items.reduce((s, it) => s + it.product.price * it.quantity, 0)
+  const subtotal = props.items.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
   const discount = props.showVoucher ? Math.min(props.discount, subtotal) : 0
   const tax = props.taxEnabled ? Math.round((subtotal - discount) * props.taxRate) : 0
   const total = subtotal - discount + tax
@@ -221,6 +224,12 @@ export default function CartPanel(props: Props) {
           <ul className="flex flex-col divide-y divide-black/5">
             {props.items.map((it) => {
               const noteVisible = showItemNote(it.product.id) || (it.notes ?? '').length > 0
+              const unitOpts = buildUnitOptions(
+                it.product.unit,
+                it.product.price,
+                it.product.unit_conversions,
+              )
+              const selectedUnit = it.unit ?? unitOpts[0].unit
               return (
                 <li key={it.product.id} className="py-3">
                   <div className="flex items-start justify-between gap-2">
@@ -251,9 +260,26 @@ export default function CartPanel(props: Props) {
                       >
                         +
                       </button>
+                      {unitOpts.length > 1 ? (
+                        <select
+                          value={selectedUnit}
+                          onChange={(e) => props.onUnitChange(it.product.id, e.target.value)}
+                          title="Pilih satuan"
+                          className="ml-1 rounded-lg border border-black/10 bg-white px-1.5 py-1 text-xs outline-none focus:border-brand-strong"
+                        >
+                          {unitOpts.map((o) => (
+                            <option key={o.unit} value={o.unit}>
+                              {o.unit}
+                              {o.isBase ? '' : ` (×${o.factor})`}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="ml-1 text-xs text-ink-soft">{selectedUnit}</span>
+                      )}
                     </div>
                     <span className="text-sm font-bold text-ink">
-                      {formatRupiah(it.product.price * it.quantity)}
+                      {formatRupiah(itemUnitPrice(it) * it.quantity)}
                     </span>
                   </div>
                   {noteVisible ? (

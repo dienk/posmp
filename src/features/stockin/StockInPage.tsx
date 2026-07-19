@@ -21,6 +21,7 @@ import {
   type SupplierWithUsage,
 } from './stockInRepository'
 import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
+import { buildUnitOptions } from '../products/productsRepository'
 
 /** Waktu sekarang dalam format input datetime-local (YYYY-MM-DDTHH:MM). */
 function nowLocalInput(): string {
@@ -42,6 +43,8 @@ interface Line {
   productId: number
   quantity: number
   costPrice: number
+  /** Satuan input terpilih (kosong = satuan dasar produk). */
+  unit?: string
 }
 
 type Tab = 'penerimaan' | 'supplier' | 'riwayat'
@@ -113,8 +116,15 @@ export default function StockInPage() {
   const updateLine = (idx: number, patch: Partial<Line>) =>
     setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)))
   const removeLine = (idx: number) => setLines((prev) => prev.filter((_, i) => i !== idx))
+  // Faktor konversi satuan sebuah baris (dasar = 1).
+  const lineFactor = (l: Line): number => {
+    const p = products.find((x) => x.id === l.productId)
+    if (!p) return 1
+    return buildUnitOptions(p.unit, 0, p.unit_conversions).find((o) => o.unit === l.unit)?.factor ?? 1
+  }
   const totalCost = lines.reduce((s, l) => s + l.quantity * l.costPrice, 0)
-  const totalQty = lines.reduce((s, l) => s + l.quantity, 0)
+  // Total qty dalam satuan dasar (baris multi-satuan dikonversi).
+  const totalQty = lines.reduce((s, l) => s + l.quantity * lineFactor(l), 0)
 
   const resetForm = () => {
     setLines([])
@@ -127,11 +137,16 @@ export default function StockInPage() {
 
   const handleSubmit = async () => {
     if (lines.length === 0) return showToast('Tambahkan minimal satu item.')
-    const payloadLines = lines.map((l) => ({
-      productId: l.productId,
-      quantity: l.quantity,
-      costPrice: l.costPrice,
-    }))
+    // Simpan dalam satuan DASAR: qty × faktor; modal per satuan dasar = modal ÷ faktor
+    // (subtotal tetap qty × modal). Detail penerimaan konsisten dengan stok.
+    const payloadLines = lines.map((l) => {
+      const factor = lineFactor(l)
+      return {
+        productId: l.productId,
+        quantity: l.quantity * factor,
+        costPrice: factor > 1 ? l.costPrice / factor : l.costPrice,
+      }
+    })
     try {
       if (editingEntryId) {
         await updateStockEntry(editingEntryId, outletId, {
@@ -321,6 +336,11 @@ export default function StockInPage() {
                 const opts = products.filter(
                   (p) => p.id === l.productId || !lines.some((x) => x.productId === p.id),
                 )
+                const lineProduct = products.find((p) => p.id === l.productId)
+                const unitOpts = lineProduct
+                  ? buildUnitOptions(lineProduct.unit, 0, lineProduct.unit_conversions)
+                  : []
+                const factor = unitOpts.find((o) => o.unit === l.unit)?.factor ?? 1
                 return (
                   <div key={idx} className="flex items-end gap-2">
                     <label className="block flex-1">
@@ -328,7 +348,9 @@ export default function StockInPage() {
                       <select
                         className={inputCls}
                         value={l.productId}
-                        onChange={(e) => updateLine(idx, { productId: Number(e.target.value) })}
+                        onChange={(e) =>
+                          updateLine(idx, { productId: Number(e.target.value), unit: undefined })
+                        }
                       >
                         {opts.map((p) => (
                           <option key={p.id} value={p.id}>
@@ -347,8 +369,27 @@ export default function StockInPage() {
                         onChange={(e) => updateLine(idx, { quantity: Number(e.target.value) })}
                       />
                     </label>
+                    {unitOpts.length > 1 && (
+                      <label className="block w-24">
+                        <span className="mb-1 block text-[11px] text-ink-soft">Satuan</span>
+                        <select
+                          className={inputCls}
+                          value={l.unit ?? unitOpts[0].unit}
+                          onChange={(e) => updateLine(idx, { unit: e.target.value })}
+                        >
+                          {unitOpts.map((o) => (
+                            <option key={o.unit} value={o.unit}>
+                              {o.unit}
+                              {o.isBase ? '' : ` (×${o.factor})`}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
                     <label className="block w-32">
-                      <span className="mb-1 block text-[11px] text-ink-soft">Harga Modal</span>
+                      <span className="mb-1 block text-[11px] text-ink-soft">
+                        Harga Modal{factor > 1 ? ` / ${l.unit}` : ''}
+                      </span>
                       <input
                         type="number"
                         min={0}
@@ -385,7 +426,7 @@ export default function StockInPage() {
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-black/5 pt-3">
               <span className="text-sm text-ink-soft">
-                {totalQty} pcs · Total modal:{' '}
+                {totalQty} (satuan dasar) · Total modal:{' '}
                 <span className="font-bold text-ink">{formatRupiah(totalCost)}</span>
               </span>
               <button
