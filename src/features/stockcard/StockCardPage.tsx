@@ -3,6 +3,7 @@ import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
 import {
+  findProductByCode,
   listStockCardProducts,
   stockCard,
   type MovementKind,
@@ -31,7 +32,22 @@ export default function StockCardPage() {
   const [productId, setProductId] = useState<number | null>(null)
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [warehouseId, setWarehouseId] = useState<number>(0) // 0 = semua gudang
+  const [scanCode, setScanCode] = useState('')
+  const [toast, setToast] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
+
+  const handleScan = () => {
+    const code = scanCode.trim()
+    if (!code) return
+    const found = findProductByCode(code)
+    setScanCode('')
+    if (found) {
+      setProductId(found.id)
+    } else {
+      setToast(`Barcode "${code}" tidak ditemukan.`)
+      window.setTimeout(() => setToast(null), 2500)
+    }
+  }
 
   useEffect(() => {
     const list = listStockCardProducts(outletId)
@@ -60,10 +76,22 @@ export default function StockCardPage() {
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Kartu Stock</h1>
+        <div className="relative ml-auto">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
+            🔦
+          </span>
+          <input
+            value={scanCode}
+            onChange={(e) => setScanCode(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleScan()}
+            placeholder="Scan barcode / QR lalu Enter…"
+            className="w-56 rounded-lg border border-black/10 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
+          />
+        </div>
         <select
           value={warehouseId}
           onChange={(e) => setWarehouseId(Number(e.target.value))}
-          className="ml-auto rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           <option value={0}>Semua Gudang</option>
           {warehouses.map((w) => (
@@ -75,7 +103,7 @@ export default function StockCardPage() {
         <select
           value={productId ?? ''}
           onChange={(e) => setProductId(Number(e.target.value))}
-          className="ml-auto min-w-56 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="min-w-56 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           {products.length === 0 && <option value="">Tidak ada produk</option>}
           {products.map((p) => (
@@ -154,6 +182,12 @@ export default function StockCardPage() {
           </table>
         </section>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-white shadow-lg">
+          {toast}
+        </div>
+      )}
     </div>
   )
 }

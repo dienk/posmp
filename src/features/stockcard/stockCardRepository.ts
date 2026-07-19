@@ -22,6 +22,18 @@ export function listStockCardProducts(outletId: number): StockCardProduct[] {
   )
 }
 
+/** Cari produk aktif via barcode/SKU/QR persis — untuk pencarian scan di kartu stok. */
+export function findProductByCode(code: string): { id: number; name: string } | null {
+  const c = code.trim()
+  if (!c) return null
+  return (
+    query<{ id: number; name: string }>(
+      `SELECT id, name FROM products WHERE is_active = 1 AND (barcode = ? OR sku = ?) LIMIT 1`,
+      [c, c],
+    )[0] ?? null
+  )
+}
+
 export type MovementKind = 'MASUK' | 'JUAL' | 'REFUND' | 'OPNAME'
 
 export interface StockMovement {
