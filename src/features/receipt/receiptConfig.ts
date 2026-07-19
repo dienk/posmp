@@ -43,8 +43,91 @@ export const RECEIPT_DEFAULTS: ReceiptConfig = {
   paperWidth: 58,
 }
 
-/** Baca konfigurasi struk dari map app_settings (dengan fallback default). */
+/** Satu template desain struk (banyak template didukung). */
+export interface ReceiptTemplate {
+  id: string
+  name: string
+  config: ReceiptConfig
+}
+
+/** Lengkapi konfigurasi parsial dengan default (tahan terhadap field baru). */
+export function normalizeReceiptConfig(c: Partial<ReceiptConfig> | undefined | null): ReceiptConfig {
+  const p = c ?? {}
+  return {
+    ...RECEIPT_DEFAULTS,
+    ...p,
+    logoPosition: p.logoPosition === 'bottom' ? 'bottom' : 'top',
+    align: p.align === 'left' || p.align === 'right' ? p.align : 'center',
+    paperWidth: p.paperWidth === 80 ? 80 : 58,
+  }
+}
+
+/** Parse daftar template dari JSON app_settings.receipt_templates. */
+export function parseTemplates(raw: string | undefined): ReceiptTemplate[] {
+  if (!raw) return []
+  try {
+    const arr = JSON.parse(raw)
+    if (!Array.isArray(arr)) return []
+    return arr
+      .filter((t) => t && typeof t.id === 'string')
+      .map((t) => ({
+        id: t.id,
+        name: typeof t.name === 'string' && t.name.trim() ? t.name : 'Template',
+        config: normalizeReceiptConfig(t.config),
+      }))
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Daftar template desain struk. Bila belum ada template tersimpan, migrasikan
+ * konfigurasi lama (kunci `receipt_*`) menjadi satu template "Struk Default".
+ */
+export function getTemplates(settings: Record<string, string>): ReceiptTemplate[] {
+  const parsed = parseTemplates(settings.receipt_templates)
+  if (parsed.length) return parsed
+  return [{ id: 'default', name: 'Struk Default', config: legacyReceiptConfig(settings) }]
+}
+
+/** ID template aktif (yang dipakai saat mencetak struk sesungguhnya). */
+export function getActiveTemplateId(settings: Record<string, string>): string {
+  const templates = getTemplates(settings)
+  const id = settings.receipt_active_template
+  return templates.some((t) => t.id === id) ? id : templates[0].id
+}
+
+/** ID unik untuk template baru. */
+export function newTemplateId(): string {
+  return 'tpl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
+}
+
+/** Serialisasi daftar template + template aktif ke app_settings. */
+export function templatesToSettings(
+  templates: ReceiptTemplate[],
+  activeId: string,
+): Record<string, string> {
+  return {
+    receipt_templates: JSON.stringify(templates),
+    receipt_active_template: activeId,
+  }
+}
+
+/**
+ * Konfigurasi struk aktif untuk dipakai render/cetak. Bila ada template
+ * tersimpan, gunakan template aktif; selain itu baca kunci lama `receipt_*`.
+ */
 export function getReceiptConfig(settings: Record<string, string>): ReceiptConfig {
+  const templates = parseTemplates(settings.receipt_templates)
+  if (templates.length) {
+    const active = templates.find((t) => t.id === settings.receipt_active_template) ?? templates[0]
+    return active.config
+  }
+  return legacyReceiptConfig(settings)
+}
+
+/** Pembaca konfigurasi lama (satu desain) dari kunci `receipt_*`. */
+function legacyReceiptConfig(settings: Record<string, string>): ReceiptConfig {
   const bool = (key: string, def: boolean) =>
     settings[key] === undefined ? def : settings[key] === '1'
   const align = settings.receipt_align

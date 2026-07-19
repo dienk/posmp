@@ -6,12 +6,16 @@ import type { ReceiptData } from '../history/historyRepository'
 import { ReceiptView } from './ReceiptModal'
 import {
   fileToScaledDataUrl,
-  getReceiptConfig,
-  receiptConfigToSettings,
+  getActiveTemplateId,
+  getTemplates,
+  newTemplateId,
+  RECEIPT_DEFAULTS,
+  templatesToSettings,
   urlToScaledDataUrl,
   type ReceiptAlign,
   type LogoPosition,
   type ReceiptConfig,
+  type ReceiptTemplate,
 } from './receiptConfig'
 
 export default function ReceiptDesignPage() {
@@ -19,14 +23,46 @@ export default function ReceiptDesignPage() {
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
   const outlet = useMemo(() => getOutlet(outletId), [outletId])
 
-  const [cfg, setCfg] = useState<ReceiptConfig>(() => getReceiptConfig(settings))
+  const [templates, setTemplates] = useState<ReceiptTemplate[]>(() => getTemplates(settings))
+  const [selectedId, setSelectedId] = useState<string>(() => getActiveTemplateId(settings))
+  const [activeId, setActiveId] = useState<string>(() => getActiveTemplateId(settings))
   const [toast, setToast] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [logoUrl, setLogoUrl] = useState('')
   const [loadingUrl, setLoadingUrl] = useState(false)
 
+  const selected = templates.find((t) => t.id === selectedId) ?? templates[0]
+  const cfg = selected.config
+
+  // Ubah satu properti config pada template yang sedang dipilih.
   const set = <K extends keyof ReceiptConfig>(key: K, value: ReceiptConfig[K]) =>
-    setCfg((prev) => ({ ...prev, [key]: value }))
+    setTemplates((prev) =>
+      prev.map((t) => (t.id === selected.id ? { ...t, config: { ...t.config, [key]: value } } : t)),
+    )
+
+  const renameSelected = (name: string) =>
+    setTemplates((prev) => prev.map((t) => (t.id === selected.id ? { ...t, name } : t)))
+
+  const addTemplate = () => {
+    const id = newTemplateId()
+    setTemplates((prev) => [...prev, { id, name: `Template ${prev.length + 1}`, config: { ...RECEIPT_DEFAULTS } }])
+    setSelectedId(id)
+  }
+
+  const duplicateTemplate = () => {
+    const id = newTemplateId()
+    setTemplates((prev) => [...prev, { id, name: `${selected.name} (salinan)`, config: { ...selected.config } }])
+    setSelectedId(id)
+  }
+
+  const removeTemplate = () => {
+    if (templates.length <= 1) return showToast('Minimal harus ada 1 template.')
+    if (!window.confirm(`Hapus template "${selected.name}"?`)) return
+    const remaining = templates.filter((t) => t.id !== selected.id)
+    setTemplates(remaining)
+    setSelectedId(remaining[0].id)
+    if (activeId === selected.id) setActiveId(remaining[0].id)
+  }
 
   const showToast = (m: string) => {
     setToast(m)
@@ -61,9 +97,9 @@ export default function ReceiptDesignPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await updateAppSettings(receiptConfigToSettings(cfg))
+      await updateAppSettings(templatesToSettings(templates, activeId))
       reloadSettings()
-      showToast('Desain struk tersimpan.')
+      showToast(`${templates.length} template tersimpan.`)
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Gagal menyimpan')
     } finally {
@@ -117,6 +153,67 @@ export default function ReceiptDesignPage() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[380px_1fr]">
         {/* Form */}
         <section className="space-y-4">
+          {/* Template */}
+          <div className="rounded-card bg-white p-5 shadow-card">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Template</h2>
+              {selected.id === activeId ? (
+                <span className="rounded-full bg-status-empty/15 px-2.5 py-0.5 text-xs font-semibold text-status-empty">
+                  ✓ Aktif
+                </span>
+              ) : (
+                <button
+                  onClick={() => setActiveId(selected.id)}
+                  className="rounded-lg border border-black/10 px-2.5 py-1 text-xs font-semibold text-ink hover:bg-background"
+                >
+                  Jadikan Aktif
+                </button>
+              )}
+            </div>
+            <select
+              value={selectedId}
+              onChange={(e) => setSelectedId(e.target.value)}
+              className={inputCls + ' mb-2'}
+            >
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                  {t.id === activeId ? ' — aktif' : ''}
+                </option>
+              ))}
+            </select>
+            <input
+              className={inputCls}
+              value={selected.name}
+              onChange={(e) => renameSelected(e.target.value)}
+              placeholder="Nama template"
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                onClick={addTemplate}
+                className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong"
+              >
+                ＋ Baru
+              </button>
+              <button
+                onClick={duplicateTemplate}
+                className="rounded-lg border border-black/10 px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
+              >
+                ⧉ Duplikat
+              </button>
+              <button
+                onClick={removeTemplate}
+                disabled={templates.length <= 1}
+                className="ml-auto rounded-lg border border-status-occupied/40 px-3 py-1.5 text-sm font-semibold text-status-occupied hover:bg-status-occupied/10 disabled:opacity-40"
+              >
+                Hapus
+              </button>
+            </div>
+            <p className="mt-2 text-[11px] text-ink-soft">
+              Template <b>Aktif</b> yang dipakai saat mencetak struk. Ubah lalu “Simpan Desain”.
+            </p>
+          </div>
+
           {/* Logo */}
           <div className="rounded-card bg-white p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
