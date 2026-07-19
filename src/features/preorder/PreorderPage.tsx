@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
+import { getLoyaltyConfig } from '../../lib/loyalty'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
 import PaymentModal from '../pos/PaymentModal'
@@ -15,7 +16,7 @@ import {
 export default function PreorderPage() {
   const { settings } = useSettings()
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
-  const pointsPerAmount = getNumberSetting(settings, 'points_per_amount', 0)
+  const loyalty = useMemo(() => getLoyaltyConfig(settings), [settings])
 
   const [orders, setOrders] = useState<Preorder[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -148,7 +149,7 @@ export default function PreorderPage() {
           onConfirm={async (payments) => {
             setShowPay(false)
             try {
-              const res = await settlePreorder(selected.id, outletId, payments, pointsPerAmount)
+              const res = await settlePreorder(selected.id, outletId, payments, loyalty)
               showToast(
                 `Pre-Order ${selected.invoice_number} lunas` +
                   (res.pointsEarned > 0 ? ` · +${res.pointsEarned} poin` : ''),

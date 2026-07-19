@@ -1,6 +1,7 @@
 import { getDb, persist, query } from '../../db/database'
 import { generateInvoiceNumber } from '../../lib/format'
 import { publish } from '../../lib/realtime'
+import { computePoints, type LoyaltyConfig } from '../../lib/loyalty'
 import type { CartItem, Category, FacilityType, Product } from '../../types'
 import { defaultWarehouseId } from '../warehouses/warehousesRepository'
 
@@ -67,8 +68,10 @@ export interface SaveOrderInput {
   discountAmount?: number
   voucherId?: number
   memberId?: number
-  /** Rp per 1 poin (mis. 1000 = 1 poin per Rp1.000). 0/undefined = tanpa poin. */
+  /** Rp per 1 poin (mis. 1000 = 1 poin per Rp1.000). 0/undefined = tanpa poin. (fallback lama) */
   pointsPerAmount?: number
+  /** Konfigurasi loyalitas lengkap; bila ada, dipakai menggantikan pointsPerAmount. */
+  loyalty?: LoyaltyConfig
   /** Rincian pembayaran berganda; dicatat ke transaction_payments (status COMPLETED). */
   payments?: PaymentInput[]
   /** Terbitkan tiket ke KDS (fire to kitchen). Default true untuk pesanan F&B. */
@@ -115,10 +118,17 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
   const orderSource = input.orderSource ?? 'POS_OFFLINE'
   const sendToKitchen = input.sendToKitchen ?? true
   // Poin hanya dihitung saat transaksi lunas & ada member terpasang.
-  const pointsEarned =
-    input.status === 'COMPLETED' && input.memberId && input.pointsPerAmount
-      ? Math.floor(total / input.pointsPerAmount)
-      : 0
+  let pointsEarned = 0
+  if (input.status === 'COMPLETED' && input.memberId) {
+    if (input.loyalty) {
+      const tier = query<{ tier: string }>('SELECT tier FROM members WHERE id = ?', [
+        input.memberId,
+      ])[0]?.tier
+      pointsEarned = computePoints(input.loyalty, { total, subtotal }, tier)
+    } else if (input.pointsPerAmount) {
+      pointsEarned = Math.floor(total / input.pointsPerAmount)
+    }
+  }
 
   db.run('BEGIN')
   try {

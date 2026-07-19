@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { formatRupiah, generateInvoiceNumber } from '../../lib/format'
 import { getNumberSetting, isModuleEnabled } from '../../lib/settings'
+import { getLoyaltyConfig } from '../../lib/loyalty'
 import { useSettings } from '../../lib/SettingsContext'
 import { useUI } from '../../lib/UIContext'
 import type { Category, FacilityType, Product } from '../../types'
@@ -65,7 +66,7 @@ export default function PosPage() {
   const [scanMode, setScanMode] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const pointsPerAmount = getNumberSetting(settings, 'points_per_amount', 0)
+  const loyalty = useMemo(() => getLoyaltyConfig(settings), [settings])
 
   // Total tagihan berjalan (untuk modal pembayaran).
   const orderTax = taxEnabled ? Math.round((cart.subtotal - discount) * taxRate) : 0
@@ -187,7 +188,7 @@ export default function PosPage() {
         discountAmount: discount,
         voucherId,
         memberId: member?.id,
-        pointsPerAmount,
+        loyalty,
         payments,
         note: orderNote,
         invoiceNumber,

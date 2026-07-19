@@ -10,6 +10,13 @@ import {
   serializePaymentMethods,
   type PayMethod,
 } from './paymentMethods'
+import {
+  computePoints,
+  getLoyaltyConfig,
+  loyaltyToSettings,
+  MEMBER_TIERS,
+  type LoyaltyConfig,
+} from '../../lib/loyalty'
 
 const MODULES: { key: string; label: string; desc: string }[] = [
   { key: 'module_table_layout', label: 'Tata Letak Meja', desc: 'Denah meja & status (F&B)' },
@@ -51,7 +58,14 @@ export default function SettingsPage() {
   const taxRatePct = getNumberSetting(settings, 'tax_rate', 0.1) * 100
   const activeTax = useMemo(() => defaultTax(), [])
   const [taxEnabled, setTaxEnabled] = useState(settings.tax_enabled === '1')
-  const [pointsPer, setPointsPer] = useState(getNumberSetting(settings, 'points_per_amount', 1000))
+  const [loyalty, setLoyalty] = useState<LoyaltyConfig>(() => getLoyaltyConfig(settings))
+  const setLoy = <K extends keyof LoyaltyConfig>(key: K, value: LoyaltyConfig[K]) =>
+    setLoyalty((prev) => ({ ...prev, [key]: value }))
+  const setTierMult = (tier: (typeof MEMBER_TIERS)[number], value: number) =>
+    setLoyalty((prev) => ({
+      ...prev,
+      tierMultiplier: { ...prev.tierMultiplier, [tier]: value },
+    }))
   const [callText, setCallText] = useState(settings.queue_call_text ?? DEFAULT_QUEUE_CALL_TEXT)
   const [modules, setModules] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, settings[m.key] === '1'])),
@@ -91,9 +105,9 @@ export default function SettingsPage() {
     try {
       const next: Record<string, string> = {
         tax_enabled: taxEnabled ? '1' : '0',
-        points_per_amount: String(Math.max(0, Math.round(pointsPer))),
         queue_call_text: callText.trim() || DEFAULT_QUEUE_CALL_TEXT,
         payment_methods: serializePaymentMethods(payMethods),
+        ...loyaltyToSettings(loyalty),
         ...Object.fromEntries(ALL_TOGGLES.map((m) => [m.key, modules[m.key] ? '1' : '0'])),
       }
       await saveSettings(next, outletId, { name, address, phone })
@@ -146,9 +160,9 @@ export default function SettingsPage() {
         {/* Transaksi */}
         <section className="rounded-card bg-white p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
-            Transaksi & Loyalitas
+            Transaksi
           </h2>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -173,17 +187,123 @@ export default function SettingsPage() {
                 </Link>
               </div>
             </div>
-            <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">
-                Rp per 1 poin
-              </span>
+          </div>
+        </section>
+
+        {/* Program Loyalitas (Poin) */}
+        <section className="rounded-card bg-white p-5 shadow-card">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
+              Program Loyalitas (Poin)
+            </h2>
+            <label className="flex items-center gap-2">
               <input
-                type="number"
-                className={inputCls}
-                value={pointsPer}
-                onChange={(e) => setPointsPer(Number(e.target.value))}
+                type="checkbox"
+                checked={loyalty.enabled}
+                onChange={(e) => setLoy('enabled', e.target.checked)}
+                className="h-4 w-4 accent-status-empty"
               />
+              <span className="text-sm font-medium text-ink">Aktif</span>
             </label>
+          </div>
+
+          <div className={loyalty.enabled ? '' : 'pointer-events-none opacity-50'}>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">Rp per 1 poin</span>
+                <input
+                  type="number"
+                  min={0}
+                  className={inputCls}
+                  value={loyalty.perAmount}
+                  onChange={(e) => setLoy('perAmount', Number(e.target.value))}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">Dasar hitung</span>
+                <select
+                  className={inputCls}
+                  value={loyalty.basis}
+                  onChange={(e) => setLoy('basis', e.target.value as LoyaltyConfig['basis'])}
+                >
+                  <option value="total">Total akhir (setelah pajak &amp; diskon)</option>
+                  <option value="subtotal">Subtotal (sebelum pajak)</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">Pembulatan</span>
+                <select
+                  className={inputCls}
+                  value={loyalty.rounding}
+                  onChange={(e) => setLoy('rounding', e.target.value as LoyaltyConfig['rounding'])}
+                >
+                  <option value="floor">Ke bawah (floor)</option>
+                  <option value="round">Terdekat (round)</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">
+                  Min. transaksi (Rp)
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  className={inputCls}
+                  value={loyalty.minPurchase}
+                  onChange={(e) => setLoy('minPurchase', Number(e.target.value))}
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">
+                  Maks. poin / transaksi (0 = tanpa batas)
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  className={inputCls}
+                  value={loyalty.maxPerTransaction}
+                  onChange={(e) => setLoy('maxPerTransaction', Number(e.target.value))}
+                />
+              </label>
+            </div>
+
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">
+                Pengali Poin per Tier
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {MEMBER_TIERS.map((t) => (
+                  <label key={t} className="block">
+                    <span className="mb-1 block text-xs font-medium text-ink-soft">{t}</span>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.25}
+                        className={inputCls}
+                        value={loyalty.tierMultiplier[t]}
+                        onChange={(e) => setTierMult(t, Number(e.target.value))}
+                      />
+                      <span className="text-xs text-ink-soft">×</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <p className="mt-3 rounded-lg bg-background px-3 py-2 text-xs text-ink-soft">
+              Contoh belanja <b>Rp 50.000</b>:{' '}
+              {MEMBER_TIERS.map((t, i) => (
+                <span key={t}>
+                  {i > 0 && ' · '}
+                  {t}{' '}
+                  <b className="text-ink">
+                    {computePoints(loyalty, { total: 50000, subtotal: 50000 }, t)}
+                  </b>{' '}
+                  poin
+                </span>
+              ))}
+            </p>
           </div>
         </section>
 

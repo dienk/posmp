@@ -1,5 +1,6 @@
 import { getDb, persist, query } from '../../db/database'
 import { publish } from '../../lib/realtime'
+import { computePoints, type LoyaltyConfig } from '../../lib/loyalty'
 import type { PaymentInput } from '../pos/posRepository'
 import { defaultWarehouseId } from '../warehouses/warehousesRepository'
 
@@ -59,10 +60,18 @@ export async function settlePreorder(
   transactionId: number,
   outletId: number,
   payments: PaymentInput[],
-  pointsPerAmount: number,
+  loyalty: LoyaltyConfig,
 ): Promise<{ pointsEarned: number }> {
-  const tx = query<{ total_amount: number; member_id: number | null; status: string }>(
-    'SELECT total_amount, member_id, status FROM transactions WHERE id = ?',
+  const tx = query<{
+    total_amount: number
+    subtotal_amount: number
+    member_id: number | null
+    status: string
+    tier: string | null
+  }>(
+    `SELECT t.total_amount, t.subtotal_amount, t.member_id, t.status, m.tier
+     FROM transactions t LEFT JOIN members m ON m.id = t.member_id
+     WHERE t.id = ?`,
     [transactionId],
   )[0]
   if (!tx) throw new Error('Pre-order tidak ditemukan.')
@@ -72,8 +81,9 @@ export async function settlePreorder(
     'SELECT product_id, quantity FROM transaction_details WHERE transaction_id = ?',
     [transactionId],
   )
-  const pointsEarned =
-    tx.member_id && pointsPerAmount ? Math.floor(tx.total_amount / pointsPerAmount) : 0
+  const pointsEarned = tx.member_id
+    ? computePoints(loyalty, { total: tx.total_amount, subtotal: tx.subtotal_amount }, tx.tier)
+    : 0
 
   const db = getDb()
   const whId = defaultWarehouseId(outletId)
