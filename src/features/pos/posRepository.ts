@@ -2,6 +2,7 @@ import { getDb, persist, query } from '../../db/database'
 import { generateInvoiceNumber } from '../../lib/format'
 import { publish } from '../../lib/realtime'
 import type { CartItem, Category, FacilityType, Product } from '../../types'
+import { defaultWarehouseId } from '../warehouses/warehousesRepository'
 
 export type PaymentMethod =
   | 'CASH'
@@ -40,10 +41,10 @@ export function fetchProducts(outletId: number, categoryId?: number, keyword?: s
     `SELECT p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
             p.unit, p.min_stock, p.description, p.is_active, p.image_path,
             c.name AS category_name,
-            COALESCE(os.stock, 0) AS stock
+            COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
+                      WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock
      FROM products p
      LEFT JOIN categories c ON c.id = p.category_id
-     LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
      WHERE p.is_active = 1 ${whereSql}
      ORDER BY p.name`,
     params,
@@ -183,12 +184,13 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
           initialCookStatus,
         ],
       )
-      // Kurangi stok fisik outlet saat transaksi diselesaikan.
+      // Kurangi stok fisik gudang default saat transaksi diselesaikan.
       if (input.status === 'COMPLETED') {
+        const whId = defaultWarehouseId(input.outletId)
         db.run(
-          `UPDATE outlet_stocks SET stock = stock - ?
-           WHERE outlet_id = ? AND product_id = ?`,
-          [it.quantity, input.outletId, it.product.id],
+          `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
+           ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock - ?`,
+          [input.outletId, whId, it.product.id, -it.quantity, it.quantity],
         )
       }
     }
@@ -310,11 +312,12 @@ export function getDraftForEdit(id: number, outletId: number): DraftDetail | nul
     `SELECT d.quantity, d.notes AS line_notes,
             p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
             p.unit, p.min_stock, p.description, p.is_active, p.image_path,
-            c.name AS category_name, COALESCE(os.stock, 0) AS stock
+            c.name AS category_name,
+            COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
+                      WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock
      FROM transaction_details d
      JOIN products p ON p.id = d.product_id
      LEFT JOIN categories c ON c.id = p.category_id
-     LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
      WHERE d.transaction_id = ?
      ORDER BY d.id`,
     [outletId, id],

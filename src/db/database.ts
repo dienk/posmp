@@ -241,6 +241,67 @@ function migrateSchema(db: Database): boolean {
     )`)
     changed = true
   }
+
+  // Gudang (warehouses) — dibuat + satu gudang default ("Gudang Utama") per outlet.
+  if (!tableExists('warehouses')) {
+    db.run(`CREATE TABLE IF NOT EXISTS warehouses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      code TEXT,
+      location TEXT,
+      is_default INTEGER NOT NULL DEFAULT 0,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+    )`)
+    const outletsW = db.exec('SELECT id FROM outlets ORDER BY id')
+    if (outletsW[0]) {
+      for (const row of outletsW[0].values) {
+        db.run(
+          `INSERT INTO warehouses (outlet_id, name, code, is_default, is_active)
+           VALUES (?, 'Gudang Utama', 'GDG-01', 1, 1)`,
+          [Number(row[0])],
+        )
+      }
+    }
+    changed = true
+  }
+
+  // outlet_stocks: tambah kolom warehouse_id (rebuild karena UNIQUE berubah);
+  // stok lama dipetakan ke gudang default tiap outlet.
+  const osCols = columnsOf('outlet_stocks')
+  if (!osCols.has('warehouse_id')) {
+    db.run(`CREATE TABLE outlet_stocks_new (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id INTEGER NOT NULL,
+      warehouse_id INTEGER NOT NULL DEFAULT 1,
+      product_id INTEGER NOT NULL,
+      stock INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY(outlet_id) REFERENCES outlets(id),
+      FOREIGN KEY(warehouse_id) REFERENCES warehouses(id),
+      FOREIGN KEY(product_id) REFERENCES products(id),
+      UNIQUE(outlet_id, warehouse_id, product_id)
+    )`)
+    db.run(`INSERT INTO outlet_stocks_new (outlet_id, warehouse_id, product_id, stock)
+      SELECT os.outlet_id,
+             COALESCE((SELECT w.id FROM warehouses w
+                       WHERE w.outlet_id = os.outlet_id AND w.is_default = 1 LIMIT 1), 1),
+             os.product_id, os.stock
+      FROM outlet_stocks os`)
+    db.run('DROP TABLE outlet_stocks')
+    db.run('ALTER TABLE outlet_stocks_new RENAME TO outlet_stocks')
+    changed = true
+  }
+
+  // warehouse_id pada header stok masuk & opname (backfill = gudang default outlet).
+  for (const t of ['stock_entries', 'stock_opnames']) {
+    if (tableExists(t) && !columnsOf(t).has('warehouse_id')) {
+      db.run(`ALTER TABLE ${t} ADD COLUMN warehouse_id INTEGER`)
+      db.run(`UPDATE ${t} SET warehouse_id =
+        (SELECT w.id FROM warehouses w WHERE w.outlet_id = ${t}.outlet_id AND w.is_default = 1 LIMIT 1)`)
+      changed = true
+    }
+  }
   return changed
 }
 

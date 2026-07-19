@@ -6,19 +6,30 @@ import {
   listOpeningProducts,
   type OpeningProduct,
 } from './stockOpeningRepository'
+import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
 
 export default function StockOpeningPage() {
   const { settings } = useSettings()
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
 
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+  const [warehouseId, setWarehouseId] = useState<number>(0)
   const [products, setProducts] = useState<OpeningProduct[]>([])
   const [balances, setBalances] = useState<Record<number, number>>({})
   const [keyword, setKeyword] = useState('')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
-  const reload = () => setProducts(listOpeningProducts(outletId))
-  useEffect(reload, [outletId])
+  useEffect(() => {
+    const ws = listWarehouses(outletId)
+    setWarehouses(ws)
+    setWarehouseId((prev) => (ws.some((w) => w.id === prev) ? prev : ws[0]?.id ?? 0))
+  }, [outletId])
+
+  const reload = () => {
+    if (warehouseId) setProducts(listOpeningProducts(outletId, warehouseId))
+  }
+  useEffect(reload, [outletId, warehouseId])
 
   const showToast = (m: string) => {
     setToast(m)
@@ -49,7 +60,7 @@ export default function StockOpeningPage() {
     if (items.length === 0) return showToast('Belum ada saldo awal yang diisi.')
     setSaving(true)
     try {
-      const n = await applyOpeningBalances(outletId, items)
+      const n = await applyOpeningBalances(outletId, warehouseId, items)
       setBalances({})
       reload()
       showToast(`Saldo awal ${n} produk tersimpan.`)
@@ -64,9 +75,17 @@ export default function StockOpeningPage() {
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Saldo Awal</h1>
-        <span className="hidden text-xs text-ink-soft sm:inline">
-          Setel stok pembuka produk (baseline)
-        </span>
+        <select
+          value={warehouseId}
+          onChange={(e) => setWarehouseId(Number(e.target.value))}
+          className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+        >
+          {warehouses.map((w) => (
+            <option key={w.id} value={w.id}>
+              🏭 {w.name}
+            </option>
+          ))}
+        </select>
         <div className="relative ml-auto">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
             🔍

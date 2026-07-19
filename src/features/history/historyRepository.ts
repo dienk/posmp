@@ -1,4 +1,5 @@
 import { getDb, persist, query } from '../../db/database'
+import { defaultWarehouseId } from '../warehouses/warehousesRepository'
 
 export interface TxSummary {
   id: number
@@ -161,10 +162,11 @@ export async function processRefund(
          VALUES (?, ?, ?, ?)`,
         [refundId, it.product_id, it.quantity, it.unit_price],
       )
-      // Kembalikan stok fisik.
+      // Kembalikan stok fisik ke gudang default.
       db.run(
-        `UPDATE outlet_stocks SET stock = stock + ? WHERE outlet_id = ? AND product_id = ?`,
-        [it.quantity, outletId, it.product_id],
+        `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
+         ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock + ?`,
+        [outletId, defaultWarehouseId(outletId), it.product_id, it.quantity, it.quantity],
       )
     }
 

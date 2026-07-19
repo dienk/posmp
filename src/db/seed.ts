@@ -19,6 +19,12 @@ export function seedDatabase(db: Database): void {
        (1, 'Kasir 2', 'KSR-02', 'Drive-Thru', 1)`,
   )
 
+  // Gudang utama (default) untuk outlet pusat — dipakai kasir untuk potong stok.
+  db.run(
+    `INSERT INTO warehouses (outlet_id, name, code, location, is_default, is_active)
+     VALUES (1, 'Gudang Utama', 'GDG-01', 'Toko', 1, 1)`,
+  )
+
   const categories: Array<[string, string]> = [
     ['Makanan', '#F2C6A1'],
     ['Minuman', '#CFC6D9'],
@@ -47,8 +53,8 @@ export function seedDatabase(db: Database): void {
       [categoryId, name, sku, barcode, price, cost, unit],
     )
     db.run(
-      `INSERT INTO outlet_stocks (outlet_id, product_id, stock)
-       VALUES (1, last_insert_rowid(), ?)`,
+      `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock)
+       VALUES (1, 1, last_insert_rowid(), ?)`,
       [stock],
     )
   }

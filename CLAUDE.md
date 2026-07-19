@@ -47,7 +47,7 @@ di akhir, lalu `publish('...')` event realtime yang relevan.
 ```
 src/
   db/
-    schema.sql          # 27 tabel (sumber kebenaran skema)
+    schema.sql          # 28 tabel (sumber kebenaran skema)
     database.ts         # init sql.js + IndexedDB persist + query/execute
     seed.ts             # data awal (outlet, kategori, produk, meja, app_settings)
   lib/
@@ -89,6 +89,11 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
 - **IndexedDB ter-scope per origin termasuk PORT.** Saat verifikasi dengan
   `npm run preview` di port berbeda, database mulai kosong (seed ulang) — ini
   ekspektasi, bukan bug.
+- **Stok dilacak per gudang.** `outlet_stocks` berkunci `(outlet_id, warehouse_id,
+  product_id)`. Tampilan stok produk (kasir/katalog) = **SUM lintas gudang** —
+  jangan `LEFT JOIN outlet_stocks` (duplikat baris); pakai subquery SUM. Kasir,
+  pre-order, & refund menyentuh **gudang default** outlet (`defaultWarehouseId`).
+  Fitur stok (Stok Masuk/Opname/Saldo Awal/Kartu) beroperasi pada gudang terpilih.
 - **Tiap tab punya salinan sql.js in-memory sendiri.** `dbInstance` singleton per
   tab dimuat sekali saat boot; tulisan tab lain (yang `persist()` ke IndexedDB)
   **tidak** otomatis terlihat. Tampilan read-only lintas-tab (Monitor TV,

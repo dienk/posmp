@@ -1,5 +1,5 @@
 -- ============================================================================
--- POSMerahPutih v1.5 — Skema Database SQLite (27 tabel)
+-- POSMerahPutih v1.5 — Skema Database SQLite (28 tabel)
 -- Local-first: dieksekusi saat inisialisasi database di browser (sql.js).
 -- ============================================================================
 
@@ -42,11 +42,13 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS outlet_stocks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     outlet_id INTEGER NOT NULL,
+    warehouse_id INTEGER NOT NULL DEFAULT 1,   -- stok dilacak per gudang
     product_id INTEGER NOT NULL,
     stock INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY(outlet_id) REFERENCES outlets(id),
+    FOREIGN KEY(warehouse_id) REFERENCES warehouses(id),
     FOREIGN KEY(product_id) REFERENCES products(id),
-    UNIQUE(outlet_id, product_id)
+    UNIQUE(outlet_id, warehouse_id, product_id)
 );
 
 -- 5. Tabel Member (Data Pelanggan, Keanggotaan & Poin Loyalitas)
@@ -228,6 +230,7 @@ CREATE TABLE IF NOT EXISTS suppliers (
 CREATE TABLE IF NOT EXISTS stock_entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     outlet_id INTEGER NOT NULL,
+    warehouse_id INTEGER,
     supplier_id INTEGER,
     reference_number TEXT UNIQUE NOT NULL,
     notes TEXT,
@@ -343,6 +346,7 @@ CREATE TABLE IF NOT EXISTS taxes (
 CREATE TABLE IF NOT EXISTS stock_opnames (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     outlet_id INTEGER NOT NULL,
+    warehouse_id INTEGER,
     reference_number TEXT,
     opname_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     note TEXT,
@@ -359,4 +363,16 @@ CREATE TABLE IF NOT EXISTS stock_opname_details (
     difference INTEGER NOT NULL,
     FOREIGN KEY(opname_id) REFERENCES stock_opnames(id),
     FOREIGN KEY(product_id) REFERENCES products(id)
+);
+
+-- 28. Tabel Gudang (Warehouse per Outlet)
+CREATE TABLE IF NOT EXISTS warehouses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    outlet_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    code TEXT,
+    location TEXT,
+    is_default INTEGER NOT NULL DEFAULT 0,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY(outlet_id) REFERENCES outlets(id)
 );

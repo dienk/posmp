@@ -38,6 +38,7 @@ const DATA_MASTER_GROUP: NavGroupDef = {
   children: [
     { to: '/outlets', label: 'Outlet', short: 'Outlet', icon: '🏬' },
     { to: '/cashiers', label: 'Kasir', short: 'Kasir', icon: '🧑‍💻' },
+    { to: '/warehouses', label: 'Gudang', short: 'Gudang', icon: '🏭' },
     { to: '/master-tables', label: 'Master Meja', short: 'Meja', icon: '🍽️' },
     { to: '/products', label: 'Produk', short: 'Produk', icon: '📦' },
     { to: '/categories', label: 'Kategori Produk', short: 'Kategori', icon: '🏷️' },

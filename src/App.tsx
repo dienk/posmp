@@ -35,6 +35,7 @@ import ContactsPage from './features/contacts/ContactsPage'
 import OutletsPage from './features/outlets/OutletsPage'
 import CashiersPage from './features/cashiers/CashiersPage'
 import MasterTablesPage from './features/tables/MasterTablesPage'
+import WarehousesPage from './features/warehouses/WarehousesPage'
 import UnitsPage from './features/units/UnitsPage'
 import TaxesPage from './features/taxes/TaxesPage'
 import CardDesignPage from './features/membercard/CardDesignPage'
@@ -68,6 +69,7 @@ const router = createHashRouter([
       { path: 'outlets', element: <OutletsPage /> },
       { path: 'cashiers', element: <CashiersPage /> },
       { path: 'master-tables', element: <MasterTablesPage /> },
+      { path: 'warehouses', element: <WarehousesPage /> },
       { path: 'units', element: <UnitsPage /> },
       { path: 'taxes', element: <TaxesPage /> },
       { path: 'settings', element: <SettingsPage /> },

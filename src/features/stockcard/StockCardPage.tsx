@@ -8,6 +8,7 @@ import {
   type MovementKind,
   type StockCardProduct,
 } from './stockCardRepository'
+import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
 
 const KIND_LABEL: Record<MovementKind, string> = {
   MASUK: 'Stok Masuk',
@@ -28,20 +29,23 @@ export default function StockCardPage() {
 
   const [products, setProducts] = useState<StockCardProduct[]>([])
   const [productId, setProductId] = useState<number | null>(null)
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+  const [warehouseId, setWarehouseId] = useState<number>(0) // 0 = semua gudang
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
     const list = listStockCardProducts(outletId)
     setProducts(list)
     setProductId((prev) => prev ?? list[0]?.id ?? null)
+    setWarehouses(listWarehouses(outletId))
   }, [outletId])
 
   // Segarkan kartu saat ada transaksi/opname (order:update).
   useRealtime('order:update', () => setTick((t) => t + 1))
 
   const card = useMemo(
-    () => (productId ? stockCard(productId, outletId) : null),
-    [productId, outletId, tick],
+    () => (productId ? stockCard(productId, outletId, warehouseId || undefined) : null),
+    [productId, outletId, warehouseId, tick],
   )
   const product = useMemo(() => products.find((p) => p.id === productId) ?? null, [products, productId])
   const totals = useMemo(() => {
@@ -56,6 +60,18 @@ export default function StockCardPage() {
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Kartu Stock</h1>
+        <select
+          value={warehouseId}
+          onChange={(e) => setWarehouseId(Number(e.target.value))}
+          className="ml-auto rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
+        >
+          <option value={0}>Semua Gudang</option>
+          {warehouses.map((w) => (
+            <option key={w.id} value={w.id}>
+              🏭 {w.name}
+            </option>
+          ))}
+        </select>
         <select
           value={productId ?? ''}
           onChange={(e) => setProductId(Number(e.target.value))}

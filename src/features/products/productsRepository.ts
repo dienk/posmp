@@ -1,5 +1,6 @@
 import { execute, getDb, persist, query } from '../../db/database'
 import type { Category, Product } from '../../types'
+import { defaultWarehouseId } from '../warehouses/warehousesRepository'
 
 export function listCategories(): Category[] {
   return query<Category>('SELECT id, name, color_code FROM categories ORDER BY name')
@@ -45,14 +46,17 @@ export async function deleteCategory(id: number): Promise<void> {
 const PRODUCT_COLS = `p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
             p.unit, p.min_stock, p.description, p.is_active, p.image_path`
 
+// Stok total produk pada outlet = jumlah stok lintas gudang.
+const STOCK_SUM = `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
+            WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock`
+
 export function listProducts(outletId: number): Product[] {
   return query<Product>(
     `SELECT ${PRODUCT_COLS},
             c.name AS category_name,
-            COALESCE(os.stock, 0) AS stock
+            ${STOCK_SUM}
      FROM products p
      LEFT JOIN categories c ON c.id = p.category_id
-     LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
      ORDER BY p.name`,
     [outletId],
   )
@@ -69,10 +73,9 @@ export function findByBarcode(code: string, outletId: number): Product | null {
     query<Product>(
       `SELECT ${PRODUCT_COLS},
               c.name AS category_name,
-              COALESCE(os.stock, 0) AS stock
+              ${STOCK_SUM}
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
-       LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
        WHERE p.is_active = 1 AND (p.barcode = ? OR p.sku = ?)
        LIMIT 1`,
       [outletId, c, c],
@@ -119,8 +122,9 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
       ],
     )
     id = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
-    db.run('INSERT INTO outlet_stocks (outlet_id, product_id, stock) VALUES (?, ?, 0)', [
+    db.run('INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, 0)', [
       outletId,
+      defaultWarehouseId(outletId),
       id,
     ])
     db.run('COMMIT')

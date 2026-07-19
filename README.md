@@ -9,7 +9,7 @@ native (Tauri / Capacitor).
 
 ## Fitur pada foundation ini (Milestone 1)
 
-- ⚙️ Inisialisasi database SQLite lokal dengan **27 tabel** (lihat `src/db/schema.sql`),
+- ⚙️ Inisialisasi database SQLite lokal dengan **28 tabel** (lihat `src/db/schema.sql`),
   dipersist otomatis ke **IndexedDB** — data bertahan walau browser ditutup.
 - 🧩 Modularitas fitur lewat tabel `app_settings` (KDS, Table Layout, Self-Order,
   Marketplace, Queue bisa dinyalakan/dimatikan).
@@ -37,7 +37,7 @@ npm run preview
 
 ```
 src/
-  db/            # schema.sql (27 tabel), database.ts (sql.js + IndexedDB), seed.ts
+  db/            # schema.sql (28 tabel), database.ts (sql.js + IndexedDB), seed.ts
   features/
     pos/         # Layar kasir: PosPage, ProductCard, CartPanel, useCart, posRepository
     tables/      # (roadmap) Interactive Table Layout
@@ -95,6 +95,7 @@ src/
 | **M40** ✅ | **Stok Masuk & Supplier lebih lengkap** (3 tab): **Penerimaan** (form + subtotal per baris & total qty/modal), **Supplier CRUD** (nama, kontak, telepon, alamat, status aktif; jumlah pemakaian; edit/hapus dijaga bila sudah dipakai penerimaan), **Riwayat** (daftar + total modal per penerimaan → detail baris item: produk, qty, modal, subtotal, total, catatan). |
 | **M41** ✅ | **Penerimaan: input waktu + Update/Delete Riwayat**: field **Waktu Penerimaan** (datetime-local, disimpan ke `entry_date`); **Edit** memuat penerimaan ke form & **menyesuaikan stok dengan selisih** (qty baru − lama), **Hapus** mengembalikan (mengurangi) stok — keduanya dijaga agar stok tak minus (barang sudah terpakai) & dalam satu transaksi SQL + publish `order:update`. |
 | **M42** ✅ | **Menu "Saldo Awal"** (grup Stock): lembar setel **stok pembuka (baseline)** per produk — input saldo awal + selisih vs stok saat ini; simpan menyetel `outlet_stocks.stock` **langsung** ke nilai tersebut (upsert, bukan penambahan). Berbeda dari Stock Opname yang mencatat selisih sebagai mutasi. |
+| **M43** ✅ | **Gudang (Warehouse) — stok per gudang**: **Data Master › Gudang** (CRUD gudang per outlet + gudang **default**). Tabel `warehouses` (28) + kolom `warehouse_id` pada `outlet_stocks` (stok kini per outlet+gudang; migrasi otomatis me-rebuild & memetakan stok lama ke gudang default) serta pada header `stock_entries`/`stock_opnames`. **Kasir** memotong/mengembalikan stok dari **gudang default** (pre-order/refund idem); tampilan stok = **jumlah lintas gudang**. Seluruh fitur stok (Stok Masuk, Saldo Awal, Stock Opname, Kartu Stock) kini punya **pemilih gudang**. |
 
 ### Sinkronisasi real-time (local-first)
 
@@ -111,6 +112,7 @@ jadi `publish()` juga men-_deliver_ ke pelanggan lokal agar layar pemicu ikut me
 | `#/` | Kasir (POS) — + diskon voucher |
 | `#/outlets` | Data Master › Outlet (cabang) |
 | `#/cashiers` | Data Master › Kasir (titik kasir per outlet) |
+| `#/warehouses` | Data Master › Gudang (CRUD gudang per outlet) |
 | `#/master-tables` | Data Master › Master Meja (kapasitas standar & maksimum) |
 | `#/products` | Data Master › Produk (katalog) |
 | `#/categories` | Data Master › Kategori Produk |

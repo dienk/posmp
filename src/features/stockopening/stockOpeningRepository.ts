@@ -9,15 +9,16 @@ export interface OpeningProduct {
   system_stock: number
 }
 
-/** Produk aktif + stok saat ini pada outlet, untuk lembar saldo awal. */
-export function listOpeningProducts(outletId: number): OpeningProduct[] {
+/** Produk aktif + stok saat ini pada gudang, untuk lembar saldo awal. */
+export function listOpeningProducts(outletId: number, warehouseId: number): OpeningProduct[] {
   return query<OpeningProduct>(
-    `SELECT p.id, p.name, p.sku, p.unit, COALESCE(os.stock, 0) AS system_stock
+    `SELECT p.id, p.name, p.sku, p.unit,
+            COALESCE((SELECT stock FROM outlet_stocks os
+                      WHERE os.product_id = p.id AND os.outlet_id = ? AND os.warehouse_id = ?), 0) AS system_stock
      FROM products p
-     LEFT JOIN outlet_stocks os ON os.product_id = p.id AND os.outlet_id = ?
      WHERE p.is_active = 1
      ORDER BY p.name`,
-    [outletId],
+    [outletId, warehouseId],
   )
 }
 
@@ -33,6 +34,7 @@ export interface OpeningBalance {
  */
 export async function applyOpeningBalances(
   outletId: number,
+  warehouseId: number,
   balances: OpeningBalance[],
 ): Promise<number> {
   const items = balances.filter((b) => Number.isFinite(b.qty) && b.qty >= 0)
@@ -43,9 +45,9 @@ export async function applyOpeningBalances(
   try {
     for (const b of items) {
       db.run(
-        `INSERT INTO outlet_stocks (outlet_id, product_id, stock) VALUES (?, ?, ?)
-         ON CONFLICT(outlet_id, product_id) DO UPDATE SET stock = excluded.stock`,
-        [outletId, b.productId, b.qty],
+        `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
+         ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = excluded.stock`,
+        [outletId, warehouseId, b.productId, b.qty],
       )
     }
     db.run('COMMIT')

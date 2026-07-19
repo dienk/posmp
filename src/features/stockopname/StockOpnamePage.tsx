@@ -9,11 +9,14 @@ import {
   type OpnameProduct,
   type OpnameSummary,
 } from './stockOpnameRepository'
+import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
 
 export default function StockOpnamePage() {
   const { settings } = useSettings()
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
 
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+  const [warehouseId, setWarehouseId] = useState<number>(0)
   const [products, setProducts] = useState<OpnameProduct[]>([])
   const [counts, setCounts] = useState<Record<number, number>>({})
   const [keyword, setKeyword] = useState('')
@@ -23,11 +26,18 @@ export default function StockOpnamePage() {
   const [toast, setToast] = useState<string | null>(null)
   const scanRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    const ws = listWarehouses(outletId)
+    setWarehouses(ws)
+    setWarehouseId((prev) => (ws.some((w) => w.id === prev) ? prev : ws[0]?.id ?? 0))
+  }, [outletId])
+
   const reload = () => {
-    setProducts(listOpnameProducts(outletId))
-    setLast(lastOpname(outletId))
+    if (!warehouseId) return
+    setProducts(listOpnameProducts(outletId, warehouseId))
+    setLast(lastOpname(outletId, warehouseId))
   }
-  useEffect(reload, [outletId])
+  useEffect(reload, [outletId, warehouseId])
 
   useEffect(() => {
     if (scanMode) scanRef.current?.focus()
@@ -57,7 +67,7 @@ export default function StockOpnamePage() {
   const handleScan = () => {
     const code = keyword.trim()
     if (!code) return
-    const found = findOpnameProduct(code, outletId)
+    const found = findOpnameProduct(code, outletId, warehouseId)
     if (!found) {
       showToast(`Barcode "${code}" tidak ditemukan.`)
     } else {
@@ -103,7 +113,7 @@ export default function StockOpnamePage() {
     }
     setSaving(true)
     try {
-      const res = await applyOpname(outletId, items)
+      const res = await applyOpname(outletId, warehouseId, items)
       setCounts({})
       reload()
       showToast(`Opname disimpan · ${res.adjusted} item · selisih ${res.totalDiff >= 0 ? '+' : ''}${res.totalDiff}`)
@@ -118,6 +128,17 @@ export default function StockOpnamePage() {
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Stock Opname</h1>
+        <select
+          value={warehouseId}
+          onChange={(e) => setWarehouseId(Number(e.target.value))}
+          className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+        >
+          {warehouses.map((w) => (
+            <option key={w.id} value={w.id}>
+              🏭 {w.name}
+            </option>
+          ))}
+        </select>
         {last && (
           <span className="text-xs text-ink-soft">
             Terakhir: {last.reference_number ?? '—'} · {last.opname_date}

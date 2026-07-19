@@ -20,6 +20,7 @@ import {
   type Supplier,
   type SupplierWithUsage,
 } from './stockInRepository'
+import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
 
 /** Waktu sekarang dalam format input datetime-local (YYYY-MM-DDTHH:MM). */
 function nowLocalInput(): string {
@@ -59,10 +60,12 @@ export default function StockInPage() {
   const [allSuppliers, setAllSuppliers] = useState<SupplierWithUsage[]>([])
   const [products, setProducts] = useState<StockProduct[]>([])
   const [entries, setEntries] = useState<StockEntrySummary[]>([])
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [toast, setToast] = useState<string | null>(null)
 
   // Form penerimaan
   const [supplierId, setSupplierId] = useState<number | ''>('')
+  const [warehouseId, setWarehouseId] = useState<number>(0)
   const [notes, setNotes] = useState('')
   const [entryDate, setEntryDate] = useState(nowLocalInput)
   const [lines, setLines] = useState<Line[]>([])
@@ -83,6 +86,11 @@ export default function StockInPage() {
     setEntries(listStockEntries(outletId))
   }
   useEffect(reloadRefs, [outletId])
+  useEffect(() => {
+    const ws = listWarehouses(outletId)
+    setWarehouses(ws)
+    setWarehouseId((prev) => (ws.some((w) => w.id === prev) ? prev : ws[0]?.id ?? 0))
+  }, [outletId])
   useEffect(() => {
     setDetail(selectedEntry ? stockEntryDetail(selectedEntry) : null)
   }, [selectedEntry, entries])
@@ -113,6 +121,7 @@ export default function StockInPage() {
     setNotes('')
     setSupplierId('')
     setEntryDate(nowLocalInput())
+    setWarehouseId(warehouses[0]?.id ?? 0)
     setEditingEntryId(null)
   }
 
@@ -129,6 +138,7 @@ export default function StockInPage() {
           supplierId: supplierId === '' ? null : supplierId,
           notes,
           entryDate: toSqlDatetime(entryDate),
+          warehouseId,
           lines: payloadLines,
         })
         showToast('Penerimaan diperbarui.')
@@ -139,6 +149,7 @@ export default function StockInPage() {
           notes,
           payloadLines,
           toSqlDatetime(entryDate),
+          warehouseId,
         )
         showToast(`Stok masuk tercatat · ${ref}`)
       }
@@ -153,6 +164,7 @@ export default function StockInPage() {
     setSupplierId('') // supplier_id tak tersedia di detail; pilih ulang bila perlu
     setNotes(d.notes ?? '')
     setEntryDate(sqlToLocalInput(d.entry_date))
+    setWarehouseId(d.warehouse_id ?? warehouses[0]?.id ?? 0)
     setLines(d.lines.map((l) => ({ productId: l.product_id, quantity: l.quantity, costPrice: l.cost_price ?? 0 })))
     setEditingEntryId(d.id)
     setTab('penerimaan')
@@ -252,7 +264,21 @@ export default function StockInPage() {
                 </button>
               )}
             </div>
-            <div className="mb-3 grid gap-3 sm:grid-cols-3">
+            <div className="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-ink-soft">Gudang</span>
+                <select
+                  className={inputCls}
+                  value={warehouseId}
+                  onChange={(e) => setWarehouseId(Number(e.target.value))}
+                >
+                  {warehouses.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-soft">Supplier</span>
                 <select
@@ -540,7 +566,7 @@ export default function StockInPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-ink">{e.reference_number}</p>
                           <p className="truncate text-xs text-ink-soft">
-                            {e.supplier_name ?? 'Tanpa supplier'} · {e.line_count} item · {e.total_qty} pcs · {e.entry_date}
+                            🏭 {e.warehouse_name ?? '—'} · {e.supplier_name ?? 'Tanpa supplier'} · {e.total_qty} pcs · {e.entry_date}
                           </p>
                         </div>
                         <span className="shrink-0 text-sm font-bold text-ink">
@@ -558,7 +584,8 @@ export default function StockInPage() {
                 <div className="rounded-card bg-white p-5 shadow-card">
                   <h2 className="text-base font-bold text-ink">{detail.reference_number}</h2>
                   <p className="mb-3 text-xs text-ink-soft">
-                    {detail.supplier_name ?? 'Tanpa supplier'} · {detail.entry_date}
+                    🏭 {detail.warehouse_name ?? '—'} · {detail.supplier_name ?? 'Tanpa supplier'} ·{' '}
+                    {detail.entry_date}
                   </p>
                   <table className="mb-3 w-full text-sm">
                     <thead>
