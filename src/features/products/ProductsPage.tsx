@@ -10,6 +10,7 @@ import {
   deleteProduct,
   listCategories,
   listProducts,
+  parseImages,
   updateProduct,
   type ProductInput,
 } from './productsRepository'
@@ -27,7 +28,7 @@ const EMPTY: ProductInput = {
   minStock: 0,
   description: '',
   isActive: 1,
-  imagePath: null,
+  images: [],
 }
 
 
@@ -83,7 +84,7 @@ export default function ProductsPage() {
       minStock: p.min_stock ?? 0,
       description: p.description ?? '',
       isActive: p.is_active ?? 1,
-      imagePath: p.image_path ?? null,
+      images: parseImages(p.images, p.image_path),
     })
     setEditingId(p.id)
   }
@@ -110,16 +111,26 @@ export default function ProductsPage() {
   }
 
   const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const files = Array.from(e.target.files ?? [])
     e.target.value = '' // izinkan pilih file sama lagi
-    if (!file) return
+    if (files.length === 0) return
     try {
-      const dataUrl = await fileToScaledDataUrl(file, 320)
-      setForm((f) => ({ ...f, imagePath: dataUrl }))
+      const urls = await Promise.all(files.map((f) => fileToScaledDataUrl(f, 320)))
+      setForm((f) => ({ ...f, images: [...f.images, ...urls] }))
     } catch {
       showToast('Gagal memuat gambar.')
     }
   }
+
+  const removeImage = (idx: number) =>
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== idx) }))
+  const makeMainImage = (idx: number) =>
+    setForm((f) => {
+      if (idx === 0) return f
+      const next = [...f.images]
+      const [pick] = next.splice(idx, 1)
+      return { ...f, images: [pick, ...next] }
+    })
 
   const remove = async (id: number) => {
     try {
@@ -253,35 +264,57 @@ export default function ProductsPage() {
               </h2>
               <div className="space-y-3">
                 <div>
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Gambar produk</span>
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg border border-black/10 bg-background">
-                      {form.imagePath ? (
-                        <img
-                          src={form.imagePath}
-                          alt="Pratinjau produk"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-2xl text-ink-soft">🖼️</span>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <label className="cursor-pointer rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-soft">
-                        {form.imagePath ? 'Ganti gambar' : 'Unggah gambar'}
-                        <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
-                      </label>
-                      {form.imagePath && (
-                        <button
-                          type="button"
-                          onClick={() => setForm((f) => ({ ...f, imagePath: null }))}
-                          className="text-xs font-semibold text-status-occupied hover:opacity-70"
-                        >
-                          Hapus gambar
-                        </button>
-                      )}
-                    </div>
+                  <span className="mb-1 block text-xs font-medium text-ink-soft">
+                    Gambar produk {form.images.length > 0 && `(${form.images.length})`}
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {form.images.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="group relative h-20 w-20 overflow-hidden rounded-lg border border-black/10 bg-background"
+                      >
+                        <img src={img} alt={`Gambar ${idx + 1}`} className="h-full w-full object-cover" />
+                        {idx === 0 && (
+                          <span className="absolute left-1 top-1 rounded bg-status-occupied px-1 py-0.5 text-[9px] font-bold text-white">
+                            Utama
+                          </span>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 flex justify-between bg-ink/60 px-1 py-0.5 opacity-0 transition group-hover:opacity-100">
+                          {idx !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => makeMainImage(idx)}
+                              title="Jadikan gambar utama"
+                              className="text-[10px] font-semibold text-white hover:text-brand"
+                            >
+                              ★ Utama
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(idx)}
+                            title="Hapus gambar"
+                            className="ml-auto text-[10px] font-semibold text-white hover:text-status-occupied"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <label className="grid h-20 w-20 shrink-0 cursor-pointer place-items-center rounded-lg border border-dashed border-black/20 bg-background px-1 text-center text-xs font-semibold text-ink-soft hover:border-brand-strong hover:bg-brand-soft">
+                      <span>＋ Gambar</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleImage}
+                      />
+                    </label>
                   </div>
+                  <p className="mt-1 text-[11px] text-ink-soft">
+                    Bisa unggah beberapa gambar. Gambar pertama (Utama) dipakai di kartu produk &amp; kasir.
+                  </p>
                 </div>
                 <label className="block">
                   <span className="mb-1 block text-xs font-medium text-ink-soft">Nama produk</span>

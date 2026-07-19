@@ -44,7 +44,7 @@ export async function deleteCategory(id: number): Promise<void> {
 }
 
 const PRODUCT_COLS = `p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
-            p.unit, p.min_stock, p.description, p.is_active, p.image_path`
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.images`
 
 // Stok total produk pada outlet = jumlah stok lintas gudang.
 const STOCK_SUM = `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
@@ -94,19 +94,29 @@ export interface ProductInput {
   minStock: number
   description: string | null
   isActive: number
-  imagePath: string | null
+  images: string[]
+}
+
+/** Gambar utama = gambar pertama; JSON semua gambar disimpan di kolom images. */
+function imageCols(images: string[]): { imagePath: string | null; imagesJson: string | null } {
+  const list = images.filter((s) => !!s)
+  return {
+    imagePath: list[0] ?? null,
+    imagesJson: list.length ? JSON.stringify(list) : null,
+  }
 }
 
 /** Buat produk baru + baris stok awal (0) pada outlet aktif, satu transaksi SQL. */
 export async function createProduct(input: ProductInput, outletId: number): Promise<number> {
   const db = getDb()
   let id = 0
+  const { imagePath, imagesJson } = imageCols(input.images)
   db.run('BEGIN')
   try {
     db.run(
       `INSERT INTO products
-         (category_id, name, sku, barcode, price, cost_price, unit, min_stock, description, is_active, image_path)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (category_id, name, sku, barcode, price, cost_price, unit, min_stock, description, is_active, image_path, images)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.categoryId,
         input.name.trim(),
@@ -118,7 +128,8 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
         input.minStock,
         input.description?.trim() || null,
         input.isActive,
-        input.imagePath || null,
+        imagePath,
+        imagesJson,
       ],
     )
     id = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
@@ -137,10 +148,11 @@ export async function createProduct(input: ProductInput, outletId: number): Prom
 }
 
 export async function updateProduct(id: number, input: ProductInput): Promise<void> {
+  const { imagePath, imagesJson } = imageCols(input.images)
   await execute(
     `UPDATE products
      SET category_id = ?, name = ?, sku = ?, barcode = ?, price = ?, cost_price = ?,
-         unit = ?, min_stock = ?, description = ?, is_active = ?, image_path = ?
+         unit = ?, min_stock = ?, description = ?, is_active = ?, image_path = ?, images = ?
      WHERE id = ?`,
     [
       input.categoryId,
@@ -153,10 +165,24 @@ export async function updateProduct(id: number, input: ProductInput): Promise<vo
       input.minStock,
       input.description?.trim() || null,
       input.isActive,
-      input.imagePath || null,
+      imagePath,
+      imagesJson,
       id,
     ],
   )
+}
+
+/** Parse kolom `images` (JSON) → array; fallback ke image_path lama bila perlu. */
+export function parseImages(imagesJson: string | null, imagePath: string | null): string[] {
+  if (imagesJson) {
+    try {
+      const arr = JSON.parse(imagesJson)
+      if (Array.isArray(arr)) return arr.filter((s): s is string => typeof s === 'string')
+    } catch {
+      /* abaikan JSON rusak */
+    }
+  }
+  return imagePath ? [imagePath] : []
 }
 
 /** Hapus produk. Menolak bila sudah dipakai transaksi/penerimaan stok. */

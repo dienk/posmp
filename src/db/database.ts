@@ -174,6 +174,7 @@ function migrateSchema(db: Database): boolean {
     ['min_stock', 'INTEGER DEFAULT 0'],
     ['description', 'TEXT'],
     ['is_active', 'INTEGER NOT NULL DEFAULT 1'],
+    ['images', 'TEXT'],
   ]
   for (const [name, def] of productAdds) {
     if (!productCols.has(name)) {

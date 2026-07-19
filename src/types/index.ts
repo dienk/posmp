@@ -37,6 +37,7 @@ export interface Product {
   description: string | null
   is_active: number
   image_path: string | null
+  images: string | null // JSON array data URL semua gambar
   category_name?: string | null
   stock?: number
 }

@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS products (
     min_stock INTEGER DEFAULT 0,      -- stok minimum (titik pemesanan ulang)
     description TEXT,                 -- deskripsi produk
     is_active INTEGER NOT NULL DEFAULT 1,
-    image_path TEXT,
+    image_path TEXT,                  -- gambar utama (= gambar pertama), untuk kartu/kasir
+    images TEXT,                      -- JSON array data URL semua gambar produk
     FOREIGN KEY(category_id) REFERENCES categories(id)
 );
 
