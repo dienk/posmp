@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
-import { getNumberSetting } from '../../lib/settings'
+import { getNumberSetting, isModuleEnabled } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
+import { updateAppSettings } from '../settings/settingsRepository'
+import { currentShift, getScheduleConfig, isOpenNow } from '../schedule/scheduleConfig'
 import {
   salesBySource,
   salesSummary,
@@ -11,12 +13,30 @@ import {
   type SourceRow,
   type TopProduct,
 } from './reportsRepository'
+import { computeRange, formatRangeLabel, RANGE_PRESETS, type RangePreset } from './dateRange'
 import {
-  computeRange,
-  formatRangeLabel,
-  RANGE_PRESETS,
-  type RangePreset,
-} from './dateRange'
+  DASHBOARD_WIDGETS,
+  dashboardWidgetsToSettings,
+  getDashboardWidgets,
+} from './dashboardConfig'
+import {
+  cashStatus,
+  memberStats,
+  opsStats,
+  otherTxStats,
+  paymentsBreakdown,
+  recentTransactions,
+  stockStats,
+  voucherStats,
+  type CashStatus,
+  type MemberStats,
+  type OpsStats,
+  type OtherTxStats,
+  type PaymentRow,
+  type RecentTx,
+  type StockStats,
+  type VoucherStats,
+} from './dashboardData'
 
 const SOURCE_LABEL: Record<string, string> = {
   POS_OFFLINE: 'Kasir',
@@ -25,14 +45,34 @@ const SOURCE_LABEL: Record<string, string> = {
   TOKOPEDIA: 'Tokopedia',
   TIKTOK: 'TikTok',
 }
+const METHOD_LABEL: Record<string, string> = {
+  CASH: 'Tunai',
+  QRIS: 'QRIS',
+  DEBIT_CARD: 'Debit',
+  CREDIT_CARD: 'Kredit',
+  VOUCHER: 'Voucher',
+}
 
 export default function DashboardPage() {
-  const { settings } = useSettings()
+  const { settings, reloadSettings } = useSettings()
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
+  const schedule = useMemo(() => getScheduleConfig(settings), [settings])
 
   const [summary, setSummary] = useState<SalesSummary | null>(null)
   const [sources, setSources] = useState<SourceRow[]>([])
   const [top, setTop] = useState<TopProduct[]>([])
+  const [pays, setPays] = useState<PaymentRow[]>([])
+  const [members, setMembers] = useState<MemberStats | null>(null)
+  const [stock, setStock] = useState<StockStats | null>(null)
+  const [cash, setCash] = useState<CashStatus | null>(null)
+  const [vouchers, setVouchers] = useState<VoucherStats | null>(null)
+  const [other, setOther] = useState<OtherTxStats | null>(null)
+  const [ops, setOps] = useState<OpsStats | null>(null)
+  const [recent, setRecent] = useState<RecentTx[]>([])
+
+  // Widget show/hide.
+  const [enabled, setEnabled] = useState<Set<string>>(() => getDashboardWidgets(settings))
+  const [showConfig, setShowConfig] = useState(false)
 
   // Filter tanggal.
   const [preset, setPreset] = useState<RangePreset>('day')
@@ -48,12 +88,49 @@ export default function DashboardPage() {
     setSummary(salesSummary(outletId, range))
     setSources(salesBySource(outletId, range))
     setTop(topProducts(outletId, range))
+    setPays(paymentsBreakdown(outletId, range))
+    setMembers(memberStats())
+    setStock(stockStats(outletId))
+    setCash(cashStatus(outletId))
+    setVouchers(voucherStats())
+    setOther(otherTxStats(outletId, range))
+    setOps(opsStats(outletId))
+    setRecent(recentTransactions(outletId))
   }, [outletId, range])
   useEffect(reload, [reload])
   useRealtime('order:update', reload)
 
   const maxQty = useMemo(() => Math.max(1, ...top.map((t) => t.qty)), [top])
   const maxSource = useMemo(() => Math.max(1, ...sources.map((s) => s.total)), [sources])
+  const maxPay = useMemo(() => Math.max(1, ...pays.map((p) => p.total)), [pays])
+  const now = useMemo(() => new Date(), [])
+
+  // Tampil bila widget aktif & modulnya (jika ada) aktif.
+  const has = (key: string): boolean => {
+    if (!enabled.has(key)) return false
+    const w = DASHBOARD_WIDGETS.find((d) => d.key === key)
+    if (w?.moduleKey && !isModuleEnabled(settings, w.moduleKey)) return false
+    return true
+  }
+
+  const toggle = (key: string) =>
+    setEnabled((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+
+  const saveConfig = async () => {
+    await updateAppSettings(dashboardWidgetsToSettings([...enabled]))
+    reloadSettings()
+    setShowConfig(false)
+  }
+
+  const storeOpen = isOpenNow(schedule, now)
+  const shift = currentShift(schedule, now)
+  const anyStat = has('store_status') || has('cash') || has('members') || has('stock') || has('vouchers') || has('other_tx') || has('operations')
+  const anyChart = has('by_source') || has('top_products') || has('payments')
 
   return (
     <div className="flex h-full flex-col">
@@ -63,6 +140,12 @@ export default function DashboardPage() {
           Ringkasan · {formatRangeLabel(range)}
         </span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowConfig(true)}
+            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
+          >
+            ⚙ Atur Widget
+          </button>
           <span className="text-xs font-medium text-ink-soft">📅 Periode</span>
           <select
             value={preset}
@@ -98,75 +181,214 @@ export default function DashboardPage() {
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
-        {/* KPI tiles */}
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Kpi label="Penjualan" value={formatRupiah(summary?.total_sales ?? 0)} accent />
-          <Kpi label="Transaksi" value={String(summary?.tx_count ?? 0)} />
-          <Kpi label="Item Terjual" value={String(summary?.items_sold ?? 0)} />
-          <Kpi label="Rata-rata / Nota" value={formatRupiah(summary?.avg_ticket ?? 0)} />
-        </div>
+        {/* KPI penjualan */}
+        {has('kpi_sales') && (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <Kpi label="Penjualan" value={formatRupiah(summary?.total_sales ?? 0)} accent />
+            <Kpi label="Transaksi" value={String(summary?.tx_count ?? 0)} />
+            <Kpi label="Item Terjual" value={String(summary?.items_sold ?? 0)} />
+            <Kpi label="Rata-rata / Nota" value={formatRupiah(summary?.avg_ticket ?? 0)} />
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <section className="rounded-card bg-white p-5 shadow-card">
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
-              Penjualan per Sumber
-            </h2>
-            {sources.length === 0 ? (
-              <p className="py-6 text-center text-sm text-ink-soft">
-                Belum ada penjualan pada periode ini.
-              </p>
-            ) : (
-              <ul className="space-y-3">
+        {/* Kartu ringkasan modul */}
+        {anyStat && (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+            {has('store_status') && (
+              <StatCard icon="🕒" title="Status Toko">
+                <span
+                  className={
+                    'inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ' +
+                    (storeOpen ? 'bg-status-empty/15 text-status-empty' : 'bg-status-occupied/15 text-status-occupied')
+                  }
+                >
+                  {storeOpen ? 'Buka' : 'Tutup'}
+                </span>
+                {schedule.shiftEnabled && (
+                  <p className="mt-2 text-sm text-ink-soft">Shift: {shift?.name ?? '—'}</p>
+                )}
+              </StatCard>
+            )}
+            {has('cash') && cash && (
+              <StatCard icon="💵" title="Saldo Kas">
+                <span
+                  className={
+                    'inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ' +
+                    (cash.open ? 'bg-status-empty/15 text-status-empty' : 'bg-ink/10 text-ink-soft')
+                  }
+                >
+                  {cash.open ? `Buka${cash.shift ? ' · ' + cash.shift : ''}` : 'Tertutup'}
+                </span>
+                <MiniStat label="Tunai hari ini" value={formatRupiah(cash.cashSalesToday)} />
+              </StatCard>
+            )}
+            {has('members') && members && (
+              <StatCard icon="⭐" title="Member">
+                <p className="text-2xl font-extrabold text-ink">{members.total}</p>
+                <MiniStat label="Aktif" value={String(members.active)} />
+                <MiniStat label="Total poin" value={members.points.toLocaleString('id-ID')} />
+              </StatCard>
+            )}
+            {has('stock') && stock && (
+              <StatCard icon="📦" title="Stok">
+                <p className="text-2xl font-extrabold text-ink">{stock.products}<span className="text-sm font-medium text-ink-soft"> produk</span></p>
+                <MiniStat label="Stok menipis" value={String(stock.lowStock)} warn={stock.lowStock > 0} />
+                <MiniStat label="Nilai stok" value={formatRupiah(stock.stockValue)} />
+              </StatCard>
+            )}
+            {has('vouchers') && vouchers && (
+              <StatCard icon="🎟️" title="Voucher">
+                <p className="text-2xl font-extrabold text-ink">{vouchers.active}<span className="text-sm font-medium text-ink-soft"> aktif</span></p>
+                <MiniStat label="Terpakai" value={String(vouchers.used)} />
+              </StatCard>
+            )}
+            {has('other_tx') && other && (
+              <StatCard icon="↩️" title="Refund · PO · Cicilan">
+                <MiniStat label="Refund" value={`${other.refundCount} · ${formatRupiah(other.refundTotal)}`} />
+                <MiniStat label="Pre-Order" value={`${other.preorderPending} pending`} />
+                <MiniStat label="Cicilan sisa" value={formatRupiah(other.installmentRemaining)} />
+              </StatCard>
+            )}
+            {has('operations') && ops && (
+              <StatCard icon="🍽️" title="Operasional">
+                <MiniStat label="Meja terisi" value={`${ops.occupied}`} />
+                <MiniStat label="Antrean" value={`${ops.queue}`} />
+                <MiniStat label="Tiket dapur" value={`${ops.kds}`} />
+              </StatCard>
+            )}
+          </div>
+        )}
+
+        {/* Grafik */}
+        {anyChart && (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            {has('by_source') && (
+              <BarCard title="Penjualan per Sumber" empty={sources.length === 0}>
                 {sources.map((s) => (
-                  <li key={s.order_source}>
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span className="font-medium text-ink">
-                        {SOURCE_LABEL[s.order_source] ?? s.order_source}
-                        <span className="ml-2 text-xs text-ink-soft">{s.tx_count} tx</span>
-                      </span>
-                      <span className="font-semibold text-ink">{formatRupiah(s.total)}</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-background">
-                      <div
-                        className="h-full rounded-full bg-brand-strong"
-                        style={{ width: `${(s.total / maxSource) * 100}%` }}
-                      />
-                    </div>
-                  </li>
+                  <Bar
+                    key={s.order_source}
+                    label={SOURCE_LABEL[s.order_source] ?? s.order_source}
+                    hint={`${s.tx_count} tx`}
+                    right={formatRupiah(s.total)}
+                    pct={(s.total / maxSource) * 100}
+                    color="bg-brand-strong"
+                  />
                 ))}
-              </ul>
+              </BarCard>
             )}
-          </section>
-
-          <section className="rounded-card bg-white p-5 shadow-card">
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
-              Produk Terlaris
-            </h2>
-            {top.length === 0 ? (
-              <p className="py-6 text-center text-sm text-ink-soft">Belum ada data.</p>
-            ) : (
-              <ul className="space-y-3">
+            {has('top_products') && (
+              <BarCard title="Produk Terlaris" empty={top.length === 0}>
                 {top.map((p) => (
-                  <li key={p.name}>
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span className="font-medium text-ink">{p.name}</span>
-                      <span className="text-ink-soft">
-                        {p.qty} pcs · {formatRupiah(p.revenue)}
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-background">
-                      <div
-                        className="h-full rounded-full bg-surface"
-                        style={{ width: `${(p.qty / maxQty) * 100}%` }}
-                      />
-                    </div>
-                  </li>
+                  <Bar
+                    key={p.name}
+                    label={p.name}
+                    right={`${p.qty} · ${formatRupiah(p.revenue)}`}
+                    pct={(p.qty / maxQty) * 100}
+                    color="bg-surface"
+                  />
                 ))}
-              </ul>
+              </BarCard>
             )}
+            {has('payments') && (
+              <BarCard title="Metode Pembayaran" empty={pays.length === 0}>
+                {pays.map((p) => (
+                  <Bar
+                    key={p.method}
+                    label={METHOD_LABEL[p.method] ?? p.method}
+                    right={formatRupiah(p.total)}
+                    pct={(p.total / maxPay) * 100}
+                    color="bg-status-empty"
+                  />
+                ))}
+              </BarCard>
+            )}
+          </div>
+        )}
+
+        {/* Transaksi terkini */}
+        {has('recent') && (
+          <section className="overflow-hidden rounded-card bg-white shadow-card">
+            <h2 className="border-b border-black/5 px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+              Transaksi Terkini
+            </h2>
+            <ul className="divide-y divide-black/5">
+              {recent.map((t) => (
+                <li key={t.invoice_number} className="flex items-center justify-between px-5 py-2.5 text-sm">
+                  <span className="font-semibold text-ink">{t.invoice_number}</span>
+                  <span className="text-xs text-ink-soft">{t.transaction_date}</span>
+                  <span className="font-semibold text-ink">{formatRupiah(t.total_amount)}</span>
+                  <span
+                    className={
+                      'rounded-full px-2 py-0.5 text-xs font-semibold ' +
+                      (t.status === 'REFUNDED'
+                        ? 'bg-status-occupied/15 text-status-occupied'
+                        : 'bg-status-empty/15 text-status-empty')
+                    }
+                  >
+                    {t.status === 'REFUNDED' ? 'Refund' : 'Lunas'}
+                  </span>
+                </li>
+              ))}
+              {recent.length === 0 && (
+                <li className="px-5 py-6 text-center text-sm text-ink-soft">Belum ada transaksi.</li>
+              )}
+            </ul>
           </section>
-        </div>
+        )}
       </div>
+
+      {/* Dialog atur widget */}
+      {showConfig && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4"
+          onClick={() => setShowConfig(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-bold text-ink">Atur Widget Dashboard</p>
+              <button onClick={() => setShowConfig(false)} className="text-xl leading-none text-ink-soft hover:text-ink">
+                ×
+              </button>
+            </div>
+            <div className="max-h-[60vh] space-y-1.5 overflow-y-auto">
+              {DASHBOARD_WIDGETS.map((w) => (
+                <label
+                  key={w.key}
+                  className="flex items-center justify-between rounded-lg bg-background px-3 py-2"
+                >
+                  <span>
+                    <span className="block text-sm font-semibold text-ink">{w.label}</span>
+                    <span className="block text-[11px] text-ink-soft">{w.desc}</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={enabled.has(w.key)}
+                    onChange={() => toggle(w.key)}
+                    className="h-5 w-5 accent-status-empty"
+                  />
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setEnabled(new Set(DASHBOARD_WIDGETS.map((w) => w.key)))}
+                className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+              >
+                Pilih Semua
+              </button>
+              <button
+                onClick={saveConfig}
+                className="rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -177,5 +399,76 @@ function Kpi({ label, value, accent }: { label: string; value: string; accent?: 
       <p className={`text-xs ${accent ? 'text-white/80' : 'text-ink-soft'}`}>{label}</p>
       <p className={`mt-1 text-xl font-extrabold ${accent ? 'text-white' : 'text-ink'}`}>{value}</p>
     </div>
+  )
+}
+
+function StatCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-card bg-white p-4 shadow-card">
+      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ink-soft">
+        <span className="text-base">{icon}</span>
+        {title}
+      </p>
+      {children}
+    </div>
+  )
+}
+
+function MiniStat({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
+  return (
+    <div className="mt-1 flex items-baseline justify-between gap-2 text-sm">
+      <span className="text-ink-soft">{label}</span>
+      <span className={'font-semibold ' + (warn ? 'text-status-occupied' : 'text-ink')}>{value}</span>
+    </div>
+  )
+}
+
+function BarCard({
+  title,
+  empty,
+  children,
+}: {
+  title: string
+  empty: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <section className="rounded-card bg-white p-5 shadow-card">
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">{title}</h2>
+      {empty ? (
+        <p className="py-6 text-center text-sm text-ink-soft">Belum ada data.</p>
+      ) : (
+        <ul className="space-y-3">{children}</ul>
+      )}
+    </section>
+  )
+}
+
+function Bar({
+  label,
+  hint,
+  right,
+  pct,
+  color,
+}: {
+  label: string
+  hint?: string
+  right: string
+  pct: number
+  color: string
+}) {
+  return (
+    <li>
+      <div className="mb-1 flex justify-between gap-2 text-sm">
+        <span className="min-w-0 truncate font-medium text-ink">
+          {label}
+          {hint && <span className="ml-2 text-xs text-ink-soft">{hint}</span>}
+        </span>
+        <span className="whitespace-nowrap font-semibold text-ink">{right}</span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-background">
+        <div className={'h-full rounded-full ' + color} style={{ width: `${Math.max(2, pct)}%` }} />
+      </div>
+    </li>
   )
 }
