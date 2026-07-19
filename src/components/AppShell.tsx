@@ -19,6 +19,8 @@ interface NavChild {
   label: string
   short: string
   icon: string
+  moduleKey?: string
+  perm?: string
 }
 
 interface NavGroupDef {
@@ -58,6 +60,8 @@ const TRANSAKSI_GROUP: NavGroupDef = {
     { to: '/drafts', label: 'Draft', short: 'Draft', icon: '📝' },
     { to: '/preorder', label: 'Pre-Order', short: 'Pre-Order', icon: '📅' },
     { to: '/installments', label: 'Cicilan', short: 'Cicilan', icon: '💳' },
+    { to: '/tables', label: 'Meja', short: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout', perm: 'tables' },
+    { to: '/queue', label: 'Antrean', short: 'Antrean', icon: '🔔', moduleKey: 'module_queue', perm: 'queue' },
   ],
 }
 
@@ -93,9 +97,7 @@ const SIDEBAR: NavEntry[] = [
   { kind: 'link', item: { to: '/', label: 'Kasir', icon: '🧾', perm: 'kasir' } },
   { kind: 'group', group: DATA_MASTER_GROUP },
   { kind: 'group', group: TRANSAKSI_GROUP },
-  { kind: 'link', item: { to: '/tables', label: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout', perm: 'tables' } },
   { kind: 'link', item: { to: '/kds', label: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds', perm: 'kds' } },
-  { kind: 'link', item: { to: '/queue', label: 'Antrean', icon: '🔔', moduleKey: 'module_queue', perm: 'queue' } },
   { kind: 'link', item: { to: '/members', label: 'Member', icon: '⭐', perm: 'members' } },
   { kind: 'group', group: STOCK_GROUP },
   { kind: 'link', item: { to: '/vouchers', label: 'Voucher', icon: '🎟️', perm: 'vouchers' } },
@@ -186,17 +188,27 @@ export default function AppShell() {
 
 function NavGroup({ group, open }: { group: NavGroupDef; open: boolean }) {
   const location = useLocation()
-  const childActive = group.children.some((c) => location.pathname === c.to)
+  const { settings } = useSettings()
+  const perms = effectivePerms(settings)
+  // Sub-menu ikut gate modul (toggle Pengaturan) & hak akses persona.
+  const children = group.children.filter(
+    (c) =>
+      (!c.moduleKey || isModuleEnabled(settings, c.moduleKey)) &&
+      (!c.perm || !perms || perms.has(c.perm)),
+  )
+  const childActive = children.some((c) => location.pathname === c.to)
   const [expanded, setExpanded] = useState(childActive)
   useEffect(() => {
     if (childActive) setExpanded(true)
   }, [childActive])
 
+  if (children.length === 0) return null
+
   // Sidebar ringkas: tampilkan sub-menu sebagai ikon datar agar tetap terjangkau.
   if (!open) {
     return (
       <>
-        {group.children.map((c) => (
+        {children.map((c) => (
           <NavLink
             key={c.to}
             to={c.to}
@@ -230,7 +242,7 @@ function NavGroup({ group, open }: { group: NavGroupDef; open: boolean }) {
       </button>
       {expanded && (
         <div className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-black/10 pl-3">
-          {group.children.map((c) => (
+          {children.map((c) => (
             <NavLink
               key={c.to}
               to={c.to}
