@@ -79,10 +79,10 @@ const STOCK_GROUP: NavGroupDef = {
   ],
 }
 
-// Grup "Program Loyalitas Pelanggan" (Member & Voucher). Tanpa perm grup —
+// Grup "Loyalitas Pelanggan" (Member & Voucher). Tanpa perm grup —
 // tiap anak di-gate sendiri (grup tersembunyi bila tak ada anak yang tampil).
 const LOYALTY_GROUP: NavGroupDef = {
-  label: 'Program Loyalitas Pelanggan',
+  label: 'Loyalitas Pelanggan',
   icon: '🎁',
   children: [
     { to: '/members', label: 'Member', short: 'Member', icon: '⭐', perm: 'members' },
