@@ -21,9 +21,10 @@
   --c-waiting: 251 192 45;
 }
 
-/* Mode gelap "Oniks": permukaan gelap agar kartu/header/modal ikut gelap. */
+/* Mode gelap "Oniks": permukaan gelap agar kartu/header/modal ikut gelap.
+   Selaras dengan surface slate-dark tema (standar ui-ux-pro-max). */
 :root[data-theme='oniks'] {
-  --c-panel: 39 39 42;
+  --c-panel: 27 35 54;
 }
 
 @layer base {
