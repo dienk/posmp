@@ -86,7 +86,7 @@ export default function SelfOrderPage() {
         <img
           src="/logo-mark.png"
           alt="POS Merah Putih"
-          className="h-11 w-11 rounded-lg bg-white p-0.5"
+          className="h-11 w-11 rounded-lg bg-panel p-0.5"
         />
         <div>
           <p className="text-xs opacity-90">POSMerahPutih · Self-Order</p>
@@ -101,7 +101,7 @@ export default function SelfOrderPage() {
             onClick={() => setActiveCat(c.id)}
             className={
               'whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition ' +
-              (activeCat === c.id ? 'bg-status-occupied text-white' : 'bg-white text-ink')
+              (activeCat === c.id ? 'bg-status-occupied text-white' : 'bg-panel text-ink')
             }
           >
             {c.name}
@@ -113,7 +113,7 @@ export default function SelfOrderPage() {
         {products.map((p) => {
           const qty = cart.items.find((i) => i.product.id === p.id)?.quantity ?? 0
           return (
-            <div key={p.id} className="flex items-center gap-3 rounded-card bg-white p-3 shadow-card">
+            <div key={p.id} className="flex items-center gap-3 rounded-card bg-panel p-3 shadow-card">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-surface/60 text-lg font-bold text-white">
                 {p.name.slice(0, 2).toUpperCase()}
               </div>
@@ -151,7 +151,7 @@ export default function SelfOrderPage() {
       </div>
 
       {cart.items.length > 0 && (
-        <div className="absolute inset-x-0 bottom-0 mx-auto max-w-md border-t border-black/10 bg-white p-4 shadow-panel">
+        <div className="absolute inset-x-0 bottom-0 mx-auto max-w-md border-t border-black/10 bg-panel p-4 shadow-panel">
           <div className="mb-2 flex justify-between text-sm text-ink-soft">
             <span>{cart.items.reduce((s, i) => s + i.quantity, 0)} item · Pajak {formatRupiah(tax)}</span>
             <span className="text-base font-bold text-ink">{formatRupiah(total)}</span>

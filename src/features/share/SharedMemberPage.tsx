@@ -28,7 +28,7 @@ export default function SharedMemberPage() {
       <div className="w-full max-w-[400px]">
         <MemberCard member={data} config={config} />
       </div>
-      <div className="w-full max-w-[400px] rounded-2xl bg-white p-4 text-center shadow-card">
+      <div className="w-full max-w-[400px] rounded-2xl bg-panel p-4 text-center shadow-card">
         <p className="text-lg font-bold text-ink">{data.name}</p>
         <p className="text-xs text-ink-soft">
           {data.member_number ?? '—'} · {data.tier}

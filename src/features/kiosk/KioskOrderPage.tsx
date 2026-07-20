@@ -92,7 +92,7 @@ export default function KioskOrderPage() {
     <div className="flex h-full">
       {/* Katalog */}
       <div className="flex min-h-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 bg-white/70 px-6 py-4 backdrop-blur">
+        <header className="flex items-center gap-3 bg-panel/70 px-6 py-4 backdrop-blur">
           <h1 className="text-xl font-extrabold text-ink">Pesan Sendiri</h1>
           <div className="ml-auto">
             <FullscreenButton />
@@ -105,7 +105,7 @@ export default function KioskOrderPage() {
               onClick={() => setActiveCat(c.id)}
               className={
                 'rounded-full px-4 py-2 text-sm font-semibold transition ' +
-                (activeCat === c.id ? 'bg-brand text-ink shadow' : 'bg-white text-ink-soft hover:bg-brand-soft')
+                (activeCat === c.id ? 'bg-brand text-ink shadow' : 'bg-panel text-ink-soft hover:bg-brand-soft')
               }
             >
               {c.name}
@@ -117,7 +117,7 @@ export default function KioskOrderPage() {
             <button
               key={p.id}
               onClick={() => cart.addProduct(p)}
-              className="flex flex-col overflow-hidden rounded-2xl bg-white text-left shadow-card transition hover:shadow-panel"
+              className="flex flex-col overflow-hidden rounded-2xl bg-panel text-left shadow-card transition hover:shadow-panel"
             >
               <div className="flex h-28 items-center justify-center bg-brand-soft/40 text-4xl">
                 {p.image_path ? (
@@ -136,7 +136,7 @@ export default function KioskOrderPage() {
       </div>
 
       {/* Keranjang */}
-      <aside className="flex w-96 shrink-0 flex-col bg-white shadow-panel">
+      <aside className="flex w-96 shrink-0 flex-col bg-panel shadow-panel">
         <div className="flex gap-2 border-b border-black/5 p-4">
           {FACILITIES.map((f) => (
             <button

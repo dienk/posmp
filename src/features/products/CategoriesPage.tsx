@@ -61,7 +61,7 @@ export default function CategoriesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Kategori Produk</h1>
         <button
           onClick={startNew}
@@ -73,7 +73,7 @@ export default function CategoriesPage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
         {/* Daftar kategori */}
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           {categories.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada kategori.</p>
           ) : (
@@ -107,7 +107,7 @@ export default function CategoriesPage() {
         </section>
 
         {/* Form */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           {editingId ? (
             <>
               <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">

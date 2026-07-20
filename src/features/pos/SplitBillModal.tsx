@@ -53,7 +53,7 @@ export default function SplitBillModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-panel shadow-2xl">
         <div className="flex items-center justify-between bg-status-occupied px-5 py-4 text-white">
           <p className="text-lg font-bold">Split Bill / Pisah Tagihan</p>
           <button onClick={onCancel} className="text-2xl leading-none hover:opacity-80">
@@ -93,7 +93,7 @@ export default function SplitBillModal({
                       'h-7 w-7 rounded-md text-xs font-bold ' +
                       ((assign[i] ?? 0) === b
                         ? 'bg-status-occupied text-white'
-                        : 'bg-white text-ink hover:bg-brand-soft')
+                        : 'bg-panel text-ink hover:bg-brand-soft')
                     }
                   >
                     {b + 1}

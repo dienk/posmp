@@ -162,7 +162,7 @@ export default function TablesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Tata Letak Meja</h1>
         <div className="flex items-center gap-3 text-xs text-ink-soft">
           <Legend color="bg-status-empty" label={`Kosong · ${counts.EMPTY}`} />
@@ -174,7 +174,7 @@ export default function TablesPage() {
             onClick={() => setEditMode((v) => !v)}
             className={
               'rounded-lg px-3 py-1.5 text-sm font-semibold transition ' +
-              (editMode ? 'bg-status-occupied text-white' : 'bg-white text-ink hover:bg-brand-soft')
+              (editMode ? 'bg-status-occupied text-white' : 'bg-panel text-ink hover:bg-brand-soft')
             }
           >
             {editMode ? 'Selesai Atur' : '✎ Atur Layout'}
@@ -298,7 +298,7 @@ export default function TablesPage() {
 
         {/* Panel detail */}
         {selected && (
-          <aside className="w-72 shrink-0 border-l border-black/5 bg-white p-5 shadow-panel">
+          <aside className="w-72 shrink-0 border-l border-black/5 bg-panel p-5 shadow-panel">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-ink">Meja {selected.table_number}</h2>
               <button onClick={() => setSelectedId(null)} className="text-ink-soft hover:text-ink">
@@ -348,7 +348,7 @@ export default function TablesPage() {
                   <select
                     value={selected.section_name}
                     onChange={(e) => handleChangeSection(e.target.value)}
-                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   >
                     {sections.map((s) => (
                       <option key={s} value={s}>
@@ -405,7 +405,7 @@ function RoomPill({
       onClick={onClick}
       className={
         'rounded-full px-3 py-1 text-xs font-semibold transition ' +
-        (active ? 'bg-status-occupied text-white shadow' : 'bg-white text-ink hover:bg-brand-soft')
+        (active ? 'bg-status-occupied text-white shadow' : 'bg-panel text-ink hover:bg-brand-soft')
       }
     >
       {label}
@@ -444,7 +444,7 @@ function ManageRoomsModal({
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-panel"
+        className="w-full max-w-md rounded-2xl bg-panel p-5 shadow-panel"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">

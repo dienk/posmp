@@ -65,7 +65,7 @@ export default function RolesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Peran & Hak Akses</h1>
         <button
           onClick={addRole}
@@ -77,7 +77,7 @@ export default function RolesPage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[280px_1fr]">
         {/* Daftar peran */}
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           <ul className="divide-y divide-black/5">
             {roles.map((r) => (
               <li key={r.id}>
@@ -99,7 +99,7 @@ export default function RolesPage() {
         {/* Editor peran */}
         <section>
           {selected ? (
-            <div className="rounded-card bg-white p-5 shadow-card">
+            <div className="rounded-card bg-panel p-5 shadow-card">
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-soft">Nama Peran</span>
                 <input
@@ -142,7 +142,7 @@ export default function RolesPage() {
               </div>
             </div>
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-card bg-white text-sm text-ink-soft shadow-card">
+            <div className="flex h-40 items-center justify-center rounded-card bg-panel text-sm text-ink-soft shadow-card">
               Pilih peran untuk mengatur hak akses.
             </div>
           )}

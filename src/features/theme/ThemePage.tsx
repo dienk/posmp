@@ -65,7 +65,7 @@ export default function ThemePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Tema</h1>
       </header>
 
@@ -87,7 +87,7 @@ export default function ThemePage() {
                   key={th.id}
                   onClick={() => choosePreset(th.id)}
                   className={
-                    'overflow-hidden rounded-card border-2 bg-white text-left shadow-card transition hover:-translate-y-0.5 ' +
+                    'overflow-hidden rounded-card border-2 bg-panel text-left shadow-card transition hover:-translate-y-0.5 ' +
                     (active ? 'border-status-occupied' : 'border-transparent')
                   }
                 >
@@ -151,7 +151,7 @@ export default function ThemePage() {
         </section>
 
         {/* Tema kustom */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Tema Kustom</h2>
             {current === CUSTOM_THEME_ID && (

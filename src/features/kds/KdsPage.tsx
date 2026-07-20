@@ -18,7 +18,7 @@ function minutesSince(orderedAt: string, nowMs: number): number {
 function ageStyle(mins: number): string {
   if (mins >= 25) return 'border-status-occupied bg-status-occupied/5'
   if (mins >= 15) return 'border-status-waiting bg-status-waiting/10'
-  return 'border-transparent bg-white'
+  return 'border-transparent bg-panel'
 }
 
 const SOURCE_LABEL: Record<string, string> = {

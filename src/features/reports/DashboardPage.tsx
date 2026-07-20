@@ -134,7 +134,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Dashboard</h1>
         <span className="hidden text-xs text-ink-soft sm:inline">
           Ringkasan · {formatRangeLabel(range)}
@@ -142,7 +142,7 @@ export default function DashboardPage() {
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowConfig(true)}
-            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
+            className="rounded-lg border border-black/10 bg-panel px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
           >
             ⚙ Atur Widget
           </button>
@@ -150,7 +150,7 @@ export default function DashboardPage() {
           <select
             value={preset}
             onChange={(e) => setPreset(e.target.value as RangePreset)}
-            className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+            className="rounded-lg border border-black/10 bg-panel px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
           >
             {RANGE_PRESETS.map((p) => (
               <option key={p.key} value={p.key}>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                 value={customFrom}
                 max={customTo || undefined}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="rounded-lg border border-black/10 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                className="rounded-lg border border-black/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
               />
               <span className="text-xs text-ink-soft">s/d</span>
               <input
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                 value={customTo}
                 min={customFrom || undefined}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="rounded-lg border border-black/10 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                className="rounded-lg border border-black/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
               />
             </div>
           )}
@@ -307,7 +307,7 @@ export default function DashboardPage() {
 
         {/* Transaksi terkini */}
         {has('recent') && (
-          <section className="overflow-hidden rounded-card bg-white shadow-card">
+          <section className="overflow-hidden rounded-card bg-panel shadow-card">
             <h2 className="border-b border-black/5 px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Transaksi Terkini
             </h2>
@@ -344,7 +344,7 @@ export default function DashboardPage() {
           onClick={() => setShowConfig(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            className="w-full max-w-md rounded-2xl bg-panel p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
@@ -395,7 +395,7 @@ export default function DashboardPage() {
 
 function Kpi({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className={`rounded-card p-4 shadow-card ${accent ? 'bg-status-occupied text-white' : 'bg-white'}`}>
+    <div className={`rounded-card p-4 shadow-card ${accent ? 'bg-status-occupied text-white' : 'bg-panel'}`}>
       <p className={`text-xs ${accent ? 'text-white/80' : 'text-ink-soft'}`}>{label}</p>
       <p className={`mt-1 text-xl font-extrabold ${accent ? 'text-white' : 'text-ink'}`}>{value}</p>
     </div>
@@ -404,7 +404,7 @@ function Kpi({ label, value, accent }: { label: string; value: string; accent?: 
 
 function StatCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-card bg-white p-4 shadow-card">
+    <div className="rounded-card bg-panel p-4 shadow-card">
       <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-ink-soft">
         <span className="text-base">{icon}</span>
         {title}
@@ -433,7 +433,7 @@ function BarCard({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-card bg-white p-5 shadow-card">
+    <section className="rounded-card bg-panel p-5 shadow-card">
       <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">{title}</h2>
       {empty ? (
         <p className="py-6 text-center text-sm text-ink-soft">Belum ada data.</p>

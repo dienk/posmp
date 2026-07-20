@@ -74,7 +74,7 @@ export default function StockCardPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Kartu Stock</h1>
         <div className="relative ml-auto">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
@@ -85,13 +85,13 @@ export default function StockCardPage() {
             onChange={(e) => setScanCode(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleScan()}
             placeholder="Scan barcode / QR lalu Enter…"
-            className="w-56 rounded-lg border border-black/10 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
+            className="w-56 rounded-lg border border-black/10 bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
           />
         </div>
         <select
           value={warehouseId}
           onChange={(e) => setWarehouseId(Number(e.target.value))}
-          className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           <option value={0}>Semua Gudang</option>
           {warehouses.map((w) => (
@@ -103,7 +103,7 @@ export default function StockCardPage() {
         <select
           value={productId ?? ''}
           onChange={(e) => setProductId(Number(e.target.value))}
-          className="min-w-56 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="min-w-56 rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           {products.length === 0 && <option value="">Tidak ada produk</option>}
           {products.map((p) => (
@@ -127,7 +127,7 @@ export default function StockCardPage() {
         )}
 
         {/* Kartu / kardex */}
-        <section className="overflow-hidden rounded-card bg-white shadow-card">
+        <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
@@ -211,7 +211,7 @@ function Kpi({
         ? 'text-status-occupied'
         : 'text-ink'
   return (
-    <div className={`rounded-card p-4 shadow-card ${accent ? 'bg-status-occupied' : 'bg-white'}`}>
+    <div className={`rounded-card p-4 shadow-card ${accent ? 'bg-status-occupied' : 'bg-panel'}`}>
       <p className={`text-xs ${accent ? 'text-white/80' : 'text-ink-soft'}`}>{label}</p>
       <p className={`mt-1 text-xl font-extrabold ${valueColor}`}>{value}</p>
     </div>

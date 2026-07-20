@@ -72,13 +72,13 @@ export default function VoucherPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Voucher Generator</h1>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[360px_1fr]">
         {/* Form generator */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Buat Voucher Massal
           </h2>
@@ -166,7 +166,7 @@ export default function VoucherPage() {
 
         {/* Daftar kampanye & sampel kode */}
         <section className="space-y-4">
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Kampanye ({campaigns.length})
             </h2>
@@ -204,7 +204,7 @@ export default function VoucherPage() {
           </div>
 
           {selected != null && (
-            <div className="rounded-card bg-white p-5 shadow-card">
+            <div className="rounded-card bg-panel p-5 shadow-card">
               <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
                 Contoh Kode (maks. 24)
               </h2>

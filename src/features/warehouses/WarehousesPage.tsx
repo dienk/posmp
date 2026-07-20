@@ -82,7 +82,7 @@ export default function WarehousesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Gudang</h1>
         <span className="text-xs text-ink-soft">{warehouses.length} gudang</span>
         <select
@@ -105,7 +105,7 @@ export default function WarehousesPage() {
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           {warehouses.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada gudang di {outletName}.</p>
           ) : (
@@ -152,7 +152,7 @@ export default function WarehousesPage() {
           )}
         </section>
 
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           {mode ? (
             <>
               <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">

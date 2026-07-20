@@ -55,7 +55,7 @@ export default function MarketplacePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Integrasi Marketplace</h1>
       </header>
 
@@ -67,7 +67,7 @@ export default function MarketplacePage() {
         </div>
 
         {/* Tambah channel */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Hubungkan Toko
           </h2>
@@ -108,7 +108,7 @@ export default function MarketplacePage() {
         </section>
 
         {/* Daftar channel */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Channel Terhubung ({channels.length})
           </h2>
@@ -154,7 +154,7 @@ export default function MarketplacePage() {
                     </button>
                     <button
                       onClick={() => toggleChannel(c.id, !c.is_active).then(reload)}
-                      className="rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-white"
+                      className="rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-panel"
                     >
                       {c.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                     </button>
@@ -172,7 +172,7 @@ export default function MarketplacePage() {
         </section>
 
         {/* Sync Queue (offline-first) */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
               Antrean Sinkronisasi

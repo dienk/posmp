@@ -143,7 +143,7 @@ export default function MembersPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Member & Loyalitas</h1>
         <input
           value={keyword}
@@ -161,7 +161,7 @@ export default function MembersPage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[320px_1fr]">
         {/* Daftar member */}
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           {members.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada member.</p>
           ) : (
@@ -211,7 +211,7 @@ export default function MembersPage() {
               onCard={() => setCardMember(selected)}
             />
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-card bg-white text-sm text-ink-soft shadow-card">
+            <div className="flex h-40 items-center justify-center rounded-card bg-panel text-sm text-ink-soft shadow-card">
               Pilih member untuk melihat detail, atau “+ Member”.
             </div>
           )}
@@ -268,7 +268,7 @@ function MemberDetail({
   const shareMsg = `Kartu member ${m.name} · ${m.tier} · ${m.points} poin`
   return (
     <div className="space-y-4">
-      <div className="rounded-card bg-white p-5 shadow-card">
+      <div className="rounded-card bg-panel p-5 shadow-card">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-ink">{m.name}</h2>
@@ -344,7 +344,7 @@ function MemberDetail({
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-card bg-white p-5 shadow-card">
+        <div className="rounded-card bg-panel p-5 shadow-card">
           <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Riwayat Transaksi
           </h3>
@@ -364,7 +364,7 @@ function MemberDetail({
             </ul>
           )}
         </div>
-        <div className="rounded-card bg-white p-5 shadow-card">
+        <div className="rounded-card bg-panel p-5 shadow-card">
           <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Riwayat Poin & Penukaran
           </h3>
@@ -404,7 +404,7 @@ function MemberForm({
   onCancel: () => void
 }) {
   return (
-    <div className="rounded-card bg-white p-5 shadow-card">
+    <div className="rounded-card bg-panel p-5 shadow-card">
       <h2 className="mb-3 text-base font-bold text-ink">{isNew ? 'Member Baru' : 'Edit Member'}</h2>
 
       <FormSection title="Identitas Pribadi">

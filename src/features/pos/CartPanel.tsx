@@ -102,7 +102,7 @@ export default function CartPanel(props: Props) {
   const txNoteVisible = showTxNote || props.orderNote.trim().length > 0
 
   return (
-    <aside className="flex h-full w-full flex-col bg-white shadow-panel">
+    <aside className="flex h-full w-full flex-col bg-panel shadow-panel">
       {/* Pelanggan (umum & member jadi satu kolom) & tipe pesanan */}
       <div className="border-b border-black/5 p-4">
         <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export default function CartPanel(props: Props) {
             {pickerOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setPickerOpen(false)} />
-                <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-black/10 bg-white shadow-lg">
+                <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-black/10 bg-panel shadow-lg">
                   <ul className="max-h-56 overflow-y-auto py-1">
                     {filteredCustomers.length === 0 ? (
                       <li className="px-3 py-2 text-xs text-ink-soft">
@@ -189,7 +189,7 @@ export default function CartPanel(props: Props) {
           <select
             value={props.facilityType}
             onChange={(e) => props.onFacilityChange(e.target.value as FacilityType)}
-            className="rounded-lg border border-black/10 bg-white px-2 py-2 text-sm outline-none
+            className="rounded-lg border border-black/10 bg-panel px-2 py-2 text-sm outline-none
                        focus:border-brand-strong"
           >
             {FACILITIES.map((f) => (
@@ -313,7 +313,7 @@ export default function CartPanel(props: Props) {
                           value={selectedUnit}
                           onChange={(e) => props.onUnitChange(it.product.id, e.target.value)}
                           title="Pilih satuan"
-                          className="ml-1 rounded-lg border border-black/10 bg-white px-1.5 py-1 text-xs outline-none focus:border-brand-strong"
+                          className="ml-1 rounded-lg border border-black/10 bg-panel px-1.5 py-1 text-xs outline-none focus:border-brand-strong"
                         >
                           {unitOpts.map((o) => (
                             <option key={o.unit} value={o.unit}>
@@ -337,7 +337,7 @@ export default function CartPanel(props: Props) {
                       onChange={(e) => props.onNotesChange(it.product.id, e.target.value)}
                       placeholder="✎ Catatan khusus (mis. tanpa sambal, level pedas)"
                       className="mt-2 w-full rounded-lg border border-dashed border-black/15 bg-background/50
-                                 px-2.5 py-1.5 text-xs outline-none focus:border-brand-strong focus:bg-white"
+                                 px-2.5 py-1.5 text-xs outline-none focus:border-brand-strong focus:bg-panel"
                     />
                   ) : (
                     <button
@@ -488,7 +488,7 @@ export default function CartPanel(props: Props) {
               {actionsOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} />
-                  <div className="absolute bottom-full left-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-black/10 bg-white shadow-lg">
+                  <div className="absolute bottom-full left-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-black/10 bg-panel shadow-lg">
                     {/* Kode voucher (opsional, diatur di Pengaturan) */}
                     {props.showVoucher && (
                       <div className="border-b border-black/5 p-3">

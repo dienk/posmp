@@ -72,13 +72,13 @@ export default function PersonaPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Persona</h1>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
         {/* Daftar persona */}
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           <ul className="divide-y divide-black/5">
             {personas.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-3 px-3 py-3">
@@ -99,7 +99,7 @@ export default function PersonaPage() {
                 <select
                   value={p.roleId}
                   onChange={(e) => changeRole(p.id, e.target.value)}
-                  className="rounded-lg border border-black/10 bg-white px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                  className="rounded-lg border border-black/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
                 >
                   {roles.map((r) => (
                     <option key={r.id} value={r.id}>
@@ -129,7 +129,7 @@ export default function PersonaPage() {
         </section>
 
         {/* Tambah persona */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Tambah Persona
           </h2>

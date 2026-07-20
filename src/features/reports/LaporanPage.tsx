@@ -101,7 +101,7 @@ export default function LaporanPage() {
   return (
     <div className="flex h-full">
       {/* Sub-menu daftar laporan */}
-      <aside className="w-60 shrink-0 overflow-y-auto border-r border-black/5 bg-white/70 p-3">
+      <aside className="w-60 shrink-0 overflow-y-auto border-r border-black/5 bg-panel/70 p-3">
         <h1 className="mb-2 px-2 text-lg font-bold text-ink">Laporan</h1>
         {REPORT_GROUPS.map((g) => (
           <div key={g} className="mb-3">
@@ -128,7 +128,7 @@ export default function LaporanPage() {
 
       {/* Isi laporan */}
       <div className="flex min-h-0 flex-1 flex-col">
-        <header className="flex flex-wrap items-center gap-2 bg-white/70 px-5 py-3 backdrop-blur">
+        <header className="flex flex-wrap items-center gap-2 bg-panel/70 px-5 py-3 backdrop-blur">
           <div className="min-w-0">
             <h2 className="truncate text-base font-bold text-ink">{tpl.title}</h2>
             <p className="text-xs text-ink-soft">
@@ -185,7 +185,7 @@ export default function LaporanPage() {
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
           {/* Editor template */}
           {showTemplate && (
-            <section className="rounded-card bg-white p-5 shadow-card">
+            <section className="rounded-card bg-panel p-5 shadow-card">
               <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
                 Template Laporan
               </h3>
@@ -273,7 +273,7 @@ export default function LaporanPage() {
           )}
 
           {/* Pratinjau data */}
-          <section className="overflow-hidden rounded-card bg-white shadow-card">
+          <section className="overflow-hidden rounded-card bg-panel shadow-card">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -335,7 +335,7 @@ export default function LaporanPage() {
           onClick={() => setShowFilter(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl"
+            className="w-full max-w-md rounded-2xl bg-panel p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">

@@ -45,7 +45,7 @@ export default function QueueMonitor() {
           <img
             src="/logo-mark.png"
             alt="POS Merah Putih"
-            className="h-14 w-14 rounded-xl bg-white p-1"
+            className="h-14 w-14 rounded-xl bg-panel p-1"
           />
           <h1 className="text-3xl font-extrabold">POSMerahPutih</h1>
         </div>

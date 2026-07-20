@@ -321,7 +321,7 @@ export default function PosPage() {
       {/* Panel Produk (kiri 65%) */}
       <section className="flex min-w-0 flex-1 flex-col" style={{ flexBasis: '65%' }}>
         {/* Header */}
-        <header className="flex items-center gap-3 bg-white/70 px-4 py-3 backdrop-blur">
+        <header className="flex items-center gap-3 bg-panel/70 px-4 py-3 backdrop-blur">
           <button
             onClick={toggleSidebar}
             className="rounded-lg p-2 text-ink hover:bg-background"
@@ -342,7 +342,7 @@ export default function PosPage() {
                 scanMode ? 'Scan barcode produk lalu Enter…' : 'Cari nama produk atau SKU…'
               }
               className={
-                'w-full rounded-xl border bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong ' +
+                'w-full rounded-xl border bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong ' +
                 (scanMode ? 'border-status-occupied ring-1 ring-status-occupied/30' : 'border-black/10')
               }
             />
@@ -354,7 +354,7 @@ export default function PosPage() {
               'flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition ' +
               (scanMode
                 ? 'bg-status-occupied text-white shadow'
-                : 'border border-black/10 bg-white text-ink hover:bg-brand-soft')
+                : 'border border-black/10 bg-panel text-ink hover:bg-brand-soft')
             }
           >
             <span className="text-base leading-none">▮▮▮</span>
@@ -364,7 +364,7 @@ export default function PosPage() {
             {mergeBillEnabled && (
               <button
                 onClick={() => setShowMerge(true)}
-                className="rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold
+                className="rounded-lg border border-black/10 bg-panel px-3 py-1.5 text-xs font-semibold
                            text-ink transition hover:bg-brand-soft"
                 title="Gabungkan beberapa bill tersimpan menjadi satu"
               >
@@ -392,7 +392,7 @@ export default function PosPage() {
                   'rounded-full px-4 py-1.5 text-sm font-medium transition ' +
                   (active
                     ? 'bg-status-occupied text-white shadow'
-                    : 'bg-white text-ink hover:bg-brand-soft')
+                    : 'bg-panel text-ink hover:bg-brand-soft')
                 }
               >
                 {c.name}

@@ -12,10 +12,18 @@
   --c-surface: 254 215 215;
   --c-ink: 51 65 85;
   --c-ink-soft: 148 163 184;
+  /* Permukaan kartu/header/modal. Putih pada tema terang; ditimpa gelap
+     untuk tema mode-gelap (Oniks). Bukan bagian registri tema (JS). */
+  --c-panel: 255 255 255;
   /* Status semantik (tetap lintas-tema) */
   --c-empty: 76 175 80;
   --c-occupied: 229 57 53;
   --c-waiting: 251 192 45;
+}
+
+/* Mode gelap "Oniks": permukaan gelap agar kartu/header/modal ikut gelap. */
+:root[data-theme='oniks'] {
+  --c-panel: 39 39 42;
 }
 
 @layer base {

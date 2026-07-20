@@ -48,7 +48,7 @@ export default function QueuePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Sistem Antrean</h1>
         <div className="ml-auto flex items-center gap-2">
           <button
@@ -130,7 +130,7 @@ function QueueColumn({
   renderActions: (t: QueueTicket) => React.ReactNode
 }) {
   return (
-    <section className="rounded-card bg-white p-4 shadow-card">
+    <section className="rounded-card bg-panel p-4 shadow-card">
       <h2 className={`mb-3 text-sm font-bold uppercase tracking-wide ${accent}`}>
         {title} · {tickets.length}
       </h2>

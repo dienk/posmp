@@ -17,6 +17,7 @@ export default {
         },
         background: 'rgb(var(--c-background) / <alpha-value>)',
         surface: 'rgb(var(--c-surface) / <alpha-value>)',
+        panel: 'rgb(var(--c-panel) / <alpha-value>)',
         ink: {
           DEFAULT: 'rgb(var(--c-ink) / <alpha-value>)',
           soft: 'rgb(var(--c-ink-soft) / <alpha-value>)',

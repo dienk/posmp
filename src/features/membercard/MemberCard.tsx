@@ -50,7 +50,7 @@ export function MemberCardModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl">
+      <div className="w-full max-w-md rounded-2xl bg-panel p-5 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-bold text-ink">Kartu ID Member</p>
           <button onClick={onClose} className="text-xl leading-none text-ink-soft hover:text-ink">

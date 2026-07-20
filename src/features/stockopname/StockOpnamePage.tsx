@@ -139,7 +139,7 @@ export default function StockOpnamePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Stock Opname</h1>
         <select
           value={warehouseId}
@@ -168,7 +168,7 @@ export default function StockOpnamePage() {
             onKeyDown={(e) => e.key === 'Enter' && scanMode && handleScan()}
             placeholder={scanMode ? 'Scan barcode produk lalu Enter…' : 'Cari nama / SKU / barcode…'}
             className={
-              'w-64 rounded-xl border bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong ' +
+              'w-64 rounded-xl border bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong ' +
               (scanMode ? 'border-status-occupied ring-1 ring-status-occupied/30' : 'border-black/10')
             }
           />
@@ -180,7 +180,7 @@ export default function StockOpnamePage() {
             'flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition ' +
             (scanMode
               ? 'bg-status-occupied text-white shadow'
-              : 'border border-black/10 bg-white text-ink hover:bg-brand-soft')
+              : 'border border-black/10 bg-panel text-ink hover:bg-brand-soft')
           }
         >
           <span className="text-base leading-none">▮▮▮</span>
@@ -189,7 +189,7 @@ export default function StockOpnamePage() {
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-5">
-        <section className="overflow-hidden rounded-card bg-white shadow-card">
+        <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
@@ -250,7 +250,7 @@ export default function StockOpnamePage() {
                               setUnits((prev) => ({ ...prev, [p.id]: e.target.value }))
                             }
                             title="Satuan input"
-                            className="rounded-lg border border-black/10 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
+                            className="rounded-lg border border-black/10 bg-panel px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
                           >
                             {opts.map((o) => (
                               <option key={o.unit} value={o.unit}>
@@ -295,7 +295,7 @@ export default function StockOpnamePage() {
       </div>
 
       {/* Footer aksi */}
-      <div className="flex flex-wrap items-center gap-3 border-t border-black/5 bg-white/70 px-5 py-3 backdrop-blur">
+      <div className="flex flex-wrap items-center gap-3 border-t border-black/5 bg-panel/70 px-5 py-3 backdrop-blur">
         <span className="text-sm text-ink-soft">
           {countedIds.length} item dihitung · Selisih total:{' '}
           <b className={totalDiff === 0 ? 'text-ink' : totalDiff > 0 ? 'text-status-empty' : 'text-status-occupied'}>

@@ -54,7 +54,7 @@ export default function KioskQueuePage() {
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8">
         {issued ? (
-          <div className="w-full max-w-lg rounded-3xl bg-white p-10 text-center shadow-2xl">
+          <div className="w-full max-w-lg rounded-3xl bg-panel p-10 text-center shadow-2xl">
             <p className="text-lg font-semibold text-ink-soft">Nomor Antrean Anda</p>
             <p className="my-4 text-8xl font-black tracking-tight text-status-occupied">{issued}</p>
             <p className="text-lg text-ink">Silakan tunggu, nomor Anda akan dipanggil. 🙏</p>
@@ -89,7 +89,7 @@ export default function KioskQueuePage() {
       </div>
 
       {serving.length > 0 && (
-        <footer className="border-t border-black/5 bg-white/70 px-8 py-4 backdrop-blur">
+        <footer className="border-t border-black/5 bg-panel/70 px-8 py-4 backdrop-blur">
           <span className="text-sm font-semibold uppercase tracking-wide text-ink-soft">
             Sedang dipanggil:
           </span>{' '}

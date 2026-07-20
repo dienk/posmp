@@ -166,7 +166,7 @@ export default function CashBalancePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Saldo Kas</h1>
         <span className="text-xs text-ink-soft">Buka & tutup kas per {shiftLabel}</span>
       </header>
@@ -174,7 +174,7 @@ export default function CashBalancePage() {
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
         {session ? (
           // ── Sesi terbuka: tutup kas ──────────────────────────────────────
-          <section className="rounded-card bg-white p-5 shadow-card">
+          <section className="rounded-card bg-panel p-5 shadow-card">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
                 Kas Terbuka
@@ -257,7 +257,7 @@ export default function CashBalancePage() {
           </section>
         ) : (
           // ── Tidak ada sesi: buka kas ─────────────────────────────────────
-          <section className="rounded-card bg-white p-5 shadow-card">
+          <section className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Buka Kas</h2>
             <div className="grid gap-3 sm:grid-cols-3">
               <label className="block">
@@ -317,7 +317,7 @@ export default function CashBalancePage() {
         )}
 
         {/* Riwayat sesi kas — di balik otoritas */}
-        <section className="overflow-hidden rounded-card bg-white shadow-card">
+        <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <div className="flex items-center justify-between border-b border-black/5 px-5 py-3">
             <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Riwayat Kas</h2>
             {canViewHistory ? (
@@ -503,7 +503,7 @@ function EditSessionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl">
+      <div className="w-full max-w-md rounded-2xl bg-panel p-5 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm font-bold text-ink">Edit Catatan Kas</p>
           <button onClick={onClose} className="text-xl leading-none text-ink-soft hover:text-ink">

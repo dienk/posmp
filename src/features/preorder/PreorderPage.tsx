@@ -47,12 +47,12 @@ export default function PreorderPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Pre-Order & Uang Muka</h1>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_360px]">
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           {orders.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada pre-order aktif.</p>
           ) : (
@@ -95,7 +95,7 @@ export default function PreorderPage() {
 
         <section>
           {selected ? (
-            <div className="rounded-card bg-white p-5 shadow-card">
+            <div className="rounded-card bg-panel p-5 shadow-card">
               <h2 className="text-base font-bold text-ink">{selected.invoice_number}</h2>
               <p className="mb-3 text-xs text-ink-soft">
                 Tenggat ambil: {selected.preorder_deadline ?? '—'}
@@ -135,7 +135,7 @@ export default function PreorderPage() {
               </button>
             </div>
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-card bg-white text-sm text-ink-soft shadow-card">
+            <div className="flex h-40 items-center justify-center rounded-card bg-panel text-sm text-ink-soft shadow-card">
               Pilih pre-order untuk melihat detail.
             </div>
           )}

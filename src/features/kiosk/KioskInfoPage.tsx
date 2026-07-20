@@ -81,7 +81,7 @@ export default function KioskInfoPage() {
             {cats.map((c) => (
               <div
                 key={c.id}
-                className="rounded-2xl bg-white p-5 shadow-card"
+                className="rounded-2xl bg-panel p-5 shadow-card"
                 style={c.color_code ? { borderTop: `4px solid ${c.color_code}` } : undefined}
               >
                 <p className="text-xl font-extrabold text-ink">{c.name}</p>
@@ -94,7 +94,7 @@ export default function KioskInfoPage() {
           </div>
 
           {(outlet?.address || outlet?.phone) && (
-            <div className="mt-6 rounded-2xl bg-white p-5 shadow-card">
+            <div className="mt-6 rounded-2xl bg-panel p-5 shadow-card">
               <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-ink-soft">🗺️ Lokasi</h3>
               {outlet?.address && <p className="text-lg font-semibold text-ink">{outlet.address}</p>}
               {outlet?.phone && <p className="text-sm text-ink-soft">☎ {outlet.phone}</p>}
@@ -122,7 +122,7 @@ export default function KioskInfoPage() {
               </div>
             ))}
             {promos.length === 0 && (
-              <div className="rounded-2xl bg-white p-6 text-center text-ink-soft shadow-card">
+              <div className="rounded-2xl bg-panel p-6 text-center text-ink-soft shadow-card">
                 Belum ada promo aktif.
               </div>
             )}

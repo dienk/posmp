@@ -238,7 +238,7 @@ export default function StockInPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Stok Masuk & Supplier</h1>
         <nav className="ml-auto flex gap-1 rounded-xl bg-background p-1">
           {(
@@ -253,7 +253,7 @@ export default function StockInPage() {
               onClick={() => setTab(key)}
               className={
                 'rounded-lg px-4 py-1.5 text-sm font-semibold transition ' +
-                (tab === key ? 'bg-white text-ink shadow-sm' : 'text-ink-soft hover:text-ink')
+                (tab === key ? 'bg-panel text-ink shadow-sm' : 'text-ink-soft hover:text-ink')
               }
             >
               {label}
@@ -265,7 +265,7 @@ export default function StockInPage() {
       <div className="min-h-0 flex-1 overflow-y-auto p-5">
         {/* ============ PENERIMAAN ============ */}
         {tab === 'penerimaan' && (
-          <section className="mx-auto max-w-3xl rounded-card bg-white p-5 shadow-card">
+          <section className="mx-auto max-w-3xl rounded-card bg-panel p-5 shadow-card">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
                 {editingEntryId ? 'Edit Penerimaan Barang' : 'Penerimaan Barang'}
@@ -443,7 +443,7 @@ export default function StockInPage() {
         {/* ============ SUPPLIER CRUD ============ */}
         {tab === 'supplier' && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
-            <section className="overflow-hidden rounded-card bg-white shadow-card">
+            <section className="overflow-hidden rounded-card bg-panel shadow-card">
               <div className="flex items-center justify-between px-4 py-3">
                 <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
                   Supplier ({allSuppliers.length})
@@ -510,7 +510,7 @@ export default function StockInPage() {
               </table>
             </section>
 
-            <section className="rounded-card bg-white p-5 shadow-card">
+            <section className="rounded-card bg-panel p-5 shadow-card">
               {supMode ? (
                 <>
                   <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
@@ -587,7 +587,7 @@ export default function StockInPage() {
         {/* ============ RIWAYAT ============ */}
         {tab === 'riwayat' && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
-            <section className="overflow-hidden rounded-card bg-white shadow-card">
+            <section className="overflow-hidden rounded-card bg-panel shadow-card">
               {entries.length === 0 ? (
                 <p className="px-4 py-10 text-center text-sm text-ink-soft">Belum ada penerimaan.</p>
               ) : (
@@ -622,7 +622,7 @@ export default function StockInPage() {
 
             <section>
               {detail ? (
-                <div className="rounded-card bg-white p-5 shadow-card">
+                <div className="rounded-card bg-panel p-5 shadow-card">
                   <h2 className="text-base font-bold text-ink">{detail.reference_number}</h2>
                   <p className="mb-3 text-xs text-ink-soft">
                     🏭 {detail.warehouse_name ?? '—'} · {detail.supplier_name ?? 'Tanpa supplier'} ·{' '}
@@ -683,7 +683,7 @@ export default function StockInPage() {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-card bg-white p-5 text-center text-sm text-ink-soft shadow-card">
+                <div className="rounded-card bg-panel p-5 text-center text-sm text-ink-soft shadow-card">
                   Pilih penerimaan untuk melihat detail.
                 </div>
               )}

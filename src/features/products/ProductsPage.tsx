@@ -166,7 +166,7 @@ export default function ProductsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Produk</h1>
         <input
           value={keyword}
@@ -184,7 +184,7 @@ export default function ProductsPage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_340px]">
         {/* Tabel produk */}
-        <section className="overflow-hidden rounded-card bg-white shadow-card">
+        <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
@@ -269,7 +269,7 @@ export default function ProductsPage() {
         </section>
 
         {/* Form tambah/edit */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           {editingId ? (
             <>
               <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">

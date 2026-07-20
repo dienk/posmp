@@ -88,7 +88,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-panel shadow-2xl">
         <div className="flex items-center justify-between bg-status-occupied px-5 py-4 text-white">
           <div>
             <p className="text-xs opacity-90">Total Tagihan</p>
@@ -142,7 +142,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
                       <button
                         key={q}
                         onClick={() => updateRow(idx, { amount: q === 0 ? total : q })}
-                        className="rounded-md bg-white px-2 py-1 text-xs font-medium text-ink hover:bg-brand-soft"
+                        className="rounded-md bg-panel px-2 py-1 text-xs font-medium text-ink hover:bg-brand-soft"
                       >
                         {q === 0 ? 'Uang Pas' : formatRupiah(q)}
                       </button>

@@ -17,7 +17,7 @@ export default function OpenDraftModal({ outletId, onCancel, onOpen }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-panel shadow-2xl">
         <div className="flex items-center justify-between bg-status-occupied px-5 py-4 text-white">
           <p className="text-lg font-bold">Buka Draft</p>
           <button onClick={onCancel} className="text-2xl leading-none hover:opacity-80">

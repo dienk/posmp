@@ -75,13 +75,13 @@ export default function InstallmentsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Cicilan Internal</h1>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[340px_1fr]">
         {/* Form buat rencana */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Buat Rencana Cicilan
           </h2>
@@ -152,7 +152,7 @@ export default function InstallmentsPage() {
         </section>
 
         {/* Daftar rencana */}
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           {plans.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada rencana cicilan.</p>
           ) : (

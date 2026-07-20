@@ -225,7 +225,7 @@ export default function ReceiptModal({ data, onClose }: { data: ReceiptData; onC
   )}. Terima kasih 🙏`
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-xs flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-xs flex-col overflow-hidden rounded-2xl bg-panel shadow-2xl">
         <div className="flex items-center justify-between border-b border-black/5 px-4 py-3">
           <p className="text-sm font-bold text-ink">Struk</p>
           <button onClick={onClose} className="text-xl leading-none text-ink-soft hover:text-ink">

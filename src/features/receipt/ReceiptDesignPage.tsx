@@ -139,7 +139,7 @@ export default function ReceiptDesignPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Desain Struk</h1>
         <button
           onClick={handleSave}
@@ -154,7 +154,7 @@ export default function ReceiptDesignPage() {
         {/* Form */}
         <section className="space-y-4">
           {/* Template */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Template</h2>
               {selected.id === activeId ? (
@@ -215,7 +215,7 @@ export default function ReceiptDesignPage() {
           </div>
 
           {/* Logo */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Logo / Gambar
             </h2>
@@ -282,7 +282,7 @@ export default function ReceiptDesignPage() {
           </div>
 
           {/* Teks (multiline) */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Teks</h2>
             <div className="space-y-3">
               <Field label="Tagline (boleh beberapa baris)">
@@ -315,7 +315,7 @@ export default function ReceiptDesignPage() {
           </div>
 
           {/* Situs & Marketplace */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Situs &amp; Marketplace
             </h2>
@@ -359,7 +359,7 @@ export default function ReceiptDesignPage() {
           </div>
 
           {/* Perataan */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Perataan Header & Footer
             </h2>
@@ -372,7 +372,7 @@ export default function ReceiptDesignPage() {
             </div>
           </div>
 
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Tampilkan
             </h2>
@@ -386,7 +386,7 @@ export default function ReceiptDesignPage() {
             </div>
           </div>
 
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Lebar Kertas
             </h2>
@@ -410,12 +410,12 @@ export default function ReceiptDesignPage() {
         </section>
 
         {/* Preview langsung */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Pratinjau
           </h2>
           <div className="flex justify-center">
-            <div className="rounded-lg border border-dashed border-ink-soft/30 bg-white p-4 shadow-inner">
+            <div className="rounded-lg border border-dashed border-ink-soft/30 bg-panel p-4 shadow-inner">
               <ReceiptView data={sample} config={cfg} />
             </div>
           </div>

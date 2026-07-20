@@ -191,7 +191,7 @@ export default function AppShell() {
     <div className="flex h-full">
       <nav
         className={
-          'flex flex-col bg-white/80 py-3 backdrop-blur transition-all duration-200 ' +
+          'flex flex-col bg-panel/80 py-3 backdrop-blur transition-all duration-200 ' +
           (sidebarOpen ? 'w-52 px-3' : 'w-20 items-center px-2')
         }
       >

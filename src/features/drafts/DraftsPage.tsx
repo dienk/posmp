@@ -50,7 +50,7 @@ export default function DraftsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Transaksi Draft</h1>
         <span className="text-xs text-ink-soft">
           {drafts.length} draft · {formatRupiah(total)}
@@ -59,7 +59,7 @@ export default function DraftsPage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_360px]">
         {/* Daftar draft */}
-        <section className="overflow-hidden rounded-card bg-white shadow-card">
+        <section className="overflow-hidden rounded-card bg-panel shadow-card">
           {drafts.length === 0 ? (
             <p className="px-4 py-10 text-center text-sm text-ink-soft">
               Belum ada transaksi draft. Simpan bill dari layar Kasir untuk menyimpannya sebagai draft.
@@ -98,7 +98,7 @@ export default function DraftsPage() {
         {/* Detail draft */}
         <section>
           {selected ? (
-            <div className="rounded-card bg-white p-5 shadow-card">
+            <div className="rounded-card bg-panel p-5 shadow-card">
               <h2 className="text-base font-bold text-ink">{selected.invoice_number}</h2>
               <p className="mb-3 text-xs text-ink-soft">
                 {selected.table_number ? `Meja ${selected.table_number} · ` : ''}
@@ -144,7 +144,7 @@ export default function DraftsPage() {
               </p>
             </div>
           ) : (
-            <div className="rounded-card bg-white p-5 text-center text-sm text-ink-soft shadow-card">
+            <div className="rounded-card bg-panel p-5 text-center text-sm text-ink-soft shadow-card">
               Pilih draft untuk melihat detail.
             </div>
           )}

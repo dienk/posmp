@@ -128,7 +128,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Pengaturan</h1>
         <button
           onClick={handleSave}
@@ -141,7 +141,7 @@ export default function SettingsPage() {
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
         {/* Outlet */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Outlet</h2>
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="block">
@@ -164,7 +164,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Transaksi */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Transaksi
           </h2>
@@ -224,7 +224,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Program Loyalitas (Poin) */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
               Program Loyalitas (Poin)
@@ -341,7 +341,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Antrean */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Antrean</h2>
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-ink-soft">
@@ -371,7 +371,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Modularitas */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Modul Aktif
           </h2>
@@ -400,7 +400,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Fitur Kasir (POS) */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Fitur Kasir
           </h2>
@@ -429,7 +429,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Metode Pembayaran */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Metode Pembayaran
           </h2>
@@ -443,7 +443,7 @@ export default function SettingsPage() {
                   <span className="text-lg leading-none">{m.icon}</span>
                   <span className="truncate text-sm font-semibold text-ink">{m.label}</span>
                   {m.builtin ? (
-                    <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-medium text-ink-soft">
+                    <span className="rounded bg-panel px-1.5 py-0.5 text-[10px] font-medium text-ink-soft">
                       Bawaan
                     </span>
                   ) : (

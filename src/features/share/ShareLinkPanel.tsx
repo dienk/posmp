@@ -61,14 +61,14 @@ export default function ShareLinkPanel({ url, message, subject, initialPhone }: 
         </a>
         <a
           href={mailtoLink(subject ?? 'POSMerahPutih', fullText)}
-          className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
+          className="rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
         >
           ✉️ Email
         </a>
         <button
           type="button"
           onClick={copy}
-          className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
+          className="rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
         >
           {copied ? '✓ Tersalin' : '🔗 Salin Link'}
         </button>
@@ -76,7 +76,7 @@ export default function ShareLinkPanel({ url, message, subject, initialPhone }: 
           <button
             type="button"
             onClick={nativeShare}
-            className="rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
+            className="rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
           >
             📤 Bagikan
           </button>
@@ -86,7 +86,7 @@ export default function ShareLinkPanel({ url, message, subject, initialPhone }: 
         readOnly
         value={url}
         onFocus={(e) => e.currentTarget.select()}
-        className="mt-2 w-full truncate rounded-lg border border-dashed border-black/15 bg-white px-2 py-1.5 text-[11px] text-ink-soft outline-none"
+        className="mt-2 w-full truncate rounded-lg border border-dashed border-black/15 bg-panel px-2 py-1.5 text-[11px] text-ink-soft outline-none"
       />
       <p className="mt-1.5 text-[11px] text-ink-soft">
         Tautan bersifat mandiri (data tersimpan di dalam tautan) — penerima cukup membukanya di

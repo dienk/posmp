@@ -75,10 +75,12 @@ export const THEMES: Theme[] = [
     vars: t('221 214 254', '237 233 254', '124 58 237', '245 243 255', '196 181 253', '46 16 101', '139 122 168'),
   },
   {
+    // Tema gelap sejati (dark mode). Permukaan --c-panel di-override gelap via
+    // [data-theme="oniks"] di index.css agar kartu/header/modal ikut gelap.
     id: 'oniks',
     name: 'Oniks',
-    desc: 'Hitam tegas berkarakter',
-    vars: t('161 161 170', '228 228 231', '24 24 27', '244 244 245', '228 228 231', '24 24 27', '82 82 91'),
+    desc: 'Hitam tegas (mode gelap)',
+    vars: t('63 63 70', '39 39 42', '82 82 91', '24 24 27', '39 39 42', '244 244 245', '161 161 170'),
   },
   {
     id: 'safir',
@@ -129,6 +131,9 @@ export function applyTheme(id: string | undefined, customVars?: Partial<Theme['v
       ? { ...themeVars(DEFAULT_THEME_ID), ...(customVars ?? {}) }
       : themeVars(id)
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v)
+  // Tandai tema aktif agar CSS bisa menimpa token non-registri (mis. --c-panel
+  // untuk mode gelap Oniks) per tema.
+  root.setAttribute('data-theme', id ?? DEFAULT_THEME_ID)
 }
 
 /** Warna CSS siap-pakai dari channel (untuk swatch di pemilih tema). */

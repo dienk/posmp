@@ -22,7 +22,7 @@ export default function ProductCard({ product, onSelect }: Props) {
       type="button"
       disabled={soldOut}
       onClick={() => onSelect(product)}
-      className="group flex flex-col overflow-hidden rounded-card bg-white text-left shadow-card
+      className="group flex flex-col overflow-hidden rounded-card bg-panel text-left shadow-card
                  transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed
                  disabled:opacity-50 disabled:hover:translate-y-0"
     >

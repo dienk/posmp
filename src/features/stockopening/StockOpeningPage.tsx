@@ -85,7 +85,7 @@ export default function StockOpeningPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Saldo Awal</h1>
         <select
           value={warehouseId}
@@ -106,13 +106,13 @@ export default function StockOpeningPage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="Cari nama / SKU…"
-            className="w-64 rounded-xl border border-black/10 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
+            className="w-64 rounded-xl border border-black/10 bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
           />
         </div>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-5">
-        <section className="overflow-hidden rounded-card bg-white shadow-card">
+        <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
@@ -159,7 +159,7 @@ export default function StockOpeningPage() {
                               setUnits((prev) => ({ ...prev, [p.id]: e.target.value }))
                             }
                             title="Satuan input"
-                            className="rounded-lg border border-black/10 bg-white px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
+                            className="rounded-lg border border-black/10 bg-panel px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
                           >
                             {opts.map((o) => (
                               <option key={o.unit} value={o.unit}>
@@ -203,7 +203,7 @@ export default function StockOpeningPage() {
         </section>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-black/5 bg-white/70 px-5 py-3 backdrop-blur">
+      <div className="flex flex-wrap items-center gap-3 border-t border-black/5 bg-panel/70 px-5 py-3 backdrop-blur">
         <span className="text-sm text-ink-soft">
           {countedIds.length} produk diisi · Saldo awal menyetel stok ke nilai ini (baseline).
         </span>

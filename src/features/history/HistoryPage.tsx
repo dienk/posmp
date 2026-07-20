@@ -84,13 +84,13 @@ export default function HistoryPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Riwayat Transaksi & Refund</h1>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_360px]">
         {/* Daftar transaksi */}
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           {txs.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada transaksi.</p>
           ) : (
@@ -132,7 +132,7 @@ export default function HistoryPage() {
         {/* Detail + refund */}
         <section>
           {selected ? (
-            <div className="rounded-card bg-white p-5 shadow-card">
+            <div className="rounded-card bg-panel p-5 shadow-card">
               <h2 className="text-base font-bold text-ink">{selected.invoice_number}</h2>
               <p className="mb-3 text-xs text-ink-soft">{selected.transaction_date}</p>
 
@@ -232,7 +232,7 @@ export default function HistoryPage() {
               )}
             </div>
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-card bg-white text-sm text-ink-soft shadow-card">
+            <div className="flex h-40 items-center justify-center rounded-card bg-panel text-sm text-ink-soft shadow-card">
               Pilih transaksi untuk melihat detail.
             </div>
           )}

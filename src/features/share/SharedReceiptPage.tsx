@@ -32,7 +32,7 @@ export default function SharedReceiptPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center bg-background p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-card">
+      <div className="w-full max-w-sm rounded-2xl bg-panel p-5 shadow-card">
         <ReceiptView data={data} config={config} />
       </div>
       <button

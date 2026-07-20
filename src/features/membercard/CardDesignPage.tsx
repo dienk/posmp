@@ -39,7 +39,7 @@ export default function CardDesignPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Desain Kartu Member</h1>
         <button
           onClick={save}
@@ -53,7 +53,7 @@ export default function CardDesignPage() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[360px_1fr]">
         {/* Form */}
         <section className="space-y-4">
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Teks</h2>
             <div className="space-y-3">
               <Field label="Judul">
@@ -65,7 +65,7 @@ export default function CardDesignPage() {
             </div>
           </div>
 
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Warna Latar</h2>
             <div className="mb-3 grid grid-cols-4 gap-2">
               {GRADIENTS.map((g) => (
@@ -102,7 +102,7 @@ export default function CardDesignPage() {
             </div>
           </div>
 
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-panel p-5 shadow-card">
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Elemen</h2>
             <div className="space-y-2">
               <Toggle label="Logo" checked={cfg.showLogo} onChange={(v) => set('showLogo', v)} />
@@ -121,7 +121,7 @@ export default function CardDesignPage() {
         </section>
 
         {/* Pratinjau */}
-        <section className="rounded-card bg-white p-6 shadow-card">
+        <section className="rounded-card bg-panel p-6 shadow-card">
           <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-ink-soft">Pratinjau</h2>
           <div className="flex justify-center">
             <MemberCard member={SAMPLE} config={cfg} />

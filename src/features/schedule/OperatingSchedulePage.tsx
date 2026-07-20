@@ -76,7 +76,7 @@ export default function OperatingSchedulePage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Jadwal Operasi</h1>
         <span
           className={
@@ -98,7 +98,7 @@ export default function OperatingSchedulePage() {
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
         {/* Jam operasional per hari */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Jam Operasional
           </h2>
@@ -145,7 +145,7 @@ export default function OperatingSchedulePage() {
         </section>
 
         {/* Shift */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Shift</h2>
             <label className="flex items-center gap-2">

@@ -109,7 +109,7 @@ export default function ContactsPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-white/70 px-5 py-3 backdrop-blur">
+      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Contact</h1>
       </header>
 
@@ -124,7 +124,7 @@ export default function ContactsPage() {
             }}
             className={
               'rounded-full px-4 py-1.5 text-sm font-medium transition ' +
-              (tab === t.key ? 'bg-status-occupied text-white shadow' : 'bg-white text-ink hover:bg-brand-soft')
+              (tab === t.key ? 'bg-status-occupied text-white shadow' : 'bg-panel text-ink hover:bg-brand-soft')
             }
           >
             {t.icon} {t.label}
@@ -134,7 +134,7 @@ export default function ContactsPage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
         {/* Daftar */}
-        <section className="rounded-card bg-white p-2 shadow-card">
+        <section className="rounded-card bg-panel p-2 shadow-card">
           {rows.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada data.</p>
           ) : (
@@ -155,7 +155,7 @@ export default function ContactsPage() {
         </section>
 
         {/* Tambah */}
-        <section className="rounded-card bg-white p-5 shadow-card">
+        <section className="rounded-card bg-panel p-5 shadow-card">
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
             Tambah {TABS.find((t) => t.key === tab)?.label}
           </h2>
