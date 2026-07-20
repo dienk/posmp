@@ -42,6 +42,9 @@ import CardDesignPage from './features/membercard/CardDesignPage'
 import DatabaseConnectionPage from './features/connection/DatabaseConnectionPage'
 import OperatingSchedulePage from './features/schedule/OperatingSchedulePage'
 import CashBalancePage from './features/cash/CashBalancePage'
+import KioskInfoPage from './features/kiosk/KioskInfoPage'
+import KioskOrderPage from './features/kiosk/KioskOrderPage'
+import KioskQueuePage from './features/kiosk/KioskQueuePage'
 import SharedReceiptPage from './features/share/SharedReceiptPage'
 import SharedMemberPage from './features/share/SharedMemberPage'
 
@@ -86,6 +89,9 @@ const router = createHashRouter([
       { path: 'card-design', element: <CardDesignPage /> },
       { path: 'database', element: <DatabaseConnectionPage /> },
       { path: 'schedule', element: <OperatingSchedulePage /> },
+      { path: 'kiosk-info', element: <KioskInfoPage /> },
+      { path: 'kiosk-order', element: <KioskOrderPage /> },
+      { path: 'kiosk-queue', element: <KioskQueuePage /> },
     ],
   },
   // Tampilan tanpa shell/navigasi (layar publik & pelanggan).

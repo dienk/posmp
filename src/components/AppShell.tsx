@@ -91,6 +91,17 @@ const LOYALTY_GROUP: NavGroupDef = {
   ],
 }
 
+// Grup "Kiosk" (layar mandiri pelanggan: informasi, pesan-bayar, antrean).
+const KIOSK_GROUP: NavGroupDef = {
+  label: 'Kiosk',
+  icon: '🖥️',
+  children: [
+    { to: '/kiosk-info', label: 'Kiosk Informasi', short: 'Info', icon: '📢' },
+    { to: '/kiosk-order', label: 'Kiosk Pemesanan & Pembayaran', short: 'Pesan', icon: '🛒' },
+    { to: '/kiosk-queue', label: 'Kiosk Antrian / Check-in', short: 'Antre', icon: '🎫' },
+  ],
+}
+
 // Grup "Setelan" (selalu tampil agar pengaturan tidak terkunci).
 const SETTINGS_GROUP: NavGroupDef = {
   label: 'Setelan',
@@ -116,6 +127,7 @@ const SIDEBAR: NavEntry[] = [
   { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace', perm: 'marketplace' } },
   { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: '📊', perm: 'reports' } },
   { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📋', perm: 'reports' } },
+  { kind: 'group', group: KIOSK_GROUP },
   { kind: 'group', group: SETTINGS_GROUP },
 ]
 
