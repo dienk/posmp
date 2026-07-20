@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Button from '../../components/ui/Button'
 import {
   createUnit,
   deleteUnit,
@@ -70,12 +71,9 @@ export default function UnitsPage() {
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Satuan</h1>
         <span className="text-xs text-ink-soft">{units.length} satuan</span>
-        <button
-          onClick={startNew}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
+        <Button size="sm" onClick={startNew} className="ml-auto">
           + Satuan
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
@@ -102,18 +100,12 @@ export default function UnitsPage() {
                       {u.description || 'Tanpa deskripsi'} · {u.product_count} produk
                     </p>
                   </div>
-                  <button
-                    onClick={() => startEdit(u)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
-                  >
+                  <Button variant="quiet" size="sm" onClick={() => startEdit(u)}>
                     Edit
-                  </button>
-                  <button
-                    onClick={() => remove(u)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                  >
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => remove(u)}>
                     Hapus
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -128,18 +120,18 @@ export default function UnitsPage() {
               </h2>
               <div className="space-y-3">
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Nama satuan</span>
+                  <span className="field-label">Nama satuan</span>
                   <input
-                    className={inputCls}
+                    className="field-input"
                     placeholder="mis. pcs / box / kg"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Deskripsi</span>
+                  <span className="field-label">Deskripsi</span>
                   <input
-                    className={inputCls}
+                    className="field-input"
                     placeholder="Opsional"
                     value={form.description}
                     onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
@@ -154,18 +146,12 @@ export default function UnitsPage() {
                   Satuan aktif
                 </label>
                 <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={save}
-                    className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-                  >
+                  <Button onClick={save} className="flex-1">
                     Simpan
-                  </button>
-                  <button
-                    onClick={cancel}
-                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-                  >
+                  </Button>
+                  <Button variant="ghost" onClick={cancel}>
                     Batal
-                  </button>
+                  </Button>
                 </div>
               </div>
             </>
@@ -186,6 +172,3 @@ export default function UnitsPage() {
     </div>
   )
 }
-
-const inputCls =
-  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
