@@ -153,13 +153,15 @@ export default function PosPage() {
   }
 
   const handleFindMember = () => {
-    const found = listMembers(memberQuery)[0]
+    const q = memberQuery.trim()
+    if (!q) return
+    const found = listMembers(q)[0]
     if (found) {
       setMember(found)
+      setCustomerName(found.name)
       setMemberQuery('')
-    } else {
-      showToast('Member tidak ditemukan.')
     }
+    // Bila tak ada member cocok: biarkan teks sebagai Pelanggan Umum (nama tetap terisi).
   }
 
   const handleApplyVoucher = () => {

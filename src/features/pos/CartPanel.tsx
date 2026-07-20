@@ -75,7 +75,6 @@ export default function CartPanel(props: Props) {
   const [showTxNote, setShowTxNote] = useState(false)
   const [noteShownIds, setNoteShownIds] = useState<Set<number>>(new Set())
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [pickerQuery, setPickerQuery] = useState('')
   const [actionsOpen, setActionsOpen] = useState(false)
 
   const showItemNote = (id: number) => noteShownIds.has(id)
@@ -87,116 +86,129 @@ export default function CartPanel(props: Props) {
       return next
     })
 
+  // Dropdown member disaring langsung dari teks di kolom pelanggan (satu kolom untuk umum & member).
   const filteredCustomers = useMemo(() => {
-    const q = pickerQuery.trim().toLowerCase()
+    const q = props.customerName.trim().toLowerCase()
     const list = q
       ? props.customers.filter(
           (c) => c.name.toLowerCase().includes(q) || (c.phone ?? '').toLowerCase().includes(q),
         )
       : props.customers
     return list.slice(0, 30)
-  }, [props.customers, pickerQuery])
+  }, [props.customers, props.customerName])
 
   const txNoteVisible = showTxNote || props.orderNote.trim().length > 0
 
   return (
     <aside className="flex h-full w-full flex-col bg-white shadow-panel">
-      {/* Info pelanggan & tipe pesanan */}
-      <div className="flex items-center gap-2 border-b border-black/5 p-4">
-        <div className="relative min-w-0 flex-1">
-          <input
-            value={props.customerName}
-            onChange={(e) => props.onCustomerNameChange(e.target.value)}
-            placeholder="Pelanggan Umum"
-            className="w-full rounded-lg border border-black/10 px-3 py-2 pr-9 text-sm
-                       outline-none focus:border-brand-strong"
-          />
-          <button
-            type="button"
-            onClick={() => setPickerOpen((v) => !v)}
-            title="Pilih dari master pelanggan"
-            className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md px-1.5 py-1 text-base
-                       text-ink-soft hover:bg-background"
+      {/* Pelanggan (umum & member jadi satu kolom) & tipe pesanan */}
+      <div className="border-b border-black/5 p-4">
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-ink-soft">
+              {props.member ? '★' : '👤'}
+            </span>
+            <input
+              value={props.customerName}
+              onChange={(e) => {
+                props.onCustomerNameChange(e.target.value)
+                props.onMemberQueryChange(e.target.value)
+                if (props.member) props.onClearMember()
+                setPickerOpen(true)
+              }}
+              onFocus={() => setPickerOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  props.onFindMember()
+                  setPickerOpen(false)
+                }
+              }}
+              placeholder="Pelanggan Umum / No. HP member"
+              className="w-full rounded-lg border border-black/10 py-2 pl-8 pr-9 text-sm
+                         outline-none focus:border-brand-strong"
+            />
+            {props.customerName || props.member ? (
+              <button
+                type="button"
+                onClick={() => {
+                  props.onCustomerNameChange('')
+                  props.onMemberQueryChange('')
+                  props.onClearMember()
+                  setPickerOpen(false)
+                }}
+                title="Kosongkan (Pelanggan Umum)"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md px-1.5 py-1 text-sm
+                           text-ink-soft hover:bg-background"
+              >
+                ✕
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPickerOpen((v) => !v)}
+                title="Pilih dari daftar member"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md px-1.5 py-1 text-base
+                           text-ink-soft hover:bg-background"
+              >
+                📇
+              </button>
+            )}
+            {pickerOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setPickerOpen(false)} />
+                <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-black/10 bg-white shadow-lg">
+                  <ul className="max-h-56 overflow-y-auto py-1">
+                    {filteredCustomers.length === 0 ? (
+                      <li className="px-3 py-2 text-xs text-ink-soft">
+                        Tidak ada member cocok · lanjut sebagai Pelanggan Umum.
+                      </li>
+                    ) : (
+                      filteredCustomers.map((c) => (
+                        <li key={c.id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              props.onSelectCustomer(c)
+                              setPickerOpen(false)
+                            }}
+                            className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-brand-soft"
+                          >
+                            <span className="font-medium text-ink">{c.name}</span>
+                            <span className="text-xs text-ink-soft">{c.phone}</span>
+                          </button>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              </>
+            )}
+          </div>
+          <select
+            value={props.facilityType}
+            onChange={(e) => props.onFacilityChange(e.target.value as FacilityType)}
+            className="rounded-lg border border-black/10 bg-white px-2 py-2 text-sm outline-none
+                       focus:border-brand-strong"
           >
-            📇
-          </button>
-          {pickerOpen && (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-black/10 bg-white shadow-lg">
-              <input
-                autoFocus
-                value={pickerQuery}
-                onChange={(e) => setPickerQuery(e.target.value)}
-                placeholder="Cari nama / No. HP…"
-                className="w-full rounded-t-xl border-b border-black/5 px-3 py-2 text-sm outline-none"
-              />
-              <ul className="max-h-56 overflow-y-auto py-1">
-                {filteredCustomers.length === 0 ? (
-                  <li className="px-3 py-2 text-xs text-ink-soft">Tidak ada pelanggan.</li>
-                ) : (
-                  filteredCustomers.map((c) => (
-                    <li key={c.id}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          props.onSelectCustomer(c)
-                          setPickerOpen(false)
-                          setPickerQuery('')
-                        }}
-                        className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-brand-soft"
-                      >
-                        <span className="font-medium text-ink">{c.name}</span>
-                        <span className="text-xs text-ink-soft">{c.phone}</span>
-                      </button>
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          )}
+            {FACILITIES.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <select
-          value={props.facilityType}
-          onChange={(e) => props.onFacilityChange(e.target.value as FacilityType)}
-          className="rounded-lg border border-black/10 bg-white px-2 py-2 text-sm outline-none
-                     focus:border-brand-strong"
-        >
-          {FACILITIES.map((f) => (
-            <option key={f.value} value={f.value}>
-              {f.label}
-            </option>
-          ))}
-        </select>
-      </div>
 
-      {/* Member loyalitas */}
-      <div className="px-4 pt-3">
-        {props.member ? (
-          <div className="flex items-center justify-between rounded-lg bg-brand-soft px-3 py-2">
+        {/* Badge member aktif (loyalitas) */}
+        {props.member && (
+          <div className="mt-2 flex items-center justify-between rounded-lg bg-brand-soft px-3 py-1.5">
             <span className="text-xs font-semibold text-ink">
-              ★ {props.member.name} · {props.member.points} poin
+              ★ Member · {props.member.points} poin
             </span>
             <button
               onClick={props.onClearMember}
               className="text-xs font-semibold text-status-occupied hover:opacity-70"
             >
               Lepas
-            </button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <input
-              value={props.memberQuery}
-              onChange={(e) => props.onMemberQueryChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && props.onFindMember()}
-              placeholder="No. HP / nama member"
-              className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
-            />
-            <button
-              onClick={props.onFindMember}
-              disabled={!props.memberQuery.trim()}
-              className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
-            >
-              Cari
             </button>
           </div>
         )}
