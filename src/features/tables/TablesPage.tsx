@@ -9,6 +9,7 @@ import {
   fetchTables,
   removeTable,
   updateTablePosition,
+  updateTableSection,
   updateTableStatus,
 } from './tablesRepository'
 
@@ -27,6 +28,9 @@ export default function TablesPage() {
   const [tables, setTables] = useState<DiningTable[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [editMode, setEditMode] = useState(false)
+  const [activeSection, setActiveSection] = useState<string>('ALL') // 'ALL' = semua ruangan
+  const [addingRoom, setAddingRoom] = useState(false)
+  const [newRoom, setNewRoom] = useState('')
   const canvasRef = useRef<HTMLDivElement>(null)
   const dragState = useRef<{ id: number; offsetX: number; offsetY: number } | null>(null)
 
@@ -34,15 +38,29 @@ export default function TablesPage() {
   useEffect(reload, [outletId])
   useRealtime('tables:update', reload)
 
+  // Daftar ruangan: dari data meja + ruangan aktif (agar ruangan baru tetap muncul walau belum ada mejanya).
+  const sections = useMemo(() => {
+    const set = new Set<string>()
+    for (const t of tables) if (t.section_name) set.add(t.section_name)
+    if (activeSection !== 'ALL') set.add(activeSection)
+    return Array.from(set).sort()
+  }, [tables, activeSection])
+
+  // Meja yang tampil di canvas mengikuti ruangan terpilih.
+  const visibleTables = useMemo(
+    () => (activeSection === 'ALL' ? tables : tables.filter((t) => t.section_name === activeSection)),
+    [tables, activeSection],
+  )
+
   const selected = useMemo(
     () => tables.find((t) => t.id === selectedId) ?? null,
     [tables, selectedId],
   )
   const counts = useMemo(() => {
     const c = { EMPTY: 0, OCCUPIED: 0, WAITING_BILL: 0 }
-    for (const t of tables) c[t.status]++
+    for (const t of visibleTables) c[t.status]++
     return c
-  }, [tables])
+  }, [visibleTables])
 
   const onPointerDown = (e: React.PointerEvent, table: DiningTable) => {
     setSelectedId(table.id)
@@ -90,7 +108,9 @@ export default function TablesPage() {
 
   const handleAddTable = async () => {
     const nextNum = tables.length + 1
-    await addTable(outletId, `T-${String(nextNum).padStart(2, '0')}`, 4, 'INDOOR', 0, 0)
+    // Meja baru masuk ke ruangan yang sedang dipilih (atau ruangan pertama bila melihat "Semua").
+    const section = activeSection !== 'ALL' ? activeSection : sections[0] ?? 'INDOOR'
+    await addTable(outletId, `T-${String(nextNum).padStart(2, '0')}`, 4, section, 0, 0)
     reload()
   }
 
@@ -99,6 +119,20 @@ export default function TablesPage() {
     await removeTable(selected.id)
     setSelectedId(null)
     reload()
+  }
+
+  const handleChangeSection = async (section: string) => {
+    if (!selected) return
+    await updateTableSection(selected.id, section)
+    reload()
+  }
+
+  const handleAddRoom = () => {
+    const name = newRoom.trim().toUpperCase()
+    if (!name) return
+    setActiveSection(name)
+    setNewRoom('')
+    setAddingRoom(false)
   }
 
   return (
@@ -129,6 +163,57 @@ export default function TablesPage() {
             </button>
           )}
         </div>
+
+        {/* Pemilih ruangan */}
+        <div className="flex w-full flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-ink-soft">Ruangan</span>
+          <RoomPill
+            active={activeSection === 'ALL'}
+            label="Semua"
+            onClick={() => setActiveSection('ALL')}
+          />
+          {sections.map((s) => (
+            <RoomPill
+              key={s}
+              active={activeSection === s}
+              label={s}
+              onClick={() => setActiveSection(s)}
+            />
+          ))}
+          {editMode &&
+            (addingRoom ? (
+              <span className="flex items-center gap-1">
+                <input
+                  autoFocus
+                  value={newRoom}
+                  onChange={(e) => setNewRoom(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddRoom()
+                    if (e.key === 'Escape') {
+                      setAddingRoom(false)
+                      setNewRoom('')
+                    }
+                  }}
+                  placeholder="Nama ruangan"
+                  className="w-32 rounded-full border border-black/10 px-3 py-1 text-xs outline-none focus:border-brand-strong"
+                />
+                <button
+                  onClick={handleAddRoom}
+                  disabled={!newRoom.trim()}
+                  className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+                >
+                  Simpan
+                </button>
+              </span>
+            ) : (
+              <button
+                onClick={() => setAddingRoom(true)}
+                className="rounded-full border border-dashed border-black/20 px-3 py-1 text-xs font-semibold text-ink-soft hover:bg-brand-soft"
+              >
+                + Ruangan
+              </button>
+            ))}
+        </div>
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -144,7 +229,7 @@ export default function TablesPage() {
             backgroundSize: `${CELL}px ${CELL}px`,
           }}
         >
-          {tables.map((t) => {
+          {visibleTables.map((t) => {
             const style = STATUS_STYLE[t.status]
             return (
               <button
@@ -167,9 +252,13 @@ export default function TablesPage() {
               </button>
             )
           })}
-          {tables.length === 0 && (
+          {visibleTables.length === 0 && (
             <p className="mt-10 text-center text-sm text-ink-soft">
-              Belum ada meja. Aktifkan “Atur Layout” lalu tambah meja.
+              {tables.length === 0
+                ? 'Belum ada meja. Aktifkan “Atur Layout” lalu tambah meja.'
+                : activeSection === 'ALL'
+                  ? 'Belum ada meja.'
+                  : `Belum ada meja di ruangan ${activeSection}. Aktifkan “Atur Layout” lalu tambah meja.`}
             </p>
           )}
         </div>
@@ -219,8 +308,22 @@ export default function TablesPage() {
                 </button>
               </div>
             ) : (
-              <div className="mt-5 grid gap-2">
+              <div className="mt-5 grid gap-3">
                 <p className="text-xs text-ink-soft">Seret meja di canvas untuk mengatur posisi.</p>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-semibold text-ink-soft">Ruangan</span>
+                  <select
+                    value={selected.section_name}
+                    onChange={(e) => handleChangeSection(e.target.value)}
+                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                  >
+                    {sections.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <button
                   onClick={handleRemove}
                   className="rounded-xl border border-status-occupied py-2.5 text-sm font-semibold text-status-occupied hover:bg-status-occupied/10"
@@ -242,5 +345,27 @@ function Legend({ color, label }: { color: string; label: string }) {
       <span className={`h-3 w-3 rounded-full ${color}`} />
       {label}
     </span>
+  )
+}
+
+function RoomPill({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={
+        'rounded-full px-3 py-1 text-xs font-semibold transition ' +
+        (active ? 'bg-status-occupied text-white shadow' : 'bg-white text-ink hover:bg-brand-soft')
+      }
+    >
+      {label}
+    </button>
   )
 }

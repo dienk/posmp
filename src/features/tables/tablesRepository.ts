@@ -17,6 +17,10 @@ export async function updateTablePosition(id: number, gridX: number, gridY: numb
   await execute('UPDATE dining_tables SET grid_x = ?, grid_y = ? WHERE id = ?', [gridX, gridY, id])
 }
 
+export async function updateTableSection(id: number, section: string): Promise<void> {
+  await execute('UPDATE dining_tables SET section_name = ? WHERE id = ?', [section, id])
+}
+
 export async function addTable(
   outletId: number,
   tableNumber: string,
