@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { useSettings } from '../../lib/SettingsContext'
 import { createMember, listMembers, type Member } from '../members/membersRepository'
 import { createSupplier, listSuppliers, type Supplier } from '../stockin/stockInRepository'
@@ -161,20 +162,20 @@ export default function ContactsPage() {
           </h2>
           <div className="space-y-3">
             <input
-              className={inputCls}
+              className="field-input"
               placeholder="Nama"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <input
-              className={inputCls}
+              className="field-input"
               placeholder={tab === 'pelanggan' ? 'Nomor HP' : 'Telepon (opsional)'}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
             {tab === 'karyawan' ? (
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Peran</span>
+                <span className="field-label">Peran</span>
                 <select
                   className={inputCls}
                   value={roleId}
@@ -189,18 +190,15 @@ export default function ContactsPage() {
               </label>
             ) : (
               <input
-                className={inputCls}
+                className="field-input"
                 placeholder={extraPlaceholder}
                 value={extra}
                 onChange={(e) => setExtra(e.target.value)}
               />
             )}
-            <button
-              onClick={add}
-              className="w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-            >
+            <Button onClick={add} className="w-full">
               Simpan
-            </button>
+            </Button>
             {tab === 'karyawan' && (
               <p className="text-xs text-ink-soft">
                 Karyawan = persona; kelola persona aktif & peran di <b>Setelan</b>.

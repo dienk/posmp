@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { listOutlets, type OutletWithStats } from '../outlets/outletsRepository'
 import {
   createCashier,
@@ -103,12 +104,9 @@ export default function CashiersPage() {
             </option>
           ))}
         </select>
-        <button
-          onClick={startNew}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
+        <Button size="sm" onClick={startNew} className="ml-auto">
           + Kasir
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_340px]">
@@ -142,18 +140,12 @@ export default function CashiersPage() {
                       {c.location ? ` · ${c.location}` : ''}
                     </p>
                   </div>
-                  <button
-                    onClick={() => startEdit(c)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
-                  >
+                  <Button variant="quiet" size="sm" onClick={() => startEdit(c)}>
                     Edit
-                  </button>
-                  <button
-                    onClick={() => remove(c)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                  >
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => remove(c)}>
                     Hapus
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -186,7 +178,7 @@ export default function CashiersPage() {
                 </Field>
                 <Field label="Nama kasir">
                   <input
-                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-input"
                     placeholder="mis. Kasir Depan"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -194,7 +186,7 @@ export default function CashiersPage() {
                 </Field>
                 <Field label="Kode">
                   <input
-                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-input"
                     placeholder="mis. KSR-01"
                     value={form.code}
                     onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
@@ -202,7 +194,7 @@ export default function CashiersPage() {
                 </Field>
                 <Field label="Lokasi">
                   <input
-                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-input"
                     placeholder="mis. Lantai 1 / Drive-Thru"
                     value={form.location}
                     onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
@@ -217,18 +209,12 @@ export default function CashiersPage() {
                   Kasir aktif
                 </label>
                 <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={save}
-                    className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-                  >
+                  <Button onClick={save} className="flex-1">
                     Simpan
-                  </button>
-                  <button
-                    onClick={cancel}
-                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-                  >
+                  </Button>
+                  <Button variant="ghost" onClick={cancel}>
                     Batal
-                  </button>
+                  </Button>
                 </div>
               </div>
             </>
@@ -253,7 +239,7 @@ export default function CashiersPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+      <span className="field-label">{label}</span>
       {children}
     </label>
   )

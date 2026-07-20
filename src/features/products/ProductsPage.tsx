@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -172,14 +173,11 @@ export default function ProductsPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="Cari nama / SKU…"
-          className="w-56 rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="field-input w-56"
         />
-        <button
-          onClick={startNew}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
+        <Button size="sm" onClick={startNew} className="ml-auto">
           + Produk
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_340px]">
@@ -241,18 +239,12 @@ export default function ProductsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => startEdit(p)}
-                        className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
-                      >
+                      <Button variant="quiet" size="sm" onClick={() => startEdit(p)}>
                         Edit
-                      </button>
-                      <button
-                        onClick={() => remove(p.id)}
-                        className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                      >
+                      </Button>
+                      <Button variant="danger" size="sm" onClick={() => remove(p.id)}>
                         Hapus
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 )
@@ -277,7 +269,7 @@ export default function ProductsPage() {
               </h2>
               <div className="space-y-3">
                 <div>
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">
+                  <span className="field-label">
                     Gambar produk {form.images.length > 0 && `(${form.images.length})`}
                   </span>
                   <div className="flex flex-wrap gap-2">
@@ -330,9 +322,9 @@ export default function ProductsPage() {
                   </p>
                 </div>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Nama produk</span>
+                  <span className="field-label">Nama produk</span>
                   <input
-                    className={inputCls}
+                    className="field-input"
                     placeholder="Nama produk"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -340,18 +332,18 @@ export default function ProductsPage() {
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">SKU</span>
+                    <span className="field-label">SKU</span>
                     <input
-                      className={inputCls}
+                      className="field-input"
                       placeholder="mis. MKN-001"
                       value={form.sku ?? ''}
                       onChange={(e) => setForm({ ...form, sku: e.target.value })}
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">Barcode</span>
+                    <span className="field-label">Barcode</span>
                     <input
-                      className={inputCls}
+                      className="field-input"
                       placeholder="Scan / ketik barcode"
                       value={form.barcode ?? ''}
                       onChange={(e) => setForm({ ...form, barcode: e.target.value })}
@@ -359,7 +351,7 @@ export default function ProductsPage() {
                   </label>
                 </div>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Kategori</span>
+                  <span className="field-label">Kategori</span>
                   <select
                     className={inputCls}
                     value={form.categoryId ?? ''}
@@ -377,19 +369,19 @@ export default function ProductsPage() {
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">Harga jual (Rp)</span>
+                    <span className="field-label">Harga jual (Rp)</span>
                     <input
                       type="number"
-                      className={inputCls}
+                      className="field-input"
                       value={form.price}
                       onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">Harga modal (Rp)</span>
+                    <span className="field-label">Harga modal (Rp)</span>
                     <input
                       type="number"
-                      className={inputCls}
+                      className="field-input"
                       value={form.costPrice}
                       onChange={(e) => setForm({ ...form, costPrice: Number(e.target.value) })}
                     />
@@ -397,9 +389,9 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">Satuan</span>
+                    <span className="field-label">Satuan</span>
                     <input
-                      className={inputCls}
+                      className="field-input"
                       list="unit-options"
                       placeholder="pcs"
                       value={form.unit ?? ''}
@@ -412,10 +404,10 @@ export default function ProductsPage() {
                     </datalist>
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">Stok minimum</span>
+                    <span className="field-label">Stok minimum</span>
                     <input
                       type="number"
-                      className={inputCls}
+                      className="field-input"
                       value={form.minStock}
                       onChange={(e) => setForm({ ...form, minStock: Number(e.target.value) })}
                     />
@@ -488,7 +480,7 @@ export default function ProductsPage() {
                 </div>
 
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Deskripsi</span>
+                  <span className="field-label">Deskripsi</span>
                   <textarea
                     rows={2}
                     className={inputCls + ' resize-none'}
@@ -507,18 +499,12 @@ export default function ProductsPage() {
                   Produk aktif (tampil di kasir)
                 </label>
                 <div className="flex gap-2">
-                  <button
-                    onClick={save}
-                    className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-                  >
+                  <Button onClick={save} className="flex-1">
                     Simpan
-                  </button>
-                  <button
-                    onClick={cancel}
-                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-                  >
+                  </Button>
+                  <Button variant="ghost" onClick={cancel}>
                     Batal
-                  </button>
+                  </Button>
                 </div>
               </div>
             </>
@@ -536,17 +522,12 @@ export default function ProductsPage() {
               </ul>
               <div className="flex gap-2">
                 <input
-                  className={inputCls}
+                  className="field-input"
                   placeholder="Kategori baru"
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
                 />
-                <button
-                  onClick={addCategory}
-                  className="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-ink hover:bg-brand-strong"
-                >
-                  +
-                </button>
+                <Button onClick={addCategory}>+</Button>
               </div>
               <p className="mt-3 text-xs text-ink-soft">
                 Pilih “+ Produk” untuk menambah, atau “Edit” pada baris produk.

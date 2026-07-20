@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Button from '../../components/ui/Button'
 import {
   createCategory,
   deleteCategory,
@@ -63,12 +64,9 @@ export default function CategoriesPage() {
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Kategori Produk</h1>
-        <button
-          onClick={startNew}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
+        <Button size="sm" onClick={startNew} className="ml-auto">
           + Kategori
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
@@ -88,18 +86,12 @@ export default function CategoriesPage() {
                     <p className="text-sm font-semibold text-ink">{c.name}</p>
                     <p className="text-xs text-ink-soft">{c.product_count} produk</p>
                   </div>
-                  <button
-                    onClick={() => startEdit(c)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
-                  >
+                  <Button variant="quiet" size="sm" onClick={() => startEdit(c)}>
                     Edit
-                  </button>
-                  <button
-                    onClick={() => remove(c)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                  >
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => remove(c)}>
                     Hapus
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -115,13 +107,13 @@ export default function CategoriesPage() {
               </h2>
               <div className="space-y-3">
                 <input
-                  className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                  className="field-input"
                   placeholder="Nama kategori"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
                 <div>
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Warna</span>
+                  <span className="field-label">Warna</span>
                   <div className="flex flex-wrap gap-2">
                     {COLORS.map((c) => (
                       <button
@@ -138,18 +130,12 @@ export default function CategoriesPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={save}
-                    className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-                  >
+                  <Button onClick={save} className="flex-1">
                     Simpan
-                  </button>
-                  <button
-                    onClick={cancel}
-                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-                  >
+                  </Button>
+                  <Button variant="ghost" onClick={cancel}>
                     Batal
-                  </button>
+                  </Button>
                 </div>
               </div>
             </>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Button from '../../components/ui/Button'
 import {
   createOutlet,
   deleteOutlet,
@@ -73,12 +74,9 @@ export default function OutletsPage() {
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Outlet</h1>
         <span className="text-xs text-ink-soft">{outlets.length} cabang</span>
-        <button
-          onClick={startNew}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
+        <Button size="sm" onClick={startNew} className="ml-auto">
           + Outlet
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_340px]">
@@ -107,18 +105,12 @@ export default function OutletsPage() {
                       {o.phone ? ` · ${o.phone}` : ''} · {o.cashier_count} kasir
                     </p>
                   </div>
-                  <button
-                    onClick={() => startEdit(o)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
-                  >
+                  <Button variant="quiet" size="sm" onClick={() => startEdit(o)}>
                     Edit
-                  </button>
-                  <button
-                    onClick={() => remove(o)}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                  >
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => remove(o)}>
                     Hapus
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -135,7 +127,7 @@ export default function OutletsPage() {
               <div className="space-y-3">
                 <Field label="Nama outlet">
                   <input
-                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-input"
                     placeholder="mis. Cabang Bandung"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -144,7 +136,7 @@ export default function OutletsPage() {
                 <Field label="Alamat">
                   <textarea
                     rows={2}
-                    className="w-full resize-none rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-input resize-none"
                     placeholder="Alamat lengkap"
                     value={form.address}
                     onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
@@ -152,7 +144,7 @@ export default function OutletsPage() {
                 </Field>
                 <Field label="Telepon">
                   <input
-                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-input"
                     placeholder="mis. 022-1234567"
                     value={form.phone}
                     onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
@@ -167,18 +159,12 @@ export default function OutletsPage() {
                   Outlet aktif
                 </label>
                 <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={save}
-                    className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-                  >
+                  <Button onClick={save} className="flex-1">
                     Simpan
-                  </button>
-                  <button
-                    onClick={cancel}
-                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-                  >
+                  </Button>
+                  <Button variant="ghost" onClick={cancel}>
                     Batal
-                  </button>
+                  </Button>
                 </div>
               </div>
             </>
@@ -203,7 +189,7 @@ export default function OutletsPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+      <span className="field-label">{label}</span>
       {children}
     </label>
   )
