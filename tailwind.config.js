@@ -3,6 +3,10 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Nunito Sans Variable"', 'Inter', 'system-ui', 'sans-serif'],
+        heading: ['"Rubik Variable"', '"Nunito Sans Variable"', 'system-ui', 'sans-serif'],
+      },
       colors: {
         // Palet visual POSMerahPutih — nilai dari CSS variables (bisa berganti tema).
         // Format channel "R G B" agar modifier opacity Tailwind tetap berfungsi.

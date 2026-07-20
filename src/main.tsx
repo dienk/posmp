@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import '@fontsource-variable/nunito-sans'
+import '@fontsource-variable/rubik'
 import App from './App'
 import './index.css'
 

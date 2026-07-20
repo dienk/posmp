@@ -27,10 +27,19 @@
 
   body {
     margin: 0;
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Nunito Sans Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     color: rgb(var(--c-ink));
     background-color: rgb(var(--c-background));
+  }
+
+  /* Heading pakai Rubik (rekomendasi typografi retail ui-ux-pro-max). */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Rubik Variable', 'Nunito Sans Variable', system-ui, sans-serif;
   }
 
   /* ── Fondasi UX (panduan ui-ux-pro-max) ─────────────────────────────────── */
