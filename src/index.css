@@ -75,6 +75,19 @@
     outline-offset: 2px;
   }
 
+  /* Standar tombol ui-ux-pro-max: transisi mikro halus (~150ms) + umpan-balik
+     tekan seragam (skala turun) untuk SETIAP <button>, tanpa menggeser layout
+     sekitar. Warna/hover per-tombol tetap dari kelas Tailwind masing-masing. */
+  button {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform,
+      filter;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
   /* Hormati preferensi "reduce motion": pangkas animasi & transisi. */
   @media (prefers-reduced-motion: reduce) {
     *,
