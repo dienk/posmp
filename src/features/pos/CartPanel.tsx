@@ -322,51 +322,6 @@ export default function CartPanel(props: Props) {
         )}
       </div>
 
-      {/* Voucher (opsional, diatur di Pengaturan) */}
-      {props.showVoucher && (
-        <div className="border-t border-black/5 px-4 pt-3">
-          {discount > 0 ? (
-            <div className="flex items-center justify-between rounded-lg bg-status-empty/10 px-3 py-2">
-              <span className="text-xs font-semibold text-status-empty">
-                Voucher {props.voucherCode} diterapkan
-              </span>
-              <button
-                onClick={props.onRemoveVoucher}
-                className="text-xs font-semibold text-status-occupied hover:opacity-70"
-              >
-                Hapus
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <input
-                value={props.voucherCode}
-                onChange={(e) => props.onVoucherCodeChange(e.target.value)}
-                placeholder="Kode voucher"
-                className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-2 text-sm uppercase outline-none focus:border-brand-strong"
-              />
-              <button
-                onClick={props.onApplyVoucher}
-                disabled={empty || !props.voucherCode.trim()}
-                className="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
-              >
-                Pakai
-              </button>
-            </div>
-          )}
-          {props.voucherMessage && (
-            <p
-              className={
-                'mt-1.5 text-xs ' +
-                (props.voucherMessage.ok ? 'text-status-empty' : 'text-status-occupied')
-              }
-            >
-              {props.voucherMessage.text}
-            </p>
-          )}
-        </div>
-      )}
-
       {/* Pre-Order (opsional, diatur di Pengaturan) */}
       {props.showPreorder && (
         <div className="px-4 pt-3">
@@ -480,58 +435,114 @@ export default function CartPanel(props: Props) {
         </dl>
 
         <div className="mt-4 flex items-stretch gap-2">
-          {/* Menu opsi (kiri): Simpan Draft & Split Bill — sembunyi saat pre-order */}
-          {!(props.showPreorder && props.isPreorder) && (
+          {/* Menu opsi (kiri): Voucher, Simpan Draft & Split Bill */}
+          {(props.showVoucher || !(props.showPreorder && props.isPreorder)) && (
             <div className="relative shrink-0">
               <button
                 type="button"
                 disabled={props.saving}
                 onClick={() => setActionsOpen((v) => !v)}
                 aria-label="Opsi lain"
-                title="Opsi lain: Simpan Draft, Split Bill"
-                className="flex h-full items-center rounded-xl border border-black/10 px-3 text-lg
+                title="Opsi lain: Voucher, Simpan Draft, Split Bill"
+                className="relative flex h-full items-center rounded-xl border border-black/10 px-3 text-lg
                            font-bold text-ink transition hover:bg-background disabled:opacity-40"
               >
                 ⋮
+                {discount > 0 && (
+                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-status-empty" />
+                )}
               </button>
               {actionsOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} />
-                  <div className="absolute bottom-full left-0 z-20 mb-2 w-52 overflow-hidden rounded-xl border border-black/10 bg-white shadow-lg">
-                    <button
-                      type="button"
-                      disabled={props.saving}
-                      onClick={() => {
-                        setActionsOpen(false)
-                        props.onOpenDraft()
-                      }}
-                      className="flex w-full items-center gap-2 border-b border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
-                    >
-                      📂 Buka Draft
-                    </button>
-                    <button
-                      type="button"
-                      disabled={empty || props.saving}
-                      onClick={() => {
-                        setActionsOpen(false)
-                        props.onSaveDraft()
-                      }}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
-                    >
-                      💾 Simpan Bill (Draft)
-                    </button>
-                    <button
-                      type="button"
-                      disabled={props.saving || props.items.length <= 1}
-                      onClick={() => {
-                        setActionsOpen(false)
-                        props.onSplit()
-                      }}
-                      title={props.items.length <= 1 ? 'Butuh minimal 2 item' : undefined}
-                      className="flex w-full items-center gap-2 border-t border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
-                    >
-                      ⑃ Split Bill
-                    </button>
+                  <div className="absolute bottom-full left-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-black/10 bg-white shadow-lg">
+                    {/* Kode voucher (opsional, diatur di Pengaturan) */}
+                    {props.showVoucher && (
+                      <div className="border-b border-black/5 p-3">
+                        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                          Kode Voucher
+                        </p>
+                        {discount > 0 ? (
+                          <div className="flex items-center justify-between rounded-lg bg-status-empty/10 px-3 py-2">
+                            <span className="min-w-0 truncate text-xs font-semibold text-status-empty">
+                              {props.voucherCode} diterapkan
+                            </span>
+                            <button
+                              onClick={props.onRemoveVoucher}
+                              className="shrink-0 text-xs font-semibold text-status-occupied hover:opacity-70"
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <input
+                              value={props.voucherCode}
+                              onChange={(e) => props.onVoucherCodeChange(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && !empty && props.onApplyVoucher()}
+                              placeholder="Kode voucher"
+                              className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-2 text-sm uppercase outline-none focus:border-brand-strong"
+                            />
+                            <button
+                              onClick={props.onApplyVoucher}
+                              disabled={empty || !props.voucherCode.trim()}
+                              className="shrink-0 rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+                            >
+                              Pakai
+                            </button>
+                          </div>
+                        )}
+                        {props.voucherMessage && (
+                          <p
+                            className={
+                              'mt-1.5 text-xs ' +
+                              (props.voucherMessage.ok ? 'text-status-empty' : 'text-status-occupied')
+                            }
+                          >
+                            {props.voucherMessage.text}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {/* Simpan Draft & Split Bill — sembunyi saat pre-order */}
+                    {!(props.showPreorder && props.isPreorder) && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={props.saving}
+                          onClick={() => {
+                            setActionsOpen(false)
+                            props.onOpenDraft()
+                          }}
+                          className="flex w-full items-center gap-2 border-b border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                        >
+                          📂 Buka Draft
+                        </button>
+                        <button
+                          type="button"
+                          disabled={empty || props.saving}
+                          onClick={() => {
+                            setActionsOpen(false)
+                            props.onSaveDraft()
+                          }}
+                          className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                        >
+                          💾 Simpan Bill (Draft)
+                        </button>
+                        <button
+                          type="button"
+                          disabled={props.saving || props.items.length <= 1}
+                          onClick={() => {
+                            setActionsOpen(false)
+                            props.onSplit()
+                          }}
+                          title={props.items.length <= 1 ? 'Butuh minimal 2 item' : undefined}
+                          className="flex w-full items-center gap-2 border-t border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                        >
+                          ⑃ Split Bill
+                        </button>
+                      </>
+                    )}
                   </div>
                 </>
               )}
