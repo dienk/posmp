@@ -6,8 +6,10 @@ import { useRealtime } from '../../lib/useRealtime'
 import type { DiningTable, TableStatus } from '../../types'
 import {
   addTable,
+  deleteSection,
   fetchTables,
   removeTable,
+  renameSection,
   updateTablePosition,
   updateTableSection,
   updateTableStatus,
@@ -31,6 +33,7 @@ export default function TablesPage() {
   const [activeSection, setActiveSection] = useState<string>('ALL') // 'ALL' = semua ruangan
   const [addingRoom, setAddingRoom] = useState(false)
   const [newRoom, setNewRoom] = useState('')
+  const [manageOpen, setManageOpen] = useState(false)
   const canvasRef = useRef<HTMLDivElement>(null)
   const dragState = useRef<{ id: number; offsetX: number; offsetY: number } | null>(null)
 
@@ -45,6 +48,13 @@ export default function TablesPage() {
     if (activeSection !== 'ALL') set.add(activeSection)
     return Array.from(set).sort()
   }, [tables, activeSection])
+
+  // Jumlah meja per ruangan (untuk panel Kelola Ruangan).
+  const roomCounts = useMemo(() => {
+    const m: Record<string, number> = {}
+    for (const t of tables) m[t.section_name] = (m[t.section_name] ?? 0) + 1
+    return m
+  }, [tables])
 
   // Meja yang tampil di canvas mengikuti ruangan terpilih.
   const visibleTables = useMemo(
@@ -135,6 +145,21 @@ export default function TablesPage() {
     setAddingRoom(false)
   }
 
+  const handleRenameRoom = async (from: string, to: string) => {
+    const name = to.trim().toUpperCase()
+    if (!name || name === from) return
+    await renameSection(outletId, from, name)
+    if (activeSection === from) setActiveSection(name)
+    reload()
+  }
+
+  const handleDeleteRoom = async (section: string) => {
+    await deleteSection(outletId, section)
+    if (activeSection === section) setActiveSection('ALL')
+    if (selected && selected.section_name === section) setSelectedId(null)
+    reload()
+  }
+
   return (
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-3 bg-white/70 px-5 py-3 backdrop-blur">
@@ -213,6 +238,14 @@ export default function TablesPage() {
                 + Ruangan
               </button>
             ))}
+          {editMode && sections.length > 0 && (
+            <button
+              onClick={() => setManageOpen(true)}
+              className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-ink-soft hover:bg-brand-soft"
+            >
+              ⚙ Kelola Ruangan
+            </button>
+          )}
         </div>
       </header>
 
@@ -335,6 +368,16 @@ export default function TablesPage() {
           </aside>
         )}
       </div>
+
+      {manageOpen && (
+        <ManageRoomsModal
+          sections={sections}
+          roomCounts={roomCounts}
+          onRename={handleRenameRoom}
+          onDelete={handleDeleteRoom}
+          onClose={() => setManageOpen(false)}
+        />
+      )}
     </div>
   )
 }
@@ -367,5 +410,142 @@ function RoomPill({
     >
       {label}
     </button>
+  )
+}
+
+function ManageRoomsModal({
+  sections,
+  roomCounts,
+  onRename,
+  onDelete,
+  onClose,
+}: {
+  sections: string[]
+  roomCounts: Record<string, number>
+  onRename: (from: string, to: string) => void | Promise<void>
+  onDelete: (section: string) => void | Promise<void>
+  onClose: () => void
+}) {
+  const [renaming, setRenaming] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+
+  const startRename = (s: string) => {
+    setConfirmDelete(null)
+    setRenaming(s)
+    setRenameValue(s)
+  }
+  const saveRename = (from: string) => {
+    onRename(from, renameValue)
+    setRenaming(null)
+    setRenameValue('')
+  }
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-panel"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-ink">Kelola Ruangan</h2>
+          <button onClick={onClose} className="text-ink-soft hover:text-ink">
+            ✕
+          </button>
+        </div>
+
+        {sections.length === 0 ? (
+          <p className="py-6 text-center text-sm text-ink-soft">Belum ada ruangan.</p>
+        ) : (
+          <ul className="divide-y divide-black/5">
+            {sections.map((s) => {
+              const count = roomCounts[s] ?? 0
+              return (
+                <li key={s} className="py-2.5">
+                  {renaming === s ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        autoFocus
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveRename(s)
+                          if (e.key === 'Escape') setRenaming(null)
+                        }}
+                        className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-1.5 text-sm uppercase outline-none focus:border-brand-strong"
+                      />
+                      <button
+                        onClick={() => saveRename(s)}
+                        disabled={!renameValue.trim() || renameValue.trim().toUpperCase() === s}
+                        className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
+                      >
+                        Simpan
+                      </button>
+                      <button
+                        onClick={() => setRenaming(null)}
+                        className="rounded-lg px-2 py-1.5 text-sm font-semibold text-ink-soft hover:bg-background"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  ) : confirmDelete === s ? (
+                    <div className="flex items-center gap-2">
+                      <span className="min-w-0 flex-1 text-xs text-status-occupied">
+                        Hapus “{s}”{count > 0 ? ` beserta ${count} meja` : ''}?
+                      </span>
+                      <button
+                        onClick={() => {
+                          onDelete(s)
+                          setConfirmDelete(null)
+                        }}
+                        className="rounded-lg bg-status-occupied px-3 py-1.5 text-sm font-semibold text-white hover:brightness-95"
+                      >
+                        Hapus
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="rounded-lg px-2 py-1.5 text-sm font-semibold text-ink-soft hover:bg-background"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
+                        {s}
+                      </span>
+                      <span className="shrink-0 rounded-full bg-background px-2 py-0.5 text-xs text-ink-soft">
+                        {count} meja
+                      </span>
+                      <button
+                        onClick={() => startRename(s)}
+                        title="Ganti nama"
+                        className="shrink-0 rounded-lg px-2 py-1 text-sm text-ink-soft hover:bg-background"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        onClick={() => {
+                          setRenaming(null)
+                          setConfirmDelete(s)
+                        }}
+                        title="Hapus ruangan"
+                        className="shrink-0 rounded-lg px-2 py-1 text-sm text-status-occupied hover:bg-status-occupied/10"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+        <p className="mt-3 text-[11px] text-ink-soft">
+          Ganti nama memindah semua meja ke nama baru (bila sama dengan ruangan lain, keduanya
+          tergabung). Menghapus ruangan ikut menghapus seluruh meja di dalamnya.
+        </p>
+      </div>
+    </div>
   )
 }

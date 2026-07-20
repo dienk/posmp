@@ -21,6 +21,22 @@ export async function updateTableSection(id: number, section: string): Promise<v
   await execute('UPDATE dining_tables SET section_name = ? WHERE id = ?', [section, id])
 }
 
+/** Ganti nama ruangan: seluruh meja di `from` dipindah ke `to`. Bila `to` sudah ada, keduanya tergabung. */
+export async function renameSection(outletId: number, from: string, to: string): Promise<void> {
+  await execute(
+    'UPDATE dining_tables SET section_name = ? WHERE outlet_id = ? AND section_name = ?',
+    [to, outletId, from],
+  )
+}
+
+/** Hapus ruangan beserta seluruh meja di dalamnya. */
+export async function deleteSection(outletId: number, section: string): Promise<void> {
+  await execute('DELETE FROM dining_tables WHERE outlet_id = ? AND section_name = ?', [
+    outletId,
+    section,
+  ])
+}
+
 export async function addTable(
   outletId: number,
   tableNumber: string,
