@@ -76,6 +76,8 @@ export default function CartPanel(props: Props) {
   const [noteShownIds, setNoteShownIds] = useState<Set<number>>(new Set())
   const [pickerOpen, setPickerOpen] = useState(false)
   const [actionsOpen, setActionsOpen] = useState(false)
+  // Buffer teks kuantitas per item agar bisa diketik (termasuk sementara kosong) tanpa langsung menghapus item.
+  const [qtyEdits, setQtyEdits] = useState<Record<number, string>>({})
 
   const showItemNote = (id: number) => noteShownIds.has(id)
   const toggleItemNote = (id: number) =>
@@ -267,7 +269,29 @@ export default function CartPanel(props: Props) {
                       >
                         −
                       </button>
-                      <span className="w-6 text-center text-sm font-semibold">{it.quantity}</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        aria-label={`Jumlah ${it.product.name}`}
+                        value={qtyEdits[it.product.id] ?? String(it.quantity)}
+                        onFocus={(e) => e.currentTarget.select()}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^0-9]/g, '')
+                          setQtyEdits((m) => ({ ...m, [it.product.id]: raw }))
+                          const n = parseInt(raw, 10)
+                          if (Number.isFinite(n) && n >= 1) props.onQuantityChange(it.product.id, n)
+                        }}
+                        onBlur={() => {
+                          setQtyEdits((m) => {
+                            const n = parseInt(m[it.product.id] ?? '', 10)
+                            if (!Number.isFinite(n) || n < 1) props.onQuantityChange(it.product.id, 1)
+                            const next = { ...m }
+                            delete next[it.product.id]
+                            return next
+                          })
+                        }}
+                        className="w-9 rounded-md border border-black/10 py-0.5 text-center text-sm font-semibold outline-none focus:border-brand-strong"
+                      />
                       <button
                         type="button"
                         onClick={() => props.onQuantityChange(it.product.id, it.quantity + 1)}
