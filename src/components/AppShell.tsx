@@ -1,5 +1,54 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import {
+  Archive,
+  Armchair,
+  Banknote,
+  Bell,
+  Boxes,
+  CalendarClock,
+  ChefHat,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Contact,
+  CreditCard,
+  Database,
+  FileText,
+  Flag,
+  FolderTree,
+  Gift,
+  History,
+  IdCard,
+  KeyRound,
+  LayoutDashboard,
+  Megaphone,
+  Monitor,
+  Package,
+  PackagePlus,
+  Palette,
+  Percent,
+  Printer,
+  Ruler,
+  ScanBarcode,
+  ScrollText,
+  Settings,
+  ShoppingBag,
+  ShoppingCart,
+  SlidersHorizontal,
+  SquareUser,
+  Star,
+  Store,
+  Tags,
+  Ticket,
+  TicketCheck,
+  Utensils,
+  Wallet,
+  Warehouse,
+  ClipboardList,
+  UserCog,
+  type LucideIcon,
+} from 'lucide-react'
 import { useSettings } from '../lib/SettingsContext'
 import { isModuleEnabled } from '../lib/settings'
 import { useConnection } from '../lib/useConnection'
@@ -9,7 +58,7 @@ import { effectivePerms } from '../features/access/accessRepository'
 interface NavItem {
   to: string
   label: string
-  icon: string
+  icon: LucideIcon
   moduleKey?: string
   perm?: string
 }
@@ -18,14 +67,14 @@ interface NavChild {
   to: string
   label: string
   short: string
-  icon: string
+  icon: LucideIcon
   moduleKey?: string
   perm?: string
 }
 
 interface NavGroupDef {
   label: string
-  icon: string
+  icon: LucideIcon
   children: NavChild[]
   perm?: string
 }
@@ -35,48 +84,48 @@ type NavEntry = { kind: 'link'; item: NavItem } | { kind: 'group'; group: NavGro
 // Grup "Data Master" (Produk & Contact).
 const DATA_MASTER_GROUP: NavGroupDef = {
   label: 'Data Master',
-  icon: '🗂️',
+  icon: FolderTree,
   perm: 'datamaster',
   children: [
-    { to: '/outlets', label: 'Outlet', short: 'Outlet', icon: '🏬' },
-    { to: '/cashiers', label: 'Kasir', short: 'Kasir', icon: '🧑‍💻' },
-    { to: '/warehouses', label: 'Gudang', short: 'Gudang', icon: '🏭' },
-    { to: '/master-tables', label: 'Master Meja', short: 'Meja', icon: '🍽️' },
-    { to: '/products', label: 'Produk', short: 'Produk', icon: '📦' },
-    { to: '/categories', label: 'Kategori Produk', short: 'Kategori', icon: '🏷️' },
-    { to: '/units', label: 'Satuan', short: 'Satuan', icon: '📏' },
-    { to: '/taxes', label: 'Pajak', short: 'Pajak', icon: '🧮' },
-    { to: '/contacts', label: 'Contact', short: 'Contact', icon: '📇' },
+    { to: '/outlets', label: 'Outlet', short: 'Outlet', icon: Store },
+    { to: '/cashiers', label: 'Kasir', short: 'Kasir', icon: UserCog },
+    { to: '/warehouses', label: 'Gudang', short: 'Gudang', icon: Warehouse },
+    { to: '/master-tables', label: 'Master Meja', short: 'Meja', icon: Armchair },
+    { to: '/products', label: 'Produk', short: 'Produk', icon: Package },
+    { to: '/categories', label: 'Kategori Produk', short: 'Kategori', icon: Tags },
+    { to: '/units', label: 'Satuan', short: 'Satuan', icon: Ruler },
+    { to: '/taxes', label: 'Pajak', short: 'Pajak', icon: Percent },
+    { to: '/contacts', label: 'Contact', short: 'Contact', icon: Contact },
   ],
 }
 
 // Grup "Transaksi" (Riwayat, Draft, Pre-Order, Cicilan).
 const TRANSAKSI_GROUP: NavGroupDef = {
   label: 'Transaksi',
-  icon: '💰',
+  icon: Wallet,
   perm: 'transaksi',
   children: [
-    { to: '/history', label: 'Riwayat', short: 'Riwayat', icon: '🧾' },
-    { to: '/cash-balance', label: 'Saldo Kas', short: 'Kas', icon: '💵' },
-    { to: '/drafts', label: 'Draft', short: 'Draft', icon: '📝' },
-    { to: '/preorder', label: 'Pre-Order', short: 'Pre-Order', icon: '📅' },
-    { to: '/installments', label: 'Cicilan', short: 'Cicilan', icon: '💳' },
-    { to: '/kds', label: 'Dapur', short: 'Dapur', icon: '👨‍🍳', moduleKey: 'module_kds', perm: 'kds' },
-    { to: '/tables', label: 'Meja', short: 'Meja', icon: '🍽️', moduleKey: 'module_table_layout', perm: 'tables' },
-    { to: '/queue', label: 'Antrean', short: 'Antrean', icon: '🔔', moduleKey: 'module_queue', perm: 'queue' },
+    { to: '/history', label: 'Riwayat', short: 'Riwayat', icon: History },
+    { to: '/cash-balance', label: 'Saldo Kas', short: 'Kas', icon: Banknote },
+    { to: '/drafts', label: 'Draft', short: 'Draft', icon: FileText },
+    { to: '/preorder', label: 'Pre-Order', short: 'Pre-Order', icon: CalendarClock },
+    { to: '/installments', label: 'Cicilan', short: 'Cicilan', icon: CreditCard },
+    { to: '/kds', label: 'Dapur', short: 'Dapur', icon: ChefHat, moduleKey: 'module_kds', perm: 'kds' },
+    { to: '/tables', label: 'Meja', short: 'Meja', icon: Utensils, moduleKey: 'module_table_layout', perm: 'tables' },
+    { to: '/queue', label: 'Antrean', short: 'Antrean', icon: Bell, moduleKey: 'module_queue', perm: 'queue' },
   ],
 }
 
 // Grup "Stock" (stok masuk, opname, kartu stock).
 const STOCK_GROUP: NavGroupDef = {
   label: 'Stock',
-  icon: '📦',
+  icon: Boxes,
   perm: 'stockin',
   children: [
-    { to: '/stock-opening', label: 'Saldo Awal', short: 'Saldo', icon: '🏁' },
-    { to: '/stockin', label: 'Stok Masuk', short: 'Masuk', icon: '📥' },
-    { to: '/stock-opname', label: 'Stock Opname', short: 'Opname', icon: '📋' },
-    { to: '/stock-card', label: 'Kartu Stock', short: 'Kartu', icon: '🗃️' },
+    { to: '/stock-opening', label: 'Saldo Awal', short: 'Saldo', icon: Flag },
+    { to: '/stockin', label: 'Stok Masuk', short: 'Masuk', icon: PackagePlus },
+    { to: '/stock-opname', label: 'Stock Opname', short: 'Opname', icon: ClipboardList },
+    { to: '/stock-card', label: 'Kartu Stock', short: 'Kartu', icon: Archive },
   ],
 }
 
@@ -84,49 +133,49 @@ const STOCK_GROUP: NavGroupDef = {
 // tiap anak di-gate sendiri (grup tersembunyi bila tak ada anak yang tampil).
 const LOYALTY_GROUP: NavGroupDef = {
   label: 'Loyalitas Pelanggan',
-  icon: '🎁',
+  icon: Gift,
   children: [
-    { to: '/members', label: 'Member', short: 'Member', icon: '⭐', perm: 'members' },
-    { to: '/vouchers', label: 'Voucher', short: 'Voucher', icon: '🎟️', perm: 'vouchers' },
+    { to: '/members', label: 'Member', short: 'Member', icon: Star, perm: 'members' },
+    { to: '/vouchers', label: 'Voucher', short: 'Voucher', icon: Ticket, perm: 'vouchers' },
   ],
 }
 
 // Grup "Kiosk" (layar mandiri pelanggan: informasi, pesan-bayar, antrean).
 const KIOSK_GROUP: NavGroupDef = {
   label: 'Kiosk',
-  icon: '🖥️',
+  icon: Monitor,
   children: [
-    { to: '/kiosk-info', label: 'Kiosk Informasi', short: 'Info', icon: '📢' },
-    { to: '/kiosk-order', label: 'Kiosk Pemesanan & Pembayaran', short: 'Pesan', icon: '🛒' },
-    { to: '/kiosk-queue', label: 'Kiosk Antrian / Check-in', short: 'Antre', icon: '🎫' },
+    { to: '/kiosk-info', label: 'Kiosk Informasi', short: 'Info', icon: Megaphone },
+    { to: '/kiosk-order', label: 'Kiosk Pemesanan & Pembayaran', short: 'Pesan', icon: ShoppingCart },
+    { to: '/kiosk-queue', label: 'Kiosk Antrian / Check-in', short: 'Antre', icon: TicketCheck },
   ],
 }
 
 // Grup "Setelan" (selalu tampil agar pengaturan tidak terkunci).
 const SETTINGS_GROUP: NavGroupDef = {
   label: 'Setelan',
-  icon: '⚙️',
+  icon: Settings,
   children: [
-    { to: '/settings', label: 'Pengaturan', short: 'Setelan', icon: '🛠️' },
-    { to: '/schedule', label: 'Jadwal Operasi', short: 'Jadwal', icon: '🕒' },
-    { to: '/personas', label: 'Persona', short: 'Persona', icon: '🧑‍💼' },
-    { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: '🔑' },
-    { to: '/theme', label: 'Tema', short: 'Tema', icon: '🎨' },
-    { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: '🖨️' },
-    { to: '/card-design', label: 'Desain Kartu', short: 'Kartu', icon: '🪪' },
-    { to: '/database', label: 'Koneksi Database', short: 'Database', icon: '🗄️' },
+    { to: '/settings', label: 'Pengaturan', short: 'Setelan', icon: SlidersHorizontal },
+    { to: '/schedule', label: 'Jadwal Operasi', short: 'Jadwal', icon: Clock },
+    { to: '/personas', label: 'Persona', short: 'Persona', icon: SquareUser },
+    { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: KeyRound },
+    { to: '/theme', label: 'Tema', short: 'Tema', icon: Palette },
+    { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: Printer },
+    { to: '/card-design', label: 'Desain Kartu', short: 'Kartu', icon: IdCard },
+    { to: '/database', label: 'Koneksi Database', short: 'Database', icon: Database },
   ],
 }
 
 const SIDEBAR: NavEntry[] = [
-  { kind: 'link', item: { to: '/', label: 'Kasir', icon: '🧾', perm: 'kasir' } },
+  { kind: 'link', item: { to: '/', label: 'Kasir', icon: ScanBarcode, perm: 'kasir' } },
   { kind: 'group', group: DATA_MASTER_GROUP },
   { kind: 'group', group: TRANSAKSI_GROUP },
   { kind: 'group', group: LOYALTY_GROUP },
   { kind: 'group', group: STOCK_GROUP },
-  { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: '🛍️', moduleKey: 'module_marketplace', perm: 'marketplace' } },
-  { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: '📊', perm: 'reports' } },
-  { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: '📋', perm: 'reports' } },
+  { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: ShoppingBag, moduleKey: 'module_marketplace', perm: 'marketplace' } },
+  { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, perm: 'reports' } },
+  { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: ScrollText, perm: 'reports' } },
   { kind: 'group', group: KIOSK_GROUP },
   { kind: 'group', group: SETTINGS_GROUP },
 ]
@@ -189,7 +238,7 @@ export default function AppShell() {
                   (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
                 }
               >
-                <span className="text-xl leading-none">{n.icon}</span>
+                <n.icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
                 {n.label}
               </NavLink>
             )
@@ -242,7 +291,7 @@ function NavGroup({ group, open }: { group: NavGroupDef; open: boolean }) {
               (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
             }
           >
-            <span className="text-xl leading-none">{c.icon}</span>
+            <c.icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
             {c.short}
           </NavLink>
         ))}
@@ -260,9 +309,13 @@ function NavGroup({ group, open }: { group: NavGroupDef; open: boolean }) {
           (childActive ? 'text-ink' : 'text-ink-soft hover:bg-brand-soft')
         }
       >
-        <span className="text-xl leading-none">{group.icon}</span>
+        <group.icon className="h-5 w-5 shrink-0" strokeWidth={1.75} />
         <span className="flex-1 text-left">{group.label}</span>
-        <span className="text-xs">{expanded ? '▾' : '▸'}</span>
+        {expanded ? (
+          <ChevronDown className="h-4 w-4 shrink-0" />
+        ) : (
+          <ChevronRight className="h-4 w-4 shrink-0" />
+        )}
       </button>
       {expanded && (
         <div className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-black/10 pl-3">
@@ -275,7 +328,7 @@ function NavGroup({ group, open }: { group: NavGroupDef; open: boolean }) {
                 (isActive ? 'bg-brand text-ink shadow' : 'text-ink-soft hover:bg-brand-soft')
               }
             >
-              <span className="text-base leading-none">{c.icon}</span>
+              <c.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
               {c.label}
             </NavLink>
           ))}
