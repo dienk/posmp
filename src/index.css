@@ -32,4 +32,36 @@
     color: rgb(var(--c-ink));
     background-color: rgb(var(--c-background));
   }
+
+  /* ── Fondasi UX (panduan ui-ux-pro-max) ─────────────────────────────────── */
+
+  /* Kursor menandai elemen interaktif; status nonaktif jelas tak bisa diklik. */
+  [role='button']:not([aria-disabled='true']),
+  label[for],
+  summary,
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /* Ring fokus konsisten untuk navigasi keyboard (aksesibilitas). */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-brand-strong));
+    outline-offset: 2px;
+  }
+
+  /* Hormati preferensi "reduce motion": pangkas animasi & transisi. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
