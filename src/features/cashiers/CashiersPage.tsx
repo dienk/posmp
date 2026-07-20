@@ -94,7 +94,7 @@ export default function CashiersPage() {
         <select
           value={filterOutlet === 'all' ? 'all' : String(filterOutlet)}
           onChange={(e) => setFilterOutlet(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-          className="rounded-lg border border-black/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+          className="rounded-lg border border-line/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
         >
           <option value="all">Semua outlet</option>
           {outlets.map((o) => (
@@ -117,7 +117,7 @@ export default function CashiersPage() {
           {visible.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada kasir.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {visible.map((c) => (
                 <li key={c.id} className="flex items-center gap-3 px-3 py-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-soft text-lg">
@@ -172,7 +172,7 @@ export default function CashiersPage() {
                   <select
                     value={form.outlet_id || ''}
                     onChange={(e) => setForm((f) => ({ ...f, outlet_id: Number(e.target.value) }))}
-                    className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   >
                     <option value="" disabled>
                       Pilih outlet
@@ -186,7 +186,7 @@ export default function CashiersPage() {
                 </Field>
                 <Field label="Nama kasir">
                   <input
-                    className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                     placeholder="mis. Kasir Depan"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -194,7 +194,7 @@ export default function CashiersPage() {
                 </Field>
                 <Field label="Kode">
                   <input
-                    className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                     placeholder="mis. KSR-01"
                     value={form.code}
                     onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
@@ -202,7 +202,7 @@ export default function CashiersPage() {
                 </Field>
                 <Field label="Lokasi">
                   <input
-                    className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                     placeholder="mis. Lantai 1 / Drive-Thru"
                     value={form.location}
                     onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
@@ -225,7 +225,7 @@ export default function CashiersPage() {
                   </button>
                   <button
                     onClick={cancel}
-                    className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
                   >
                     Batal
                   </button>

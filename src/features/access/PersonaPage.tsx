@@ -79,7 +79,7 @@ export default function PersonaPage() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_320px]">
         {/* Daftar persona */}
         <section className="rounded-card bg-panel p-2 shadow-card">
-          <ul className="divide-y divide-black/5">
+          <ul className="divide-y divide-line/5">
             {personas.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-3 px-3 py-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-ink">
@@ -99,7 +99,7 @@ export default function PersonaPage() {
                 <select
                   value={p.roleId}
                   onChange={(e) => changeRole(p.id, e.target.value)}
-                  className="rounded-lg border border-black/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                  className="rounded-lg border border-line/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
                 >
                   {roles.map((r) => (
                     <option key={r.id} value={r.id}>
@@ -184,4 +184,4 @@ export default function PersonaPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

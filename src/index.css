@@ -15,6 +15,9 @@
   /* Permukaan kartu/header/modal. Putih pada tema terang; ditimpa gelap
      untuk tema mode-gelap (Oniks). Bukan bagian registri tema (JS). */
   --c-panel: 255 255 255;
+  /* Warna dasar garis/border & divider. Hitam pada tema terang (dipakai
+     dengan opacity rendah); ditimpa putih untuk tema gelap agar tetap terlihat. */
+  --c-border: 0 0 0;
   /* Status semantik (tetap lintas-tema) */
   --c-empty: 76 175 80;
   --c-occupied: 229 57 53;
@@ -25,6 +28,7 @@
    Selaras dengan surface slate-dark tema (standar ui-ux-pro-max). */
 :root[data-theme='oniks'] {
   --c-panel: 27 35 54;
+  --c-border: 255 255 255;
 }
 
 @layer base {

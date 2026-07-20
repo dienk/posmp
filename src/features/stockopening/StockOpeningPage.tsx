@@ -90,7 +90,7 @@ export default function StockOpeningPage() {
         <select
           value={warehouseId}
           onChange={(e) => setWarehouseId(Number(e.target.value))}
-          className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           {warehouses.map((w) => (
             <option key={w.id} value={w.id}>
@@ -106,7 +106,7 @@ export default function StockOpeningPage() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="Cari nama / SKU…"
-            className="w-64 rounded-xl border border-black/10 bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
+            className="w-64 rounded-xl border border-line/10 bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
           />
         </div>
       </header>
@@ -115,7 +115,7 @@ export default function StockOpeningPage() {
         <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
+              <tr className="border-b border-line/5 text-left text-xs uppercase text-ink-soft">
                 <th className="px-4 py-3">Produk</th>
                 <th className="px-4 py-3 text-right">Stok Saat Ini</th>
                 <th className="px-4 py-3 text-center">Saldo Awal</th>
@@ -133,7 +133,7 @@ export default function StockOpeningPage() {
                 return (
                   <tr
                     key={p.id}
-                    className={'border-b border-black/5 ' + (set ? 'bg-brand-soft/40' : 'hover:bg-background')}
+                    className={'border-b border-line/5 ' + (set ? 'bg-brand-soft/40' : 'hover:bg-background')}
                   >
                     <td className="px-4 py-3">
                       <p className="font-semibold text-ink">{p.name}</p>
@@ -150,7 +150,7 @@ export default function StockOpeningPage() {
                           value={b ?? ''}
                           onChange={(e) => setBalance(p.id, e.target.value)}
                           placeholder={String(p.system_stock)}
-                          className="w-24 rounded-lg border border-black/10 px-2 py-1.5 text-center text-sm outline-none focus:border-brand-strong"
+                          className="w-24 rounded-lg border border-line/10 px-2 py-1.5 text-center text-sm outline-none focus:border-brand-strong"
                         />
                         {opts.length > 1 && (
                           <select
@@ -159,7 +159,7 @@ export default function StockOpeningPage() {
                               setUnits((prev) => ({ ...prev, [p.id]: e.target.value }))
                             }
                             title="Satuan input"
-                            className="rounded-lg border border-black/10 bg-panel px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
+                            className="rounded-lg border border-line/10 bg-panel px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
                           >
                             {opts.map((o) => (
                               <option key={o.unit} value={o.unit}>
@@ -203,7 +203,7 @@ export default function StockOpeningPage() {
         </section>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-black/5 bg-panel/70 px-5 py-3 backdrop-blur">
+      <div className="flex flex-wrap items-center gap-3 border-t border-line/5 bg-panel/70 px-5 py-3 backdrop-blur">
         <span className="text-sm text-ink-soft">
           {countedIds.length} produk diisi · Saldo awal menyetel stok ke nilai ini (baseline).
         </span>

@@ -220,7 +220,7 @@ export default function TablesPage() {
                     }
                   }}
                   placeholder="Nama ruangan"
-                  className="w-32 rounded-full border border-black/10 px-3 py-1 text-xs outline-none focus:border-brand-strong"
+                  className="w-32 rounded-full border border-line/10 px-3 py-1 text-xs outline-none focus:border-brand-strong"
                 />
                 <button
                   onClick={handleAddRoom}
@@ -233,7 +233,7 @@ export default function TablesPage() {
             ) : (
               <button
                 onClick={() => setAddingRoom(true)}
-                className="rounded-full border border-dashed border-black/20 px-3 py-1 text-xs font-semibold text-ink-soft hover:bg-brand-soft"
+                className="rounded-full border border-dashed border-line/20 px-3 py-1 text-xs font-semibold text-ink-soft hover:bg-brand-soft"
               >
                 + Ruangan
               </button>
@@ -241,7 +241,7 @@ export default function TablesPage() {
           {editMode && sections.length > 0 && (
             <button
               onClick={() => setManageOpen(true)}
-              className="rounded-full border border-black/10 px-3 py-1 text-xs font-semibold text-ink-soft hover:bg-brand-soft"
+              className="rounded-full border border-line/10 px-3 py-1 text-xs font-semibold text-ink-soft hover:bg-brand-soft"
             >
               ⚙ Kelola Ruangan
             </button>
@@ -298,7 +298,7 @@ export default function TablesPage() {
 
         {/* Panel detail */}
         {selected && (
-          <aside className="w-72 shrink-0 border-l border-black/5 bg-panel p-5 shadow-panel">
+          <aside className="w-72 shrink-0 border-l border-line/5 bg-panel p-5 shadow-panel">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-ink">Meja {selected.table_number}</h2>
               <button onClick={() => setSelectedId(null)} className="text-ink-soft hover:text-ink">
@@ -335,7 +335,7 @@ export default function TablesPage() {
                 </button>
                 <button
                   onClick={() => handleSetStatus('EMPTY')}
-                  className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                  className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
                 >
                   Kosongkan Meja
                 </button>
@@ -348,7 +348,7 @@ export default function TablesPage() {
                   <select
                     value={selected.section_name}
                     onChange={(e) => handleChangeSection(e.target.value)}
-                    className="w-full rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   >
                     {sections.map((s) => (
                       <option key={s} value={s}>
@@ -457,7 +457,7 @@ function ManageRoomsModal({
         {sections.length === 0 ? (
           <p className="py-6 text-center text-sm text-ink-soft">Belum ada ruangan.</p>
         ) : (
-          <ul className="divide-y divide-black/5">
+          <ul className="divide-y divide-line/5">
             {sections.map((s) => {
               const count = roomCounts[s] ?? 0
               return (
@@ -472,7 +472,7 @@ function ManageRoomsModal({
                           if (e.key === 'Enter') saveRename(s)
                           if (e.key === 'Escape') setRenaming(null)
                         }}
-                        className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-1.5 text-sm uppercase outline-none focus:border-brand-strong"
+                        className="min-w-0 flex-1 rounded-lg border border-line/10 px-3 py-1.5 text-sm uppercase outline-none focus:border-brand-strong"
                       />
                       <button
                         onClick={() => saveRename(s)}

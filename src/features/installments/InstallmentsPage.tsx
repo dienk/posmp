@@ -156,7 +156,7 @@ export default function InstallmentsPage() {
           {plans.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada rencana cicilan.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {plans.map((p) => {
                 const paid = p.total_payable - p.remaining_balance
                 const pct = Math.min(100, Math.round((paid / p.total_payable) * 100))
@@ -217,4 +217,4 @@ export default function InstallmentsPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

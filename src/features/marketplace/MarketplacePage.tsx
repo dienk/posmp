@@ -154,7 +154,7 @@ export default function MarketplacePage() {
                     </button>
                     <button
                       onClick={() => toggleChannel(c.id, !c.is_active).then(reload)}
-                      className="rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-panel"
+                      className="rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-panel"
                     >
                       {c.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                     </button>
@@ -236,4 +236,4 @@ export default function MarketplacePage() {
 }
 
 const inputCls =
-  'rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

@@ -85,13 +85,13 @@ export default function StockCardPage() {
             onChange={(e) => setScanCode(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleScan()}
             placeholder="Scan barcode / QR lalu Enter…"
-            className="w-56 rounded-lg border border-black/10 bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
+            className="w-56 rounded-lg border border-line/10 bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong"
           />
         </div>
         <select
           value={warehouseId}
           onChange={(e) => setWarehouseId(Number(e.target.value))}
-          className="rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="rounded-lg border border-line/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           <option value={0}>Semua Gudang</option>
           {warehouses.map((w) => (
@@ -103,7 +103,7 @@ export default function StockCardPage() {
         <select
           value={productId ?? ''}
           onChange={(e) => setProductId(Number(e.target.value))}
-          className="min-w-56 rounded-lg border border-black/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="min-w-56 rounded-lg border border-line/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           {products.length === 0 && <option value="">Tidak ada produk</option>}
           {products.map((p) => (
@@ -130,7 +130,7 @@ export default function StockCardPage() {
         <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
+              <tr className="border-b border-line/5 text-left text-xs uppercase text-ink-soft">
                 <th className="px-4 py-3">Tanggal</th>
                 <th className="px-4 py-3">Referensi</th>
                 <th className="px-4 py-3">Jenis</th>
@@ -141,7 +141,7 @@ export default function StockCardPage() {
             </thead>
             <tbody>
               {card && (
-                <tr className="border-b border-black/5 bg-background/50">
+                <tr className="border-b border-line/5 bg-background/50">
                   <td className="px-4 py-2.5 text-ink-soft" colSpan={5}>
                     Saldo awal
                   </td>
@@ -149,7 +149,7 @@ export default function StockCardPage() {
                 </tr>
               )}
               {card?.movements.map((m, i) => (
-                <tr key={i} className="border-b border-black/5 hover:bg-background">
+                <tr key={i} className="border-b border-line/5 hover:bg-background">
                   <td className="px-4 py-2.5 text-ink-soft">{m.at}</td>
                   <td className="px-4 py-2.5 font-medium text-ink">{m.ref ?? '—'}</td>
                   <td className="px-4 py-2.5">

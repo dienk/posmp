@@ -79,7 +79,7 @@ export default function MergeBillModal({
           </button>
         </div>
 
-        <div className="border-b border-black/5 px-5 py-3 text-xs text-ink-soft">
+        <div className="border-b border-line/5 px-5 py-3 text-xs text-ink-soft">
           Pilih 2 bill tersimpan (Draft) atau lebih untuk digabung menjadi satu tagihan. Meja bill
           yang digabung akan dikosongkan.
         </div>
@@ -97,7 +97,7 @@ export default function MergeBillModal({
                   key={b.id}
                   className={
                     'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition ' +
-                    (on ? 'border-status-occupied bg-status-occupied/5' : 'border-black/10 hover:bg-background')
+                    (on ? 'border-status-occupied bg-status-occupied/5' : 'border-line/10 hover:bg-background')
                   }
                 >
                   <input
@@ -125,7 +125,7 @@ export default function MergeBillModal({
           {error && <p className="text-sm font-medium text-status-occupied">{error}</p>}
         </div>
 
-        <div className="border-t border-black/5 p-4">
+        <div className="border-t border-line/5 p-4">
           <div className="mb-2 flex justify-between text-sm">
             <span className="text-ink-soft">
               {selectedBills.length} bill dipilih

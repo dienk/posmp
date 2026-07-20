@@ -89,7 +89,7 @@ export default function KioskQueuePage() {
       </div>
 
       {serving.length > 0 && (
-        <footer className="border-t border-black/5 bg-panel/70 px-8 py-4 backdrop-blur">
+        <footer className="border-t border-line/5 bg-panel/70 px-8 py-4 backdrop-blur">
           <span className="text-sm font-semibold uppercase tracking-wide text-ink-soft">
             Sedang dipanggil:
           </span>{' '}

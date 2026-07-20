@@ -139,7 +139,7 @@ export default function ThemePage() {
                       <span
                         key={r.key}
                         title={`${r.label}: ${channelsToHex(th.vars[r.key])}`}
-                        className="h-5 flex-1 rounded border border-black/10"
+                        className="h-5 flex-1 rounded border border-line/10"
                         style={{ backgroundColor: rgb(th.vars[r.key]) }}
                       />
                     ))}
@@ -161,13 +161,13 @@ export default function ThemePage() {
             )}
             <button
               onClick={loadFromActivePreset}
-              className="ml-auto rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
+              className="ml-auto rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
             >
               Muat dari preset
             </button>
             <button
               onClick={previewCustom}
-              className="rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
+              className="rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
             >
               Pratinjau
             </button>
@@ -183,13 +183,13 @@ export default function ThemePage() {
               {PALETTE_ROLES.map((r) => (
                 <label
                   key={r.key}
-                  className="flex items-center gap-3 rounded-lg border border-black/10 px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-line/10 px-3 py-2"
                 >
                   <input
                     type="color"
                     value={channelsToHex(customVars[r.key])}
                     onChange={(e) => setRole(r.key, e.target.value)}
-                    className="h-9 w-9 shrink-0 cursor-pointer rounded border border-black/10 bg-transparent p-0"
+                    className="h-9 w-9 shrink-0 cursor-pointer rounded border border-line/10 bg-transparent p-0"
                   />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-ink">{r.label}</p>
@@ -202,7 +202,7 @@ export default function ThemePage() {
             </div>
 
             {/* Pratinjau kustom */}
-            <div className="overflow-hidden rounded-card border border-black/10">
+            <div className="overflow-hidden rounded-card border border-line/10">
               <div className="p-4" style={{ backgroundColor: rgb(customVars['--c-background']) }}>
                 <div className="mb-3 flex items-center justify-between">
                   <span

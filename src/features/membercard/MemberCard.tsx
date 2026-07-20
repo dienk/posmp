@@ -72,7 +72,7 @@ export function MemberCardModal({
           </button>
           <button
             onClick={() => downloadCardPng(svg, filename)}
-            className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+            className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
           >
             ⬇ Unduh PNG
           </button>

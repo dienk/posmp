@@ -144,7 +144,7 @@ export default function StockOpnamePage() {
         <select
           value={warehouseId}
           onChange={(e) => setWarehouseId(Number(e.target.value))}
-          className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
         >
           {warehouses.map((w) => (
             <option key={w.id} value={w.id}>
@@ -169,7 +169,7 @@ export default function StockOpnamePage() {
             placeholder={scanMode ? 'Scan barcode produk lalu Enter…' : 'Cari nama / SKU / barcode…'}
             className={
               'w-64 rounded-xl border bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong ' +
-              (scanMode ? 'border-status-occupied ring-1 ring-status-occupied/30' : 'border-black/10')
+              (scanMode ? 'border-status-occupied ring-1 ring-status-occupied/30' : 'border-line/10')
             }
           />
         </div>
@@ -180,7 +180,7 @@ export default function StockOpnamePage() {
             'flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition ' +
             (scanMode
               ? 'bg-status-occupied text-white shadow'
-              : 'border border-black/10 bg-panel text-ink hover:bg-brand-soft')
+              : 'border border-line/10 bg-panel text-ink hover:bg-brand-soft')
           }
         >
           <span className="text-base leading-none">▮▮▮</span>
@@ -192,7 +192,7 @@ export default function StockOpnamePage() {
         <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
+              <tr className="border-b border-line/5 text-left text-xs uppercase text-ink-soft">
                 <th className="px-4 py-3">Produk</th>
                 <th className="px-4 py-3 text-right">Stok Sistem</th>
                 <th className="px-4 py-3 text-center">Stok Fisik</th>
@@ -210,7 +210,7 @@ export default function StockOpnamePage() {
                 return (
                   <tr
                     key={p.id}
-                    className={'border-b border-black/5 ' + (counted ? 'bg-brand-soft/40' : 'hover:bg-background')}
+                    className={'border-b border-line/5 ' + (counted ? 'bg-brand-soft/40' : 'hover:bg-background')}
                   >
                     <td className="px-4 py-3">
                       <p className="font-semibold text-ink">{p.name}</p>
@@ -234,7 +234,7 @@ export default function StockOpnamePage() {
                           value={c ?? ''}
                           onChange={(e) => setCount(p.id, e.target.value)}
                           placeholder="—"
-                          className="w-16 rounded-lg border border-black/10 px-2 py-1.5 text-center text-sm outline-none focus:border-brand-strong"
+                          className="w-16 rounded-lg border border-line/10 px-2 py-1.5 text-center text-sm outline-none focus:border-brand-strong"
                         />
                         <button
                           type="button"
@@ -250,7 +250,7 @@ export default function StockOpnamePage() {
                               setUnits((prev) => ({ ...prev, [p.id]: e.target.value }))
                             }
                             title="Satuan input"
-                            className="rounded-lg border border-black/10 bg-panel px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
+                            className="rounded-lg border border-line/10 bg-panel px-1.5 py-1.5 text-xs outline-none focus:border-brand-strong"
                           >
                             {opts.map((o) => (
                               <option key={o.unit} value={o.unit}>
@@ -295,7 +295,7 @@ export default function StockOpnamePage() {
       </div>
 
       {/* Footer aksi */}
-      <div className="flex flex-wrap items-center gap-3 border-t border-black/5 bg-panel/70 px-5 py-3 backdrop-blur">
+      <div className="flex flex-wrap items-center gap-3 border-t border-line/5 bg-panel/70 px-5 py-3 backdrop-blur">
         <span className="text-sm text-ink-soft">
           {countedIds.length} item dihitung · Selisih total:{' '}
           <b className={totalDiff === 0 ? 'text-ink' : totalDiff > 0 ? 'text-status-empty' : 'text-status-occupied'}>

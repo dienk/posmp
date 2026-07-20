@@ -19,7 +19,7 @@ import { useSettings } from '../../lib/SettingsContext'
 import { updateAppSettings } from '../settings/settingsRepository'
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`
@@ -289,7 +289,7 @@ export default function DatabaseConnectionPage() {
             </div>
             {storage && storage.quota > 0 && (
               <>
-                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-black/10">
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-line/10">
                   <div
                     className="h-full rounded-full bg-brand-strong"
                     style={{ width: `${Math.min(100, (storage.usage / storage.quota) * 100)}%` }}
@@ -313,7 +313,7 @@ export default function DatabaseConnectionPage() {
             <button
               onClick={handleVacuum}
               disabled={busy}
-              className="rounded-lg border border-black/10 px-4 py-2 text-sm font-semibold text-ink hover:bg-background disabled:opacity-40"
+              className="rounded-lg border border-line/10 px-4 py-2 text-sm font-semibold text-ink hover:bg-background disabled:opacity-40"
             >
               🧹 Kompakkan Database (VACUUM)
             </button>
@@ -404,7 +404,7 @@ export default function DatabaseConnectionPage() {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="rounded-lg border border-black/10 px-4 py-2 text-sm font-semibold text-ink hover:bg-background disabled:opacity-40"
+              className="rounded-lg border border-line/10 px-4 py-2 text-sm font-semibold text-ink hover:bg-background disabled:opacity-40"
             >
               ⬆️ Pulihkan dari File
             </button>

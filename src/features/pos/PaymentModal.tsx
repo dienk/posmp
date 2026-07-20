@@ -106,7 +106,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
               <button
                 key={m.key}
                 onClick={() => addRow(m.key)}
-                className="rounded-lg border border-black/10 px-3 py-1.5 text-sm font-medium text-ink hover:bg-background"
+                className="rounded-lg border border-line/10 px-3 py-1.5 text-sm font-medium text-ink hover:bg-background"
               >
                 {m.icon} {m.label}
               </button>
@@ -124,7 +124,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
                     min={0}
                     value={r.amount}
                     onChange={(e) => updateRow(idx, { amount: Number(e.target.value) })}
-                    className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-2 text-right text-sm outline-none focus:border-brand-strong"
+                    className="min-w-0 flex-1 rounded-lg border border-line/10 px-3 py-2 text-right text-sm outline-none focus:border-brand-strong"
                   />
                   {rows.length > 1 && (
                     <button
@@ -154,7 +154,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
                     value={r.qrisRef}
                     onChange={(e) => updateRow(idx, { qrisRef: e.target.value })}
                     placeholder="No. Referensi / RRN (opsional)"
-                    className="mt-2 w-full rounded-lg border border-black/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+                    className="mt-2 w-full rounded-lg border border-line/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
                   />
                 )}
                 {r.method === 'VOUCHER' && (
@@ -167,7 +167,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
                           e.key === 'Enter' && checkVoucher(idx, r.voucherCode ?? '')
                         }
                         placeholder="Kode gift card"
-                        className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-1.5 text-sm uppercase outline-none focus:border-brand-strong"
+                        className="min-w-0 flex-1 rounded-lg border border-line/10 px-3 py-1.5 text-sm uppercase outline-none focus:border-brand-strong"
                       />
                       <button
                         onClick={() => checkVoucher(idx, r.voucherCode ?? '')}
@@ -194,7 +194,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
           </div>
 
           {/* Ringkasan */}
-          <dl className="space-y-1 border-t border-black/5 pt-3 text-sm">
+          <dl className="space-y-1 border-t border-line/5 pt-3 text-sm">
             <div className="flex justify-between text-ink-soft">
               <dt>Terbayar</dt>
               <dd>{formatRupiah(paid)}</dd>
@@ -214,7 +214,7 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
           </dl>
         </div>
 
-        <div className="border-t border-black/5 p-4">
+        <div className="border-t border-line/5 p-4">
           <button
             onClick={handleConfirm}
             disabled={!canConfirm}

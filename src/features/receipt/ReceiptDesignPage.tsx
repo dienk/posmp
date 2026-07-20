@@ -164,7 +164,7 @@ export default function ReceiptDesignPage() {
               ) : (
                 <button
                   onClick={() => setActiveId(selected.id)}
-                  className="rounded-lg border border-black/10 px-2.5 py-1 text-xs font-semibold text-ink hover:bg-background"
+                  className="rounded-lg border border-line/10 px-2.5 py-1 text-xs font-semibold text-ink hover:bg-background"
                 >
                   Jadikan Aktif
                 </button>
@@ -197,7 +197,7 @@ export default function ReceiptDesignPage() {
               </button>
               <button
                 onClick={duplicateTemplate}
-                className="rounded-lg border border-black/10 px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
+                className="rounded-lg border border-line/10 px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
               >
                 ⧉ Duplikat
               </button>
@@ -235,7 +235,7 @@ export default function ReceiptDesignPage() {
                 {cfg.logo && (
                   <button
                     onClick={() => set('logo', '')}
-                    className="rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-status-occupied hover:bg-background"
+                    className="rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-status-occupied hover:bg-background"
                   >
                     Hapus Logo
                   </button>
@@ -432,7 +432,7 @@ export default function ReceiptDesignPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 const segBtn = (active: boolean) =>
   'flex-1 rounded-lg py-2 text-sm font-semibold transition ' +

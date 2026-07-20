@@ -226,7 +226,7 @@ export default function ReceiptModal({ data, onClose }: { data: ReceiptData; onC
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
       <div className="flex max-h-[85vh] w-full max-w-xs flex-col overflow-hidden rounded-2xl bg-panel shadow-2xl">
-        <div className="flex items-center justify-between border-b border-black/5 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-line/5 px-4 py-3">
           <p className="text-sm font-bold text-ink">Struk</p>
           <button onClick={onClose} className="text-xl leading-none text-ink-soft hover:text-ink">
             ×
@@ -235,7 +235,7 @@ export default function ReceiptModal({ data, onClose }: { data: ReceiptData; onC
         <div className="min-h-0 flex-1 overflow-y-auto p-5">
           <ReceiptView data={data} config={config} />
         </div>
-        <div className="space-y-3 border-t border-black/5 p-3">
+        <div className="space-y-3 border-t border-line/5 p-3">
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => printReceipt(buildReceiptHtml(data, config))}
@@ -249,7 +249,7 @@ export default function ReceiptModal({ data, onClose }: { data: ReceiptData; onC
                 'rounded-xl py-2.5 text-sm font-bold transition ' +
                 (showShare
                   ? 'bg-brand text-ink'
-                  : 'border border-black/10 text-ink hover:bg-background')
+                  : 'border border-line/10 text-ink hover:bg-background')
               }
             >
               🔗 Kirim Link

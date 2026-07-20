@@ -17,7 +17,7 @@ import {
 } from './cashRepository'
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 /** Waktu sekarang dalam format input datetime-local (lokal). */
 function nowLocalInput(): string {
@@ -318,7 +318,7 @@ export default function CashBalancePage() {
 
         {/* Riwayat sesi kas — di balik otoritas */}
         <section className="overflow-hidden rounded-card bg-panel shadow-card">
-          <div className="flex items-center justify-between border-b border-black/5 px-5 py-3">
+          <div className="flex items-center justify-between border-b border-line/5 px-5 py-3">
             <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">Riwayat Kas</h2>
             {canViewHistory ? (
               <button
@@ -326,7 +326,7 @@ export default function CashBalancePage() {
                 className={
                   'rounded-lg px-3 py-1.5 text-sm font-semibold transition ' +
                   (historyOpen
-                    ? 'border border-black/10 text-ink hover:bg-background'
+                    ? 'border border-line/10 text-ink hover:bg-background'
                     : 'bg-status-occupied text-white hover:brightness-95')
                 }
               >
@@ -354,7 +354,7 @@ export default function CashBalancePage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
+                <tr className="border-b border-line/5 text-left text-xs uppercase text-ink-soft">
                   <th className="px-4 py-2.5">Buka</th>
                   <th className="px-4 py-2.5">Tutup</th>
                   <th className="px-4 py-2.5">Shift</th>
@@ -368,7 +368,7 @@ export default function CashBalancePage() {
               </thead>
               <tbody>
                 {history.map((s, i) => (
-                  <tr key={s.id} className="border-b border-black/5 hover:bg-background">
+                  <tr key={s.id} className="border-b border-line/5 hover:bg-background">
                     <td className="px-4 py-2.5 text-ink-soft">{s.opened_at}</td>
                     <td className="px-4 py-2.5 text-ink-soft">
                       {s.status === 'OPEN' ? (
@@ -577,7 +577,7 @@ function EditSessionModal({
           </button>
           <button
             onClick={onClose}
-            className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+            className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
           >
             Batal
           </button>

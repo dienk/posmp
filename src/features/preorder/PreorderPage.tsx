@@ -56,7 +56,7 @@ export default function PreorderPage() {
           {orders.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada pre-order aktif.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {orders.map((o) => (
                 <li key={o.id}>
                   <button
@@ -101,7 +101,7 @@ export default function PreorderPage() {
                 Tenggat ambil: {selected.preorder_deadline ?? '—'}
               </p>
 
-              <ul className="mb-3 divide-y divide-black/5">
+              <ul className="mb-3 divide-y divide-line/5">
                 {items.map((it, i) => (
                   <li key={i} className="flex justify-between py-2 text-sm">
                     <span className="text-ink">
@@ -112,7 +112,7 @@ export default function PreorderPage() {
                 ))}
               </ul>
 
-              <dl className="space-y-1 border-t border-black/5 pt-2 text-sm">
+              <dl className="space-y-1 border-t border-line/5 pt-2 text-sm">
                 <div className="flex justify-between text-ink">
                   <dt className="font-semibold">Total</dt>
                   <dd className="font-semibold">{formatRupiah(selected.total_amount)}</dd>

@@ -343,7 +343,7 @@ export default function PosPage() {
               }
               className={
                 'w-full rounded-xl border bg-panel py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-strong ' +
-                (scanMode ? 'border-status-occupied ring-1 ring-status-occupied/30' : 'border-black/10')
+                (scanMode ? 'border-status-occupied ring-1 ring-status-occupied/30' : 'border-line/10')
               }
             />
           </div>
@@ -354,7 +354,7 @@ export default function PosPage() {
               'flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition ' +
               (scanMode
                 ? 'bg-status-occupied text-white shadow'
-                : 'border border-black/10 bg-panel text-ink hover:bg-brand-soft')
+                : 'border border-line/10 bg-panel text-ink hover:bg-brand-soft')
             }
           >
             <span className="text-base leading-none">▮▮▮</span>
@@ -364,7 +364,7 @@ export default function PosPage() {
             {mergeBillEnabled && (
               <button
                 onClick={() => setShowMerge(true)}
-                className="rounded-lg border border-black/10 bg-panel px-3 py-1.5 text-xs font-semibold
+                className="rounded-lg border border-line/10 bg-panel px-3 py-1.5 text-xs font-semibold
                            text-ink transition hover:bg-brand-soft"
                 title="Gabungkan beberapa bill tersimpan menjadi satu"
               >

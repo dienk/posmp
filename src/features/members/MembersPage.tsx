@@ -149,7 +149,7 @@ export default function MembersPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="Cari nama / HP / no. kartu…"
-          className="w-64 rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="w-64 rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
         />
         <button
           onClick={startNew}
@@ -165,7 +165,7 @@ export default function MembersPage() {
           {members.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada member.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {members.map((m) => (
                 <li key={m.id}>
                   <button
@@ -313,7 +313,7 @@ function MemberDetail({
             onClick={() => setShowShare((v) => !v)}
             className={
               'rounded-xl px-5 py-2.5 text-sm font-bold transition ' +
-              (showShare ? 'bg-brand text-ink' : 'border border-black/10 text-ink hover:bg-background')
+              (showShare ? 'bg-brand text-ink' : 'border border-line/10 text-ink hover:bg-background')
             }
           >
             🔗 Kirim Link
@@ -490,7 +490,7 @@ function MemberForm({
         </button>
         <button
           onClick={onCancel}
-          className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+          className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
         >
           Batal
         </button>
@@ -501,7 +501,7 @@ function MemberForm({
 
 // ---------- Bits ----------
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 function Label({ children }: { children: React.ReactNode }) {
   return <span className="mb-1 block text-xs font-medium text-ink-soft">{children}</span>
@@ -542,7 +542,7 @@ function FormSection({ title, children }: { title: string; children: React.React
 }
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mt-4 border-t border-black/5 pt-3">
+    <div className="mt-4 border-t border-line/5 pt-3">
       <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-soft">{title}</h3>
       <div className="grid gap-x-4 gap-y-1 sm:grid-cols-2">{children}</div>
     </div>

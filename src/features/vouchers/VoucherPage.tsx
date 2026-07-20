@@ -173,7 +173,7 @@ export default function VoucherPage() {
             {campaigns.length === 0 ? (
               <p className="py-6 text-center text-sm text-ink-soft">Belum ada kampanye voucher.</p>
             ) : (
-              <ul className="divide-y divide-black/5">
+              <ul className="divide-y divide-line/5">
                 {campaigns.map((c) => (
                   <li key={c.id}>
                     <button
@@ -238,7 +238,7 @@ export default function VoucherPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

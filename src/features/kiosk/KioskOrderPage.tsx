@@ -137,7 +137,7 @@ export default function KioskOrderPage() {
 
       {/* Keranjang */}
       <aside className="flex w-96 shrink-0 flex-col bg-panel shadow-panel">
-        <div className="flex gap-2 border-b border-black/5 p-4">
+        <div className="flex gap-2 border-b border-line/5 p-4">
           {FACILITIES.map((f) => (
             <button
               key={f.value}
@@ -157,7 +157,7 @@ export default function KioskOrderPage() {
               Ketuk menu untuk memulai pesanan
             </div>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {cart.items.map((it) => (
                 <li key={it.product.id} className="flex items-center gap-2 py-3">
                   <div className="min-w-0 flex-1">
@@ -182,7 +182,7 @@ export default function KioskOrderPage() {
             </ul>
           )}
         </div>
-        <div className="border-t border-black/5 p-4">
+        <div className="border-t border-line/5 p-4">
           <dl className="mb-3 space-y-1 text-sm">
             <div className="flex justify-between text-ink-soft">
               <dt>Subtotal</dt>

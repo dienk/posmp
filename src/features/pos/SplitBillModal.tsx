@@ -61,7 +61,7 @@ export default function SplitBillModal({
           </button>
         </div>
 
-        <div className="flex items-center gap-2 border-b border-black/5 px-5 py-3 text-sm">
+        <div className="flex items-center gap-2 border-b border-line/5 px-5 py-3 text-sm">
           <span className="text-ink-soft">Jumlah nota:</span>
           <button
             onClick={() => setBillCount((n) => Math.max(2, n - 1))}
@@ -107,7 +107,7 @@ export default function SplitBillModal({
             {bills.map((b, i) => (
               <div
                 key={i}
-                className="flex justify-between rounded-lg border border-black/10 px-3 py-2 text-sm"
+                className="flex justify-between rounded-lg border border-line/10 px-3 py-2 text-sm"
               >
                 <span className="font-semibold text-ink">
                   Nota {i + 1} <span className="text-ink-soft">({b.length} item)</span>
@@ -120,7 +120,7 @@ export default function SplitBillModal({
           </div>
         </div>
 
-        <div className="border-t border-black/5 p-4">
+        <div className="border-t border-line/5 p-4">
           <button
             onClick={() => onConfirm(nonEmpty)}
             disabled={!canConfirm}

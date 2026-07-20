@@ -104,7 +104,7 @@ export default function CartPanel(props: Props) {
   return (
     <aside className="flex h-full w-full flex-col bg-panel shadow-panel">
       {/* Pelanggan (umum & member jadi satu kolom) & tipe pesanan */}
-      <div className="border-b border-black/5 p-4">
+      <div className="border-b border-line/5 p-4">
         <div className="flex items-center gap-2">
           <div className="relative min-w-0 flex-1">
             <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-ink-soft">
@@ -126,7 +126,7 @@ export default function CartPanel(props: Props) {
                 }
               }}
               placeholder="Pelanggan Umum / No. HP member"
-              className="w-full rounded-lg border border-black/10 py-2 pl-8 pr-9 text-sm
+              className="w-full rounded-lg border border-line/10 py-2 pl-8 pr-9 text-sm
                          outline-none focus:border-brand-strong"
             />
             {props.customerName || props.member ? (
@@ -158,7 +158,7 @@ export default function CartPanel(props: Props) {
             {pickerOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setPickerOpen(false)} />
-                <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-black/10 bg-panel shadow-lg">
+                <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-xl border border-line/10 bg-panel shadow-lg">
                   <ul className="max-h-56 overflow-y-auto py-1">
                     {filteredCustomers.length === 0 ? (
                       <li className="px-3 py-2 text-xs text-ink-soft">
@@ -189,7 +189,7 @@ export default function CartPanel(props: Props) {
           <select
             value={props.facilityType}
             onChange={(e) => props.onFacilityChange(e.target.value as FacilityType)}
-            className="rounded-lg border border-black/10 bg-panel px-2 py-2 text-sm outline-none
+            className="rounded-lg border border-line/10 bg-panel px-2 py-2 text-sm outline-none
                        focus:border-brand-strong"
           >
             {FACILITIES.map((f) => (
@@ -223,7 +223,7 @@ export default function CartPanel(props: Props) {
           <input
             value={props.invoiceNumber}
             onChange={(e) => props.onInvoiceChange(e.target.value)}
-            className="min-w-0 flex-1 rounded-md border border-black/10 px-2 py-1 text-xs font-semibold normal-case tracking-normal text-ink outline-none focus:border-brand-strong"
+            className="min-w-0 flex-1 rounded-md border border-line/10 px-2 py-1 text-xs font-semibold normal-case tracking-normal text-ink outline-none focus:border-brand-strong"
           />
         </label>
         <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs font-semibold text-ink-soft">
@@ -238,7 +238,7 @@ export default function CartPanel(props: Props) {
             Pilih produk untuk memulai transaksi
           </div>
         ) : (
-          <ul className="flex flex-col divide-y divide-black/5">
+          <ul className="flex flex-col divide-y divide-line/5">
             {props.items.map((it, index) => {
               const noteVisible = showItemNote(it.product.id) || (it.notes ?? '').length > 0
               const unitOpts = buildUnitOptions(
@@ -299,7 +299,7 @@ export default function CartPanel(props: Props) {
                             return next
                           })
                         }}
-                        className="h-11 w-12 rounded-md border border-black/10 text-center text-sm font-semibold outline-none focus:border-brand-strong"
+                        className="h-11 w-12 rounded-md border border-line/10 text-center text-sm font-semibold outline-none focus:border-brand-strong"
                       />
                       <button
                         type="button"
@@ -313,7 +313,7 @@ export default function CartPanel(props: Props) {
                           value={selectedUnit}
                           onChange={(e) => props.onUnitChange(it.product.id, e.target.value)}
                           title="Pilih satuan"
-                          className="ml-1 rounded-lg border border-black/10 bg-panel px-1.5 py-1 text-xs outline-none focus:border-brand-strong"
+                          className="ml-1 rounded-lg border border-line/10 bg-panel px-1.5 py-1 text-xs outline-none focus:border-brand-strong"
                         >
                           {unitOpts.map((o) => (
                             <option key={o.unit} value={o.unit}>
@@ -336,7 +336,7 @@ export default function CartPanel(props: Props) {
                       value={it.notes ?? ''}
                       onChange={(e) => props.onNotesChange(it.product.id, e.target.value)}
                       placeholder="✎ Catatan khusus (mis. tanpa sambal, level pedas)"
-                      className="mt-2 w-full rounded-lg border border-dashed border-black/15 bg-background/50
+                      className="mt-2 w-full rounded-lg border border-dashed border-line/15 bg-background/50
                                  px-2.5 py-1.5 text-xs outline-none focus:border-brand-strong focus:bg-panel"
                     />
                   ) : (
@@ -375,7 +375,7 @@ export default function CartPanel(props: Props) {
                   type="date"
                   value={props.preorderDeadline}
                   onChange={(e) => props.onDeadlineChange(e.target.value)}
-                  className="w-full rounded-lg border border-black/10 px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                  className="w-full rounded-lg border border-line/10 px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
                 />
               </label>
               <label className="block">
@@ -385,7 +385,7 @@ export default function CartPanel(props: Props) {
                   min={0}
                   value={props.dpAmount}
                   onChange={(e) => props.onDpChange(Number(e.target.value))}
-                  className="w-full rounded-lg border border-black/10 px-2 py-1.5 text-right text-sm outline-none focus:border-brand-strong"
+                  className="w-full rounded-lg border border-line/10 px-2 py-1.5 text-right text-sm outline-none focus:border-brand-strong"
                 />
               </label>
             </div>
@@ -405,7 +405,7 @@ export default function CartPanel(props: Props) {
               value={props.orderNote}
               onChange={(e) => props.onOrderNoteChange(e.target.value)}
               placeholder="Catatan khusus untuk seluruh pesanan (mis. bungkus terpisah, minta struk)"
-              className="w-full resize-none rounded-lg border border-black/10 px-3 py-2 text-sm
+              className="w-full resize-none rounded-lg border border-line/10 px-3 py-2 text-sm
                          outline-none focus:border-brand-strong"
             />
           </>
@@ -477,7 +477,7 @@ export default function CartPanel(props: Props) {
                 onClick={() => setActionsOpen((v) => !v)}
                 aria-label="Opsi lain"
                 title="Opsi lain: Voucher, Simpan Draft, Split Bill"
-                className="relative flex h-full items-center rounded-xl border border-black/10 px-3 text-lg
+                className="relative flex h-full items-center rounded-xl border border-line/10 px-3 text-lg
                            font-bold text-ink transition hover:bg-background disabled:opacity-40"
               >
                 ⋮
@@ -488,10 +488,10 @@ export default function CartPanel(props: Props) {
               {actionsOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setActionsOpen(false)} />
-                  <div className="absolute bottom-full left-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-black/10 bg-panel shadow-lg">
+                  <div className="absolute bottom-full left-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-line/10 bg-panel shadow-lg">
                     {/* Kode voucher (opsional, diatur di Pengaturan) */}
                     {props.showVoucher && (
-                      <div className="border-b border-black/5 p-3">
+                      <div className="border-b border-line/5 p-3">
                         <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
                           Kode Voucher
                         </p>
@@ -514,7 +514,7 @@ export default function CartPanel(props: Props) {
                               onChange={(e) => props.onVoucherCodeChange(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && !empty && props.onApplyVoucher()}
                               placeholder="Kode voucher"
-                              className="min-w-0 flex-1 rounded-lg border border-black/10 px-3 py-2 text-sm uppercase outline-none focus:border-brand-strong"
+                              className="min-w-0 flex-1 rounded-lg border border-line/10 px-3 py-2 text-sm uppercase outline-none focus:border-brand-strong"
                             />
                             <button
                               onClick={props.onApplyVoucher}
@@ -547,7 +547,7 @@ export default function CartPanel(props: Props) {
                             setActionsOpen(false)
                             props.onOpenDraft()
                           }}
-                          className="flex w-full items-center gap-2 border-b border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                          className="flex w-full items-center gap-2 border-b border-line/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
                         >
                           📂 Buka Draft
                         </button>
@@ -570,7 +570,7 @@ export default function CartPanel(props: Props) {
                             props.onSplit()
                           }}
                           title={props.items.length <= 1 ? 'Butuh minimal 2 item' : undefined}
-                          className="flex w-full items-center gap-2 border-t border-black/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+                          className="flex w-full items-center gap-2 border-t border-line/5 px-4 py-2.5 text-left text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
                         >
                           ⑃ Split Bill
                         </button>

@@ -22,7 +22,7 @@ export function FullscreenButton() {
     <button
       onClick={toggle}
       title="Mode layar penuh (kiosk)"
-      className="rounded-xl border border-black/10 bg-panel px-4 py-2 text-sm font-semibold text-ink hover:bg-background"
+      className="rounded-xl border border-line/10 bg-panel px-4 py-2 text-sm font-semibold text-ink hover:bg-background"
     >
       {fs ? '✕ Keluar' : '⛶ Layar Penuh'}
     </button>

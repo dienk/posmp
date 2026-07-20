@@ -94,7 +94,7 @@ export default function HistoryPage() {
           {txs.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada transaksi.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {txs.map((t) => (
                 <li key={t.id}>
                   <button
@@ -136,7 +136,7 @@ export default function HistoryPage() {
               <h2 className="text-base font-bold text-ink">{selected.invoice_number}</h2>
               <p className="mb-3 text-xs text-ink-soft">{selected.transaction_date}</p>
 
-              <ul className="mb-3 divide-y divide-black/5">
+              <ul className="mb-3 divide-y divide-line/5">
                 {items.map((it) => (
                   <li key={it.product_id} className="py-2 text-sm">
                     <div className="flex justify-between">
@@ -151,7 +151,7 @@ export default function HistoryPage() {
                   </li>
                 ))}
               </ul>
-              <div className="flex justify-between border-t border-black/5 pt-2 text-sm font-bold text-ink">
+              <div className="flex justify-between border-t border-line/5 pt-2 text-sm font-bold text-ink">
                 <span>Total</span>
                 <span>{formatRupiah(selected.total_amount)}</span>
               </div>
@@ -197,7 +197,7 @@ export default function HistoryPage() {
                   const r = getReceipt(selected.id)
                   if (r) setReceipt(r)
                 }}
-                className="mt-3 w-full rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                className="mt-3 w-full rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
               >
                 🧾 Lihat Struk
               </button>
@@ -212,7 +212,7 @@ export default function HistoryPage() {
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Alasan refund (opsional)"
-                    className="mb-2 w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="mb-2 w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   />
                   <button
                     onClick={handleRefund}

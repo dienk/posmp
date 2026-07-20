@@ -172,7 +172,7 @@ export default function ProductsPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="Cari nama / SKU…"
-          className="w-56 rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="w-56 rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
         />
         <button
           onClick={startNew}
@@ -187,7 +187,7 @@ export default function ProductsPage() {
         <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
+              <tr className="border-b border-line/5 text-left text-xs uppercase text-ink-soft">
                 <th className="px-4 py-3">Nama</th>
                 <th className="px-4 py-3">Barcode / SKU</th>
                 <th className="px-4 py-3">Kategori</th>
@@ -201,7 +201,7 @@ export default function ProductsPage() {
               {filtered.map((p) => {
                 const lowStock = (p.stock ?? 0) <= (p.min_stock ?? 0)
                 return (
-                  <tr key={p.id} className="border-b border-black/5 hover:bg-background">
+                  <tr key={p.id} className="border-b border-line/5 hover:bg-background">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-background">
@@ -284,7 +284,7 @@ export default function ProductsPage() {
                     {form.images.map((img, idx) => (
                       <div
                         key={idx}
-                        className="group relative h-20 w-20 overflow-hidden rounded-lg border border-black/10 bg-background"
+                        className="group relative h-20 w-20 overflow-hidden rounded-lg border border-line/10 bg-background"
                       >
                         <img src={img} alt={`Gambar ${idx + 1}`} className="h-full w-full object-cover" />
                         {idx === 0 && (
@@ -314,7 +314,7 @@ export default function ProductsPage() {
                         </div>
                       </div>
                     ))}
-                    <label className="grid h-20 w-20 shrink-0 cursor-pointer place-items-center rounded-lg border border-dashed border-black/20 bg-background px-1 text-center text-xs font-semibold text-ink-soft hover:border-brand-strong hover:bg-brand-soft">
+                    <label className="grid h-20 w-20 shrink-0 cursor-pointer place-items-center rounded-lg border border-dashed border-line/20 bg-background px-1 text-center text-xs font-semibold text-ink-soft hover:border-brand-strong hover:bg-brand-soft">
                       <span>＋ Gambar</span>
                       <input
                         type="file"
@@ -423,7 +423,7 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Multi-satuan & konversi */}
-                <div className="rounded-lg border border-black/10 p-3">
+                <div className="rounded-lg border border-line/10 p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-xs font-semibold text-ink-soft">Satuan Turunan & Konversi</span>
                     <button
@@ -449,7 +449,7 @@ export default function ProductsPage() {
                             placeholder="satuan"
                             value={c.unit}
                             onChange={(e) => updateConversion(idx, { unit: e.target.value })}
-                            className="w-24 rounded-lg border border-black/10 px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                            className="w-24 rounded-lg border border-line/10 px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
                           />
                           <span className="text-xs text-ink-soft">=</span>
                           <input
@@ -457,7 +457,7 @@ export default function ProductsPage() {
                             min={1}
                             value={c.conversion}
                             onChange={(e) => updateConversion(idx, { conversion: Number(e.target.value) || 0 })}
-                            className="w-16 rounded-lg border border-black/10 px-2 py-1.5 text-right text-sm outline-none focus:border-brand-strong"
+                            className="w-16 rounded-lg border border-line/10 px-2 py-1.5 text-right text-sm outline-none focus:border-brand-strong"
                           />
                           <span className="shrink-0 text-xs text-ink-soft">{form.unit || 'pcs'}</span>
                           <div className="relative flex-1">
@@ -470,7 +470,7 @@ export default function ProductsPage() {
                               placeholder="harga (opsional)"
                               value={c.price || ''}
                               onChange={(e) => updateConversion(idx, { price: Number(e.target.value) || 0 })}
-                              className="w-full rounded-lg border border-black/10 py-1.5 pl-7 pr-2 text-right text-sm outline-none focus:border-brand-strong"
+                              className="w-full rounded-lg border border-line/10 py-1.5 pl-7 pr-2 text-right text-sm outline-none focus:border-brand-strong"
                             />
                           </div>
                           <button
@@ -515,7 +515,7 @@ export default function ProductsPage() {
                   </button>
                   <button
                     onClick={cancel}
-                    className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
                   >
                     Batal
                   </button>
@@ -566,4 +566,4 @@ export default function ProductsPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

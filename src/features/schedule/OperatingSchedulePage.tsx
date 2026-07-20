@@ -14,7 +14,7 @@ import {
 } from './scheduleConfig'
 
 const inputCls =
-  'rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 export default function OperatingSchedulePage() {
   const { settings, reloadSettings } = useSettings()

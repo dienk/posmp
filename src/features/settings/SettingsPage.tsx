@@ -180,7 +180,7 @@ export default function SettingsPage() {
             </label>
             <div className="block">
               <span className="mb-1 block text-xs font-medium text-ink-soft">Tarif Pajak (%)</span>
-              <div className="flex items-center gap-2 rounded-lg border border-black/10 bg-background px-3 py-2 text-sm">
+              <div className="flex items-center gap-2 rounded-lg border border-line/10 bg-background px-3 py-2 text-sm">
                 <span className="font-semibold text-ink">{taxRatePct}%</span>
                 <span className="text-xs text-ink-soft">
                   {activeTax ? `· ${activeTax.name}` : ''}
@@ -357,7 +357,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => callQueueNumber('A-01', callText)}
-                className="shrink-0 rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
+                className="shrink-0 rounded-lg border border-line/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
                 title="Dengarkan contoh panggilan untuk nomor A-01"
               >
                 🔊 Coba
@@ -467,7 +467,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Tambah metode kustom */}
-          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-black/5 pt-3">
+          <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-line/5 pt-3">
             <label className="block w-16">
               <span className="mb-1 block text-xs font-medium text-ink-soft">Ikon</span>
               <input
@@ -515,4 +515,4 @@ export default function SettingsPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

@@ -151,7 +151,7 @@ export default function SelfOrderPage() {
       </div>
 
       {cart.items.length > 0 && (
-        <div className="absolute inset-x-0 bottom-0 mx-auto max-w-md border-t border-black/10 bg-panel p-4 shadow-panel">
+        <div className="absolute inset-x-0 bottom-0 mx-auto max-w-md border-t border-line/10 bg-panel p-4 shadow-panel">
           <div className="mb-2 flex justify-between text-sm text-ink-soft">
             <span>{cart.items.reduce((s, i) => s + i.quantity, 0)} item · Pajak {formatRupiah(tax)}</span>
             <span className="text-base font-bold text-ink">{formatRupiah(total)}</span>

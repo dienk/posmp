@@ -318,7 +318,7 @@ function NavGroup({ group, open }: { group: NavGroupDef; open: boolean }) {
         )}
       </button>
       {expanded && (
-        <div className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-black/10 pl-3">
+        <div className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-line/10 pl-3">
           {children.map((c) => (
             <NavLink
               key={c.to}
@@ -353,7 +353,7 @@ function ConnectionBadge({
   return (
     <div
       className={
-        'mt-2 border-t border-black/5 pt-2 text-[10px] text-ink-soft ' +
+        'mt-2 border-t border-line/5 pt-2 text-[10px] text-ink-soft ' +
         (open ? 'flex items-center gap-3 px-1' : 'flex flex-col items-center gap-1.5')
       }
     >

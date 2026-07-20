@@ -67,7 +67,7 @@ export default function QueuePage() {
             href="#/monitor"
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border border-black/10 px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
+            className="rounded-lg border border-line/10 px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
           >
             🖥️ Buka Monitor TV
           </a>
@@ -98,7 +98,7 @@ export default function QueuePage() {
             <div className="flex gap-2">
               <button
                 onClick={() => callQueueNumber(t.queue_number)}
-                className="rounded-lg border border-black/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
+                className="rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
               >
                 Panggil Ulang
               </button>

@@ -77,7 +77,7 @@ export default function CategoriesPage() {
           {categories.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada kategori.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {categories.map((c) => (
                 <li key={c.id} className="flex items-center gap-3 px-3 py-3">
                   <span
@@ -115,7 +115,7 @@ export default function CategoriesPage() {
               </h2>
               <div className="space-y-3">
                 <input
-                  className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                  className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   placeholder="Nama kategori"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -146,7 +146,7 @@ export default function CategoriesPage() {
                   </button>
                   <button
                     onClick={cancel}
-                    className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
                   >
                     Batal
                   </button>

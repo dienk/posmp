@@ -25,7 +25,7 @@ export default function OpenDraftModal({ outletId, onCancel, onOpen }: Props) {
           </button>
         </div>
 
-        <div className="border-b border-black/5 px-5 py-3 text-xs text-ink-soft">
+        <div className="border-b border-line/5 px-5 py-3 text-xs text-ink-soft">
           Pilih bill tersimpan (Draft) untuk dimuat ke keranjang & dilanjutkan. Isi keranjang saat ini
           akan digantikan.
         </div>
@@ -41,7 +41,7 @@ export default function OpenDraftModal({ outletId, onCancel, onOpen }: Props) {
                 key={d.id}
                 type="button"
                 onClick={() => onOpen(d.id)}
-                className="flex w-full items-center gap-3 rounded-lg border border-black/10 p-3 text-left transition hover:border-status-occupied hover:bg-status-occupied/5"
+                className="flex w-full items-center gap-3 rounded-lg border border-line/10 p-3 text-left transition hover:border-status-occupied hover:bg-status-occupied/5"
               >
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-status-waiting/15 text-lg">
                   📝

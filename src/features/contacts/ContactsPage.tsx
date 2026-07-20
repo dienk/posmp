@@ -138,7 +138,7 @@ export default function ContactsPage() {
           {rows.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada data.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {rows.map((r, i) => (
                 <li key={i} className="flex items-center gap-3 px-3 py-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-ink">
@@ -220,4 +220,4 @@ export default function ContactsPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

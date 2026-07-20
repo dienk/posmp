@@ -65,7 +65,7 @@ export default function DraftsPage() {
               Belum ada transaksi draft. Simpan bill dari layar Kasir untuk menyimpannya sebagai draft.
             </p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {drafts.map((d) => (
                 <li key={d.id}>
                   <button
@@ -105,7 +105,7 @@ export default function DraftsPage() {
                 {selected.transaction_date}
               </p>
 
-              <ul className="mb-3 divide-y divide-black/5">
+              <ul className="mb-3 divide-y divide-line/5">
                 {items.map((it) => (
                   <li key={it.product_id} className="py-2 text-sm">
                     <div className="flex justify-between">
@@ -118,7 +118,7 @@ export default function DraftsPage() {
                   </li>
                 ))}
               </ul>
-              <div className="flex justify-between border-t border-black/5 pt-2 text-sm font-bold text-ink">
+              <div className="flex justify-between border-t border-line/5 pt-2 text-sm font-bold text-ink">
                 <span>Total</span>
                 <span>{formatRupiah(selected.total_amount)}</span>
               </div>

@@ -70,7 +70,7 @@ export default function KdsPage() {
                   key={t.id}
                   className={`flex flex-col rounded-card border-2 shadow-card ${ageStyle(mins)}`}
                 >
-                  <div className="flex items-start justify-between gap-2 border-b border-black/5 p-3">
+                  <div className="flex items-start justify-between gap-2 border-b border-line/5 p-3">
                     <div>
                       <p className="text-sm font-bold text-ink">
                         #{idx + 1} ·{' '}

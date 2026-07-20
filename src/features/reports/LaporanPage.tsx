@@ -28,7 +28,7 @@ import {
 type Row = Record<string, unknown>
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 export default function LaporanPage() {
   const { settings, reloadSettings } = useSettings()
@@ -101,7 +101,7 @@ export default function LaporanPage() {
   return (
     <div className="flex h-full">
       {/* Sub-menu daftar laporan */}
-      <aside className="w-60 shrink-0 overflow-y-auto border-r border-black/5 bg-panel/70 p-3">
+      <aside className="w-60 shrink-0 overflow-y-auto border-r border-line/5 bg-panel/70 p-3">
         <h1 className="mb-2 px-2 text-lg font-bold text-ink">Laporan</h1>
         {REPORT_GROUPS.map((g) => (
           <div key={g} className="mb-3">
@@ -143,7 +143,7 @@ export default function LaporanPage() {
                 'rounded-lg px-3 py-2 text-sm font-semibold transition ' +
                 (filterOn
                   ? 'bg-status-occupied text-white'
-                  : 'border border-black/10 text-ink hover:bg-background')
+                  : 'border border-line/10 text-ink hover:bg-background')
               }
             >
               🔎 Filter{filterOn ? ' •' : ''}
@@ -154,14 +154,14 @@ export default function LaporanPage() {
                 'rounded-lg px-3 py-2 text-sm font-semibold transition ' +
                 (showTemplate
                   ? 'bg-brand text-ink'
-                  : 'border border-black/10 text-ink hover:bg-background')
+                  : 'border border-line/10 text-ink hover:bg-background')
               }
             >
               ✎ Template
             </button>
             <button
               onClick={() => downloadText(`${fileBase}.csv`, toCSV(def, filteredRows, tpl), 'text/csv')}
-              className="rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
+              className="rounded-lg border border-line/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
             >
               ⬇ CSV
             </button>
@@ -169,7 +169,7 @@ export default function LaporanPage() {
               onClick={() =>
                 downloadText(`${fileBase}.json`, toJSON(def, filteredRows, tpl), 'application/json')
               }
-              className="rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
+              className="rounded-lg border border-line/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
             >
               ⬇ JSON
             </button>
@@ -254,7 +254,7 @@ export default function LaporanPage() {
                           'rounded-full px-3 py-1 text-xs font-semibold transition ' +
                           (on
                             ? 'bg-brand text-ink'
-                            : 'border border-black/10 text-ink-soft line-through hover:bg-background')
+                            : 'border border-line/10 text-ink-soft line-through hover:bg-background')
                         }
                       >
                         {c.label}
@@ -277,7 +277,7 @@ export default function LaporanPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
+                  <tr className="border-b border-line/5 text-left text-xs uppercase text-ink-soft">
                     {cols.map((c) => (
                       <th
                         key={c.key}
@@ -293,7 +293,7 @@ export default function LaporanPage() {
                 </thead>
                 <tbody>
                   {filteredRows.map((r, i) => (
-                    <tr key={i} className="border-b border-black/5 hover:bg-background">
+                    <tr key={i} className="border-b border-line/5 hover:bg-background">
                       {cols.map((c) => (
                         <td
                           key={c.key}
@@ -413,7 +413,7 @@ export default function LaporanPage() {
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
                 onClick={() => setFilter(DEFAULT_FILTER)}
-                className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
               >
                 Reset
               </button>

@@ -142,7 +142,7 @@ export default function DashboardPage() {
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowConfig(true)}
-            className="rounded-lg border border-black/10 bg-panel px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
+            className="rounded-lg border border-line/10 bg-panel px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
           >
             ⚙ Atur Widget
           </button>
@@ -150,7 +150,7 @@ export default function DashboardPage() {
           <select
             value={preset}
             onChange={(e) => setPreset(e.target.value as RangePreset)}
-            className="rounded-lg border border-black/10 bg-panel px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+            className="rounded-lg border border-line/10 bg-panel px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
           >
             {RANGE_PRESETS.map((p) => (
               <option key={p.key} value={p.key}>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                 value={customFrom}
                 max={customTo || undefined}
                 onChange={(e) => setCustomFrom(e.target.value)}
-                className="rounded-lg border border-black/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                className="rounded-lg border border-line/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
               />
               <span className="text-xs text-ink-soft">s/d</span>
               <input
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                 value={customTo}
                 min={customFrom || undefined}
                 onChange={(e) => setCustomTo(e.target.value)}
-                className="rounded-lg border border-black/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+                className="rounded-lg border border-line/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
               />
             </div>
           )}
@@ -308,10 +308,10 @@ export default function DashboardPage() {
         {/* Transaksi terkini */}
         {has('recent') && (
           <section className="overflow-hidden rounded-card bg-panel shadow-card">
-            <h2 className="border-b border-black/5 px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+            <h2 className="border-b border-line/5 px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
               Transaksi Terkini
             </h2>
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {recent.map((t) => (
                 <li key={t.invoice_number} className="flex items-center justify-between px-5 py-2.5 text-sm">
                   <span className="font-semibold text-ink">{t.invoice_number}</span>
@@ -375,7 +375,7 @@ export default function DashboardPage() {
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button
                 onClick={() => setEnabled(new Set(DASHBOARD_WIDGETS.map((w) => w.key)))}
-                className="rounded-xl border border-black/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
               >
                 Pilih Semua
               </button>

@@ -120,7 +120,7 @@ export default function MasterTablesPage() {
         <select
           value={filterOutlet === 'all' ? 'all' : String(filterOutlet)}
           onChange={(e) => setFilterOutlet(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-          className="rounded-lg border border-black/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+          className="rounded-lg border border-line/10 px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
         >
           <option value="all">Semua outlet</option>
           {outlets.map((o) => (
@@ -142,7 +142,7 @@ export default function MasterTablesPage() {
         <section className="overflow-hidden rounded-card bg-panel shadow-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-black/5 text-left text-xs uppercase text-ink-soft">
+              <tr className="border-b border-line/5 text-left text-xs uppercase text-ink-soft">
                 <th className="px-4 py-3">Meja</th>
                 <th className="px-4 py-3">Outlet</th>
                 <th className="px-4 py-3">Area</th>
@@ -153,7 +153,7 @@ export default function MasterTablesPage() {
             </thead>
             <tbody>
               {visible.map((t) => (
-                <tr key={t.id} className="border-b border-black/5 hover:bg-background">
+                <tr key={t.id} className="border-b border-line/5 hover:bg-background">
                   <td className="px-4 py-3 font-semibold text-ink">{t.table_number}</td>
                   <td className="px-4 py-3 text-ink-soft">{t.outlet_name ?? '—'}</td>
                   <td className="px-4 py-3 text-ink-soft">{t.section_name}</td>
@@ -198,7 +198,7 @@ export default function MasterTablesPage() {
                   <select
                     value={form.outlet_id || ''}
                     onChange={(e) => setForm((f) => ({ ...f, outlet_id: Number(e.target.value) }))}
-                    className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   >
                     <option value="" disabled>
                       Pilih outlet
@@ -212,7 +212,7 @@ export default function MasterTablesPage() {
                 </Field>
                 <Field label="Nomor / nama meja">
                   <input
-                    className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                     placeholder="mis. T-09 / VIP-1"
                     value={form.table_number}
                     onChange={(e) => setForm((f) => ({ ...f, table_number: e.target.value }))}
@@ -222,7 +222,7 @@ export default function MasterTablesPage() {
                   <select
                     value={form.section_name}
                     onChange={(e) => setForm((f) => ({ ...f, section_name: e.target.value }))}
-                    className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   >
                     {SECTIONS.map((s) => (
                       <option key={s} value={s}>
@@ -236,7 +236,7 @@ export default function MasterTablesPage() {
                     <input
                       type="number"
                       min={1}
-                      className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                      className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                       value={form.capacity}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, capacity: Number(e.target.value) || 0 }))
@@ -247,7 +247,7 @@ export default function MasterTablesPage() {
                     <input
                       type="number"
                       min={1}
-                      className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                      className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                       value={form.max_capacity}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, max_capacity: Number(e.target.value) || 0 }))
@@ -264,7 +264,7 @@ export default function MasterTablesPage() {
                   </button>
                   <button
                     onClick={cancel}
-                    className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
                   >
                     Batal
                   </button>

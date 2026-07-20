@@ -78,7 +78,7 @@ export default function RolesPage() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[280px_1fr]">
         {/* Daftar peran */}
         <section className="rounded-card bg-panel p-2 shadow-card">
-          <ul className="divide-y divide-black/5">
+          <ul className="divide-y divide-line/5">
             {roles.map((r) => (
               <li key={r.id}>
                 <button
@@ -103,7 +103,7 @@ export default function RolesPage() {
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-soft">Nama Peran</span>
                 <input
-                  className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                  className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
                   value={selected.name}
                   onChange={(e) => updateSelected({ name: e.target.value })}
                 />

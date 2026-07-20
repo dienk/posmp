@@ -84,7 +84,7 @@ export default function TaxesPage() {
           {taxes.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-soft">Belum ada pajak.</p>
           ) : (
-            <ul className="divide-y divide-black/5">
+            <ul className="divide-y divide-line/5">
               {taxes.map((t) => (
                 <li key={t.id} className="flex items-center gap-3 px-3 py-3">
                   <span className="grid h-10 w-12 shrink-0 place-items-center rounded-lg bg-brand-soft text-sm font-bold text-ink">
@@ -187,7 +187,7 @@ export default function TaxesPage() {
                   </button>
                   <button
                     onClick={cancel}
-                    className="rounded-xl border border-black/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
+                    className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
                   >
                     Batal
                   </button>
@@ -214,4 +214,4 @@ export default function TaxesPage() {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
