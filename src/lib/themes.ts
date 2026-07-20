@@ -74,6 +74,24 @@ export const THEMES: Theme[] = [
     desc: 'Ungu elegan',
     vars: t('221 214 254', '237 233 254', '124 58 237', '245 243 255', '196 181 253', '46 16 101', '139 122 168'),
   },
+  {
+    id: 'oniks',
+    name: 'Oniks',
+    desc: 'Hitam tegas berkarakter',
+    vars: t('161 161 170', '228 228 231', '24 24 27', '244 244 245', '228 228 231', '24 24 27', '82 82 91'),
+  },
+  {
+    id: 'safir',
+    name: 'Safir',
+    desc: 'Biru tegas & dalam',
+    vars: t('96 165 250', '219 234 254', '29 78 216', '239 246 255', '191 219 254', '30 58 138', '71 85 105'),
+  },
+  {
+    id: 'zamrud',
+    name: 'Zamrud',
+    desc: 'Hijau tegas & pekat',
+    vars: t('74 222 128', '220 252 231', '21 128 61', '240 253 244', '187 247 208', '20 83 45', '71 85 105'),
+  },
 ]
 
 export const DEFAULT_THEME_ID = 'merahputih'
