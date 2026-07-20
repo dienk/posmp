@@ -166,14 +166,14 @@ export default function KioskOrderPage() {
                   </div>
                   <button
                     onClick={() => cart.setQuantity(it.product.id, it.quantity - 1)}
-                    className="h-8 w-8 rounded-full bg-background text-lg font-bold"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-background text-lg font-bold"
                   >
                     −
                   </button>
                   <span className="w-6 text-center font-bold">{it.quantity}</span>
                   <button
                     onClick={() => cart.setQuantity(it.product.id, it.quantity + 1)}
-                    className="h-8 w-8 rounded-full bg-background text-lg font-bold"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-background text-lg font-bold"
                   >
                     +
                   </button>

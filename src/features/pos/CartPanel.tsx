@@ -270,7 +270,7 @@ export default function CartPanel(props: Props) {
                       <button
                         type="button"
                         onClick={() => props.onQuantityChange(it.product.id, it.quantity - 1)}
-                        className="h-7 w-7 rounded-full bg-background text-ink hover:bg-brand-soft"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-background text-lg text-ink hover:bg-brand-soft"
                       >
                         −
                       </button>
@@ -299,12 +299,12 @@ export default function CartPanel(props: Props) {
                             return next
                           })
                         }}
-                        className="w-9 rounded-md border border-black/10 py-0.5 text-center text-sm font-semibold outline-none focus:border-brand-strong"
+                        className="h-11 w-12 rounded-md border border-black/10 text-center text-sm font-semibold outline-none focus:border-brand-strong"
                       />
                       <button
                         type="button"
                         onClick={() => props.onQuantityChange(it.product.id, it.quantity + 1)}
-                        className="h-7 w-7 rounded-full bg-background text-ink hover:bg-brand-soft"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-background text-lg text-ink hover:bg-brand-soft"
                       >
                         +
                       </button>
