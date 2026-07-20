@@ -239,7 +239,7 @@ export default function CartPanel(props: Props) {
           </div>
         ) : (
           <ul className="flex flex-col divide-y divide-black/5">
-            {props.items.map((it) => {
+            {props.items.map((it, index) => {
               const noteVisible = showItemNote(it.product.id) || (it.notes ?? '').length > 0
               const unitOpts = buildUnitOptions(
                 it.product.unit,
@@ -250,11 +250,16 @@ export default function CartPanel(props: Props) {
               return (
                 <li key={it.product.id} className="py-3">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-semibold text-ink">{it.product.name}</p>
+                    <p className="flex min-w-0 items-start gap-2 text-sm font-semibold text-ink">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-background text-xs font-bold text-ink-soft">
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0">{it.product.name}</span>
+                    </p>
                     <button
                       type="button"
                       onClick={() => props.onRemove(it.product.id)}
-                      className="text-status-occupied hover:opacity-70"
+                      className="shrink-0 text-status-occupied hover:opacity-70"
                       aria-label={`Hapus ${it.product.name}`}
                     >
                       ✕
@@ -282,9 +287,13 @@ export default function CartPanel(props: Props) {
                           if (Number.isFinite(n) && n >= 1) props.onQuantityChange(it.product.id, n)
                         }}
                         onBlur={() => {
-                          setQtyEdits((m) => {
-                            const n = parseInt(m[it.product.id] ?? '', 10)
+                          const raw = qtyEdits[it.product.id]
+                          if (raw !== undefined) {
+                            const n = parseInt(raw, 10)
                             if (!Number.isFinite(n) || n < 1) props.onQuantityChange(it.product.id, 1)
+                          }
+                          setQtyEdits((m) => {
+                            if (!(it.product.id in m)) return m
                             const next = { ...m }
                             delete next[it.product.id]
                             return next
