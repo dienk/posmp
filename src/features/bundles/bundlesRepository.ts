@@ -59,8 +59,12 @@ export function listComponentCandidates(outletId: number): ComponentCandidate[] 
   )
 }
 
-/** Daftar seluruh paket bundling + komponennya (dengan harga & stok komponen). */
-export function listBundles(outletId: number): Bundle[] {
+/**
+ * Daftar seluruh paket bundling + komponennya (harga & stok komponen). Bila
+ * `warehouseId` diisi, stok komponen (→ ketersediaan paket) dihitung dari gudang
+ * tsb saja; tanpa itu = total lintas gudang.
+ */
+export function listBundles(outletId: number, warehouseId?: number): Bundle[] {
   const bundles = query<Omit<Bundle, 'components' | 'componentsTotal' | 'available'>>(
     `SELECT p.id, p.category_id, p.name, p.sku, p.price, p.description, p.is_active, p.image_path,
             c.name AS category_name
@@ -71,15 +75,20 @@ export function listBundles(outletId: number): Bundle[] {
   )
   if (!bundles.length) return []
 
+  const stockExpr = warehouseId
+    ? `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
+                 WHERE os.product_id = cp.id AND os.outlet_id = ? AND os.warehouse_id = ?), 0)`
+    : `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
+                 WHERE os.product_id = cp.id AND os.outlet_id = ?), 0)`
+  const params: number[] = warehouseId ? [outletId, warehouseId] : [outletId]
   const rows = query<BundleComponent & { bundle_product_id: number }>(
     `SELECT bi.bundle_product_id, bi.component_product_id, bi.quantity,
             cp.name AS name, cp.unit AS unit, cp.price AS price,
-            COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
-                      WHERE os.product_id = cp.id AND os.outlet_id = ?), 0) AS stock
+            ${stockExpr} AS stock
      FROM product_bundle_items bi
      JOIN products cp ON cp.id = bi.component_product_id
      ORDER BY bi.bundle_product_id, cp.name`,
-    [outletId],
+    params,
   )
   const byBundle = new Map<number, BundleComponent[]>()
   for (const r of rows) {

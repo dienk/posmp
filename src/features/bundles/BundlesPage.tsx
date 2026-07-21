@@ -6,6 +6,7 @@ import { useSettings } from '../../lib/SettingsContext'
 import { publish } from '../../lib/realtime'
 import { fileToScaledDataUrl } from '../receipt/receiptConfig'
 import { listCategories } from '../products/productsRepository'
+import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
 import type { Category } from '../../types'
 import {
   createBundle,
@@ -38,16 +39,19 @@ export default function BundlesPage() {
   const [bundles, setBundles] = useState<Bundle[]>([])
   const [candidates, setCandidates] = useState<ComponentCandidate[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+  const [warehouseId, setWarehouseId] = useState<number | null>(null) // null = semua gudang
   const [mode, setMode] = useState<Mode>(null)
   const [form, setForm] = useState(emptyForm())
   const [toast, setToast] = useState<string | null>(null)
 
   const reload = () => {
-    setBundles(listBundles(outletId))
+    setBundles(listBundles(outletId, warehouseId ?? undefined))
     setCandidates(listComponentCandidates(outletId))
     setCategories(listCategories())
+    setWarehouses(listWarehouses(outletId))
   }
-  useEffect(reload, [outletId])
+  useEffect(reload, [outletId, warehouseId])
 
   const showToast = (m: string) => {
     setToast(m)
@@ -153,7 +157,20 @@ export default function BundlesPage() {
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Bundling</h1>
         <span className="text-xs text-ink-soft">{bundles.length} paket</span>
-        <Button size="sm" onClick={startNew} className="ml-auto">
+        <select
+          value={warehouseId ?? ''}
+          onChange={(e) => setWarehouseId(e.target.value ? Number(e.target.value) : null)}
+          className="field-select ml-auto w-48"
+          title="Ketersediaan paket dihitung dari stok komponen di gudang ini"
+        >
+          <option value="">🏬 Semua Gudang</option>
+          {warehouses.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.name}
+            </option>
+          ))}
+        </select>
+        <Button size="sm" onClick={startNew}>
           + Paket
         </Button>
       </header>
