@@ -150,6 +150,22 @@
    konsisten, warna dari token tema (aksen brand-strong yang adaptif tema;
    status-occupied hanya untuk aksi merusak/destruktif). */
 @layer components {
+  /* Snackbar / toast. Tema terang: toast gelap + teks terang (inverse).
+     Tema gelap (oniks/safir/zamrud): permukaan gelap elevated + teks terang +
+     garis tipis — bukan kotak putih menyilaukan. */
+  .snackbar {
+    @apply rounded-xl px-5 py-3 text-sm font-medium shadow-lg;
+    background-color: rgb(var(--c-ink));
+    color: rgb(var(--c-panel));
+  }
+  :root[data-theme='oniks'] .snackbar,
+  :root[data-theme='safir'] .snackbar,
+  :root[data-theme='zamrud'] .snackbar {
+    background-color: rgb(var(--c-panel));
+    color: rgb(var(--c-ink));
+    border: 1px solid rgb(var(--c-border) / 0.25);
+  }
+
   .btn {
     @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 text-sm
       font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
