@@ -5,6 +5,8 @@ import { SettingsProvider, useSettings } from './lib/SettingsContext'
 import { UIProvider } from './lib/UIContext'
 import { applyTheme, parseCustomVars } from './lib/themes'
 import AppShell from './components/AppShell'
+import LoginPage from './features/auth/LoginPage'
+import RequireLogin from './features/auth/RequireLogin'
 import PosPage from './features/pos/PosPage'
 import KasirPinGate from './features/access/KasirPinGate'
 import TablesPage from './features/tables/TablesPage'
@@ -51,9 +53,14 @@ import SharedMemberPage from './features/share/SharedMemberPage'
 
 // Hash router agar tetap berfungsi saat dibuka sebagai file/native wrapper (Tauri/Capacitor).
 const router = createHashRouter([
+  { path: '/login', element: <LoginPage /> },
   {
     path: '/',
-    element: <AppShell />,
+    element: (
+      <RequireLogin>
+        <AppShell />
+      </RequireLogin>
+    ),
     children: [
       {
         index: true,

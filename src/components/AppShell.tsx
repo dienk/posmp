@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Archive,
   Armchair,
@@ -22,6 +22,7 @@ import {
   IdCard,
   KeyRound,
   LayoutDashboard,
+  LogOut,
   Megaphone,
   Monitor,
   Package,
@@ -53,7 +54,8 @@ import { useSettings } from '../lib/SettingsContext'
 import { isModuleEnabled } from '../lib/settings'
 import { useConnection } from '../lib/useConnection'
 import { useUI } from '../lib/UIContext'
-import { effectivePerms } from '../features/access/accessRepository'
+import { effectivePerms, getActivePersona } from '../features/access/accessRepository'
+import { logout } from '../lib/session'
 
 interface NavItem {
   to: string
@@ -184,6 +186,12 @@ const SIDEBAR: NavEntry[] = [
 export default function AppShell() {
   const { settings } = useSettings()
   const conn = useConnection()
+  const navigate = useNavigate()
+  const activePersona = getActivePersona(settings)
+  const doLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
   const { sidebarOpen, toggleSidebar } = useUI()
   // Izin efektif persona aktif; null = tanpa pembatasan.
   const perms = effectivePerms(settings)
@@ -245,6 +253,25 @@ export default function AppShell() {
             )
           })}
         </div>
+
+        {/* Pengguna aktif + keluar */}
+        <button
+          onClick={doLogout}
+          title={`Keluar${activePersona ? ` (${activePersona.name})` : ''}`}
+          className={
+            'mt-1 flex items-center rounded-xl text-ink-soft transition hover:bg-brand-soft hover:text-ink ' +
+            (sidebarOpen ? 'gap-3 px-3 py-2.5 text-sm' : 'w-16 flex-col gap-1 py-2 text-[11px]')
+          }
+        >
+          <LogOut className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+          {sidebarOpen ? (
+            <span className="min-w-0 flex-1 truncate text-left">
+              Keluar{activePersona ? ` · ${activePersona.name}` : ''}
+            </span>
+          ) : (
+            'Keluar'
+          )}
+        </button>
 
         <ConnectionBadge
           open={sidebarOpen}

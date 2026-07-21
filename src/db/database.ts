@@ -8,6 +8,74 @@ const IDB_NAME = 'posmerahputih'
 const IDB_STORE = 'sqlite'
 const IDB_KEY = 'main.db'
 
+// ── Multi-database (slot) ────────────────────────────────────────────────────
+// Aditif: slot 'main' tetap memakai kunci 'main.db' (data lama utuh). Slot lain
+// disimpan di kunci 'db:<id>'. Registry & slot aktif di localStorage.
+const REG_KEY = 'posmp_db_registry'
+const CUR_KEY = 'posmp_db_current'
+
+export interface DbSlot {
+  id: string
+  label: string
+}
+
+function readRegistry(): DbSlot[] {
+  try {
+    const r = JSON.parse(localStorage.getItem(REG_KEY) ?? '')
+    if (Array.isArray(r) && r.length) return r as DbSlot[]
+  } catch {
+    /* fallthrough */
+  }
+  return [{ id: 'main', label: 'Database Utama' }]
+}
+function writeRegistry(reg: DbSlot[]): void {
+  localStorage.setItem(REG_KEY, JSON.stringify(reg.length ? reg : [{ id: 'main', label: 'Database Utama' }]))
+}
+function idbKeyFor(id: string): string {
+  return id === 'main' ? IDB_KEY : `db:${id}`
+}
+function currentKey(): string {
+  return idbKeyFor(getCurrentDbId())
+}
+
+/** Daftar database (slot) yang tersedia. */
+export function listDatabases(): DbSlot[] {
+  return readRegistry()
+}
+/** ID database yang sedang aktif (default 'main'). */
+export function getCurrentDbId(): string {
+  return localStorage.getItem(CUR_KEY) ?? 'main'
+}
+/** Buat database baru (slot). Aktif setelah `switchDatabase`. */
+export function createDatabase(label: string): DbSlot {
+  const id = `db_${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`
+  const slot: DbSlot = { id, label: label.trim() || 'Database Baru' }
+  writeRegistry([...readRegistry(), slot])
+  return slot
+}
+/** Ganti nama database. */
+export function renameDatabase(id: string, label: string): void {
+  writeRegistry(readRegistry().map((s) => (s.id === id ? { ...s, label: label.trim() || s.label } : s)))
+}
+/** Pindah ke database lain (memuat ulang halaman agar seluruh cache segar). */
+export function switchDatabase(id: string): void {
+  localStorage.setItem(CUR_KEY, id)
+  location.reload()
+}
+/** Hapus database (slot) beserta datanya. Slot 'main' tak bisa dihapus. */
+export async function deleteDatabase(id: string): Promise<void> {
+  if (id === 'main') return
+  writeRegistry(readRegistry().filter((s) => s.id !== id))
+  if (getCurrentDbId() === id) localStorage.setItem(CUR_KEY, 'main')
+  const idb = await openIndexedDb()
+  await new Promise<void>((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite')
+    tx.objectStore(IDB_STORE).delete(idbKeyFor(id))
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+}
+
 let dbInstance: Database | null = null
 // Simpan factory sql.js agar snapshot bisa dimuat ulang dari IndexedDB (lintas-tab).
 let sqlEngine: Awaited<ReturnType<typeof initSqlJs>> | null = null
@@ -31,7 +99,7 @@ async function loadPersisted(): Promise<Uint8Array | null> {
   const idb = await openIndexedDb()
   return new Promise((resolve, reject) => {
     const tx = idb.transaction(IDB_STORE, 'readonly')
-    const req = tx.objectStore(IDB_STORE).get(IDB_KEY)
+    const req = tx.objectStore(IDB_STORE).get(currentKey())
     req.onsuccess = () => resolve((req.result as Uint8Array) ?? null)
     req.onerror = () => reject(req.error)
   })
@@ -41,7 +109,7 @@ async function writePersisted(bytes: Uint8Array): Promise<void> {
   const idb = await openIndexedDb()
   return new Promise((resolve, reject) => {
     const tx = idb.transaction(IDB_STORE, 'readwrite')
-    tx.objectStore(IDB_STORE).put(bytes, IDB_KEY)
+    tx.objectStore(IDB_STORE).put(bytes, currentKey())
     tx.oncomplete = () => resolve()
     tx.onerror = () => reject(tx.error)
   })
