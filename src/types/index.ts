@@ -39,6 +39,7 @@ export interface Product {
   image_path: string | null
   images: string | null // JSON array data URL semua gambar
   unit_conversions: string | null // JSON [{unit, conversion, price}]
+  is_bundle?: number // 1 = paket bundling (stok dari komponen)
   category_name?: string | null
   stock?: number
 }

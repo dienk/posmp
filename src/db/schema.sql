@@ -37,7 +37,21 @@ CREATE TABLE IF NOT EXISTS products (
     image_path TEXT,                  -- gambar utama (= gambar pertama), untuk kartu/kasir
     images TEXT,                      -- JSON array data URL semua gambar produk
     unit_conversions TEXT,            -- JSON [{unit, conversion, price}] satuan turunan (dasar = unit)
+    is_bundle INTEGER NOT NULL DEFAULT 0,  -- 1 = paket bundling (stok dari komponen, lihat product_bundle_items)
     FOREIGN KEY(category_id) REFERENCES categories(id)
+);
+
+-- 3b. Komponen Bundling: 1 produk paket (is_bundle=1) terdiri dari beberapa
+-- produk komponen. Saat paket terjual, stok yang dipotong = stok komponen
+-- (quantity × jumlah paket), bukan stok paket itu sendiri.
+CREATE TABLE IF NOT EXISTS product_bundle_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bundle_product_id INTEGER NOT NULL,
+    component_product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,   -- banyak komponen (satuan dasar) per 1 paket
+    FOREIGN KEY(bundle_product_id) REFERENCES products(id),
+    FOREIGN KEY(component_product_id) REFERENCES products(id),
+    UNIQUE(bundle_product_id, component_product_id)
 );
 
 -- 4. Tabel Stok Produk per Outlet (Multi-Outlet Inventory)

@@ -3,6 +3,7 @@ import { publish } from '../../lib/realtime'
 import { computePoints, type LoyaltyConfig } from '../../lib/loyalty'
 import type { PaymentInput } from '../pos/posRepository'
 import { defaultWarehouseId } from '../warehouses/warehousesRepository'
+import { stockTargets } from '../bundles/bundlesRepository'
 
 export interface Preorder {
   id: number
@@ -90,11 +91,14 @@ export async function settlePreorder(
   db.run('BEGIN')
   try {
     for (const it of items) {
-      db.run(
-        `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
-         ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock - ?`,
-        [outletId, whId, it.product_id, -it.quantity, it.quantity],
-      )
+      // Paket bundling → potong stok komponen; produk biasa → dirinya sendiri.
+      for (const t of stockTargets(it.product_id, it.quantity)) {
+        db.run(
+          `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
+           ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock - ?`,
+          [outletId, whId, t.productId, -t.qty, t.qty],
+        )
+      }
     }
     for (const p of payments) {
       db.run(

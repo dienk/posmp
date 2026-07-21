@@ -127,7 +127,7 @@ export function listProductsForStock(outletId: number): StockProduct[] {
             COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock
      FROM products p
-     WHERE p.is_active = 1
+     WHERE p.is_active = 1 AND p.is_bundle = 0
      ORDER BY p.name`,
     [outletId],
   )

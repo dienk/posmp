@@ -44,7 +44,8 @@ export async function deleteCategory(id: number): Promise<void> {
 }
 
 const PRODUCT_COLS = `p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
-            p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.images, p.unit_conversions`
+            p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.images, p.unit_conversions,
+            p.is_bundle`
 
 // Stok total produk pada outlet = jumlah stok lintas gudang.
 const STOCK_SUM = `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
@@ -57,6 +58,7 @@ export function listProducts(outletId: number): Product[] {
             ${STOCK_SUM}
      FROM products p
      LEFT JOIN categories c ON c.id = p.category_id
+     WHERE p.is_bundle = 0
      ORDER BY p.name`,
     [outletId],
   )

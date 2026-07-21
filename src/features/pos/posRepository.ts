@@ -4,6 +4,7 @@ import { publish } from '../../lib/realtime'
 import { computePoints, type LoyaltyConfig } from '../../lib/loyalty'
 import type { CartItem, Category, FacilityType, Product } from '../../types'
 import { defaultWarehouseId } from '../warehouses/warehousesRepository'
+import { bundleAvailability, stockTargets } from '../bundles/bundlesRepository'
 
 // Metode bawaan; metode kustom (dari Pengaturan) memakai label sebagai nilai.
 export type PaymentMethod =
@@ -40,9 +41,10 @@ export function fetchProducts(outletId: number, categoryId?: number, keyword?: s
     params.push(`%${keyword.trim()}%`, `%${keyword.trim()}%`)
   }
   const whereSql = where.length ? `AND ${where.join(' AND ')}` : ''
-  return query<Product>(
+  const products = query<Product>(
     `SELECT p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
             p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.unit_conversions,
+            p.is_bundle,
             c.name AS category_name,
             COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock
@@ -52,6 +54,13 @@ export function fetchProducts(outletId: number, categoryId?: number, keyword?: s
      ORDER BY p.name`,
     params,
   )
+  // Stok paket bundling tidak disimpan sendiri — turunkan dari stok komponen.
+  const bundleIds = products.filter((p) => p.is_bundle).map((p) => p.id)
+  if (bundleIds.length) {
+    const avail = bundleAvailability(outletId, bundleIds)
+    for (const p of products) if (p.is_bundle) p.stock = avail.get(p.id) ?? 0
+  }
+  return products
 }
 
 export interface SaveOrderInput {
@@ -213,14 +222,17 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
           initialCookStatus,
         ],
       )
-      // Kurangi stok fisik gudang default saat transaksi diselesaikan.
+      // Kurangi stok fisik gudang default saat transaksi diselesaikan. Untuk
+      // paket bundling, stok yang dipotong adalah stok komponen (bukan paket).
       if (input.status === 'COMPLETED') {
         const whId = defaultWarehouseId(input.outletId)
-        db.run(
-          `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
-           ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock - ?`,
-          [input.outletId, whId, it.product.id, -baseQty, baseQty],
-        )
+        for (const t of stockTargets(it.product.id, baseQty)) {
+          db.run(
+            `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
+             ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock - ?`,
+            [input.outletId, whId, t.productId, -t.qty, t.qty],
+          )
+        }
       }
     }
 

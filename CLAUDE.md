@@ -120,6 +120,15 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
   sedapat mungkin
   memanfaatkan kolom yang ada (mis. `parent_transaction_id`, `is_preorder`,
   `transaction_payments.voucher_id`) alih-alih menambah tabel.
+- **Bundling (paket produk).** Paket = produk `is_bundle=1` **tanpa baris stok
+  sendiri**; komponennya di `product_bundle_items` (bundle→komponen×qty). Paket
+  dijual seperti produk biasa (1 baris `transaction_details`), tapi stok yang
+  dipotong/dikembalikan adalah **stok komponen** — selalu lewat
+  `stockTargets(productId, baseQty)` (`bundlesRepository`) di **ketiga** titik
+  mutasi stok: `posRepository.saveOrder`, `preorderRepository` (pelunasan), dan
+  `historyRepository.processRefund`. Stok paket di katalog **diturunkan** dari
+  komponen via `bundleAvailability` (min ⌊stok÷qty⌋), bukan `outlet_stocks`. Paket
+  dikecualikan dari `listProducts` (halaman Produk) & `listProductsForStock` (Stok).
 - **Status transaksi**: `DRAFT` (bill tersimpan) · `PREPARING` (pre-order/antre
   aktif) · `READY` (siap) · `COMPLETED` (lunas) · `REFUNDED`. Laporan/dashboard
   hanya menghitung `COMPLETED`.

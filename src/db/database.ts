@@ -262,6 +262,7 @@ function migrateSchema(db: Database): boolean {
     ['is_active', 'INTEGER NOT NULL DEFAULT 1'],
     ['images', 'TEXT'],
     ['unit_conversions', 'TEXT'],
+    ['is_bundle', 'INTEGER NOT NULL DEFAULT 0'],
   ]
   for (const [name, def] of productAdds) {
     if (!productCols.has(name)) {
@@ -409,6 +410,20 @@ function migrateSchema(db: Database): boolean {
         (SELECT w.id FROM warehouses w WHERE w.outlet_id = ${t}.outlet_id AND w.is_default = 1 LIMIT 1)`)
       changed = true
     }
+  }
+
+  // Komponen bundling (paket produk) — dibuat untuk database lama.
+  if (!tableExists('product_bundle_items')) {
+    db.run(`CREATE TABLE IF NOT EXISTS product_bundle_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bundle_product_id INTEGER NOT NULL,
+      component_product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 1,
+      FOREIGN KEY(bundle_product_id) REFERENCES products(id),
+      FOREIGN KEY(component_product_id) REFERENCES products(id),
+      UNIQUE(bundle_product_id, component_product_id)
+    )`)
+    changed = true
   }
   return changed
 }

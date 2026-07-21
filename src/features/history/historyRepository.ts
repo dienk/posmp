@@ -1,5 +1,6 @@
 import { getDb, persist, query } from '../../db/database'
 import { defaultWarehouseId } from '../warehouses/warehousesRepository'
+import { stockTargets } from '../bundles/bundlesRepository'
 
 export interface TxSummary {
   id: number
@@ -172,12 +173,15 @@ export async function processRefund(
          VALUES (?, ?, ?, ?)`,
         [refundId, it.product_id, it.quantity, it.unit_price],
       )
-      // Kembalikan stok fisik ke gudang default.
-      db.run(
-        `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
-         ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock + ?`,
-        [outletId, defaultWarehouseId(outletId), it.product_id, it.quantity, it.quantity],
-      )
+      // Kembalikan stok fisik ke gudang default. Paket bundling → kembalikan
+      // stok komponen; produk biasa → dirinya sendiri.
+      for (const t of stockTargets(it.product_id, it.quantity)) {
+        db.run(
+          `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock) VALUES (?, ?, ?, ?)
+           ON CONFLICT(outlet_id, warehouse_id, product_id) DO UPDATE SET stock = stock + ?`,
+          [outletId, defaultWarehouseId(outletId), t.productId, t.qty, t.qty],
+        )
+      }
     }
 
     db.run(`UPDATE transactions SET status = 'REFUNDED' WHERE id = ?`, [transactionId])

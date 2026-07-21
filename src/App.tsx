@@ -34,6 +34,7 @@ import RolesPage from './features/access/RolesPage'
 import RequirePerm from './features/access/RequirePerm'
 import ThemePage from './features/theme/ThemePage'
 import ProductsPage from './features/products/ProductsPage'
+import BundlesPage from './features/bundles/BundlesPage'
 import CategoriesPage from './features/products/CategoriesPage'
 import ContactsPage from './features/contacts/ContactsPage'
 import OutletsPage from './features/outlets/OutletsPage'
@@ -89,6 +90,7 @@ const router = createHashRouter([
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'reports', element: <LaporanPage /> },
       { path: 'products', element: <ProductsPage /> },
+      { path: 'bundles', element: <BundlesPage /> },
       { path: 'categories', element: <CategoriesPage /> },
       { path: 'contacts', element: <ContactsPage /> },
       { path: 'outlets', element: <OutletsPage /> },

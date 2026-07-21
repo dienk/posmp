@@ -94,6 +94,7 @@ const DATA_MASTER_GROUP: NavGroupDef = {
     { to: '/warehouses', label: 'Gudang', short: 'Gudang', icon: Warehouse },
     { to: '/master-tables', label: 'Master Meja', short: 'Meja', icon: Armchair },
     { to: '/products', label: 'Produk', short: 'Produk', icon: Package },
+    { to: '/bundles', label: 'Bundling', short: 'Bundle', icon: PackagePlus },
     { to: '/categories', label: 'Kategori Produk', short: 'Kategori', icon: Tags },
     { to: '/units', label: 'Satuan', short: 'Satuan', icon: Ruler },
     { to: '/taxes', label: 'Pajak', short: 'Pajak', icon: Percent },
