@@ -64,7 +64,7 @@ export function stockStats(outletId: number): StockStats {
     ),
     lowStock: n(
       query<Num>(
-        `SELECT COUNT(*) AS n FROM products p WHERE p.is_active = 1 AND
+        `SELECT COUNT(*) AS n FROM products p WHERE p.is_active = 1 AND COALESCE(p.is_bundle,0) = 0 AND
            COALESCE((SELECT SUM(stock) FROM outlet_stocks WHERE outlet_id = ? AND product_id = p.id),0) <= p.min_stock`,
         [outletId],
       ),

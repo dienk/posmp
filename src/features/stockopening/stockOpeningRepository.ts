@@ -17,7 +17,7 @@ export function listOpeningProducts(outletId: number, warehouseId: number): Open
             COALESCE((SELECT stock FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ? AND os.warehouse_id = ?), 0) AS system_stock
      FROM products p
-     WHERE p.is_active = 1
+     WHERE p.is_active = 1 AND p.is_bundle = 0
      ORDER BY p.name`,
     [outletId, warehouseId],
   )

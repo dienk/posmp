@@ -291,7 +291,7 @@ export const REPORTS: ReportDef[] = [
          FROM products p
          LEFT JOIN (SELECT product_id, SUM(stock) AS stock FROM outlet_stocks WHERE outlet_id = ? GROUP BY product_id) s
            ON s.product_id = p.id
-         WHERE p.is_active = 1 AND COALESCE(s.stock,0) <= p.min_stock
+         WHERE p.is_active = 1 AND COALESCE(p.is_bundle,0) = 0 AND COALESCE(s.stock,0) <= p.min_stock
          ORDER BY stock ASC`,
         [o],
       ),

@@ -20,7 +20,7 @@ export function listOpnameProducts(outletId: number, warehouseId: number): Opnam
   return query<OpnameProduct>(
     `SELECT ${SELECT_COLS}
      FROM products p
-     WHERE p.is_active = 1
+     WHERE p.is_active = 1 AND p.is_bundle = 0
      ORDER BY p.name`,
     [outletId, warehouseId],
   )
@@ -38,7 +38,7 @@ export function findOpnameProduct(
     query<OpnameProduct>(
       `SELECT ${SELECT_COLS}
        FROM products p
-       WHERE p.is_active = 1 AND (p.barcode = ? OR p.sku = ?)
+       WHERE p.is_active = 1 AND p.is_bundle = 0 AND (p.barcode = ? OR p.sku = ?)
        LIMIT 1`,
       [outletId, warehouseId, c, c],
     )[0] ?? null
