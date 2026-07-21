@@ -74,7 +74,10 @@ export default function StockCardPage() {
     return products.filter(
       (p) =>
         (!onlyLow || isLow(p)) &&
-        (!k || p.name.toLowerCase().includes(k) || (p.sku ?? '').toLowerCase().includes(k)),
+        (!k ||
+          p.name.toLowerCase().includes(k) ||
+          (p.sku ?? '').toLowerCase().includes(k) ||
+          (p.barcode ?? '').toLowerCase().includes(k)),
     )
   }, [products, search, onlyLow])
   const totals = useMemo(() => {
@@ -145,7 +148,7 @@ export default function StockCardPage() {
             placeholder={
               product
                 ? `${product.name}${product.sku ? ` · ${product.sku}` : ''}`
-                : 'Cari nama / SKU produk…'
+                : 'Cari nama / SKU / barcode…'
             }
             className="w-full rounded-lg border border-line/10 bg-panel py-2 pl-9 pr-3 text-sm text-ink outline-none placeholder:text-ink placeholder:opacity-100 focus:border-brand-strong focus:placeholder:opacity-50"
           />
