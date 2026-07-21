@@ -57,25 +57,32 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;')
 }
 
-/** Tampilan baris item: jumlah & satuan terpilih, harga per satuan, judul baris. */
+/** Tampilan baris item: jumlah & satuan terpilih, harga per satuan (KOTOR,
+ *  sebelum diskon item), judul baris, dan diskon item bila ada. */
 function itemDisplay(it: TxItem, c: ReceiptConfig) {
+  const gross = it.subtotal + (it.discount ?? 0) // harga baris sebelum diskon item
   const qty = it.unit_qty ?? it.quantity
   const label = it.unit ?? it.base_unit
-  const perUnit = it.unit_qty && it.unit_qty > 0 ? Math.round(it.subtotal / it.unit_qty) : it.unit_price
+  const perUnit = qty > 0 ? Math.round(gross / qty) : it.unit_price
   const head = c.showItemUnit && label ? `${qty} ${label} ${it.name}` : `${qty}x ${it.name}`
   const priceUnit = c.showItemUnit && label ? `${formatRupiah(perUnit)} / ${label}` : formatRupiah(perUnit)
-  return { head, priceUnit }
+  return { head, priceUnit, gross, discount: it.discount ?? 0 }
 }
 
 export function buildReceiptHtml(d: ReceiptData, c: ReceiptConfig): string {
   const line = (l: string, r: string) =>
     `<div style="display:flex;justify-content:space-between"><span>${escapeHtml(l)}</span><span>${escapeHtml(r)}</span></div>`
+  const itemDiscTotal = d.items.reduce((s, it) => s + (it.discount ?? 0), 0)
+  const grossSubtotal = d.subtotal_amount + itemDiscTotal
   const items = d.items
     .map((it) => {
-      const { head, priceUnit } = itemDisplay(it, c)
+      const { head, priceUnit, gross, discount } = itemDisplay(it, c)
       return (
-        line(head, formatRupiah(it.subtotal)) +
+        line(head, formatRupiah(gross)) +
         `<div style="color:#666;font-size:11px">@ ${priceUnit}</div>` +
+        (discount > 0
+          ? `<div style="color:#666;font-size:11px">↳ Diskon item -${escapeHtml(formatRupiah(discount))}</div>`
+          : '') +
         (c.showItemNote && it.notes
           ? `<div style="color:#666;font-size:11px">✎ ${escapeHtml(it.notes)}</div>`
           : '')
@@ -126,8 +133,9 @@ export function buildReceiptHtml(d: ReceiptData, c: ReceiptConfig): string {
     <hr>
     ${items}
     <hr>
-    ${line('Subtotal', formatRupiah(d.subtotal_amount))}
-    ${d.discount_amount > 0 ? line('Diskon', '-' + formatRupiah(d.discount_amount)) : ''}
+    ${line('Subtotal', formatRupiah(grossSubtotal))}
+    ${itemDiscTotal > 0 ? line('Diskon item', '-' + formatRupiah(itemDiscTotal)) : ''}
+    ${d.discount_amount > 0 ? line(itemDiscTotal > 0 ? 'Diskon transaksi' : 'Diskon', '-' + formatRupiah(d.discount_amount)) : ''}
     ${d.service_charge_amount > 0 ? line('Service Charge', formatRupiah(d.service_charge_amount)) : ''}
     ${d.tax_amount > 0 ? line('Pajak', formatRupiah(d.tax_amount)) : ''}
     <div class="b">${line('TOTAL', formatRupiah(d.total_amount))}</div>
@@ -144,6 +152,8 @@ export function buildReceiptHtml(d: ReceiptData, c: ReceiptConfig): string {
 /** Tampilan struk di layar (dipakai modal & preview desain). */
 export function ReceiptView({ data, config }: { data: ReceiptData; config: ReceiptConfig }) {
   const change = data.payments.reduce((s, p) => s + p.change_amount, 0)
+  const itemDiscTotal = data.items.reduce((s, it) => s + (it.discount ?? 0), 0)
+  const grossSubtotal = data.subtotal_amount + itemDiscTotal
   const alignCls = ALIGN_CLASS[config.align]
   const logo = config.logo ? (
     <div className={alignCls}>
@@ -172,11 +182,14 @@ export function ReceiptView({ data, config }: { data: ReceiptData; config: Recei
       {config.showMember && data.member_name && <Row l="Member" r={data.member_name} />}
       <Dashed />
       {data.items.map((it, i) => {
-        const { head, priceUnit } = itemDisplay(it, config)
+        const { head, priceUnit, gross, discount } = itemDisplay(it, config)
         return (
           <div key={i}>
-            <Row l={head} r={formatRupiah(it.subtotal)} />
+            <Row l={head} r={formatRupiah(gross)} />
             <p className="text-[11px] text-ink-soft">@ {priceUnit}</p>
+            {discount > 0 && (
+              <p className="text-[11px] text-ink-soft">↳ Diskon item -{formatRupiah(discount)}</p>
+            )}
             {config.showItemNote && it.notes && (
               <p className="text-[11px] text-ink-soft">✎ {it.notes}</p>
             )}
@@ -184,8 +197,11 @@ export function ReceiptView({ data, config }: { data: ReceiptData; config: Recei
         )
       })}
       <Dashed />
-      <Row l="Subtotal" r={formatRupiah(data.subtotal_amount)} />
-      {data.discount_amount > 0 && <Row l="Diskon" r={'-' + formatRupiah(data.discount_amount)} />}
+      <Row l="Subtotal" r={formatRupiah(grossSubtotal)} />
+      {itemDiscTotal > 0 && <Row l="Diskon item" r={'-' + formatRupiah(itemDiscTotal)} />}
+      {data.discount_amount > 0 && (
+        <Row l={itemDiscTotal > 0 ? 'Diskon transaksi' : 'Diskon'} r={'-' + formatRupiah(data.discount_amount)} />
+      )}
       {data.service_charge_amount > 0 && (
         <Row l="Service Charge" r={formatRupiah(data.service_charge_amount)} />
       )}

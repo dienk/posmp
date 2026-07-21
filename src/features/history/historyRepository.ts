@@ -30,6 +30,8 @@ export interface TxItem {
   unit_qty: number | null
   /** Satuan dasar produk (untuk menampilkan satuan pada baris satuan dasar). */
   base_unit: string | null
+  /** Diskon (Rp) baris ini; subtotal sudah bersih (harga kotor = subtotal + discount). */
+  discount: number
 }
 
 export function listTransactions(outletId: number, limit = 40): TxSummary[] {
@@ -112,7 +114,7 @@ export function transactionPayments(transactionId: number): TxPayment[] {
 export function transactionItems(transactionId: number): TxItem[] {
   return query<TxItem>(
     `SELECT d.product_id, p.name, d.quantity, d.unit_price, d.subtotal, d.notes,
-            d.unit, d.unit_qty, p.unit AS base_unit
+            d.unit, d.unit_qty, p.unit AS base_unit, COALESCE(d.discount, 0) AS discount
      FROM transaction_details d
      JOIN products p ON p.id = d.product_id
      WHERE d.transaction_id = ?

@@ -129,9 +129,9 @@ export default function ReceiptDesignPage() {
     points_earned: 143,
     status: 'COMPLETED',
     items: [
-      { product_id: 1, name: 'Nasi Goreng Spesial', quantity: 1, unit_price: 25000, subtotal: 25000, notes: 'Pedas, tanpa timun', unit: null, unit_qty: null, base_unit: 'porsi' },
-      { product_id: 2, name: 'Es Teh Manis', quantity: 2, unit_price: 5000, subtotal: 10000, notes: null, unit: null, unit_qty: null, base_unit: 'gelas' },
-      { product_id: 3, name: 'Air Mineral', quantity: 24, unit_price: 4167, subtotal: 100000, notes: null, unit: 'dus', unit_qty: 1, base_unit: 'botol' },
+      { product_id: 1, name: 'Nasi Goreng Spesial', quantity: 1, unit_price: 22000, subtotal: 22000, notes: 'Pedas, tanpa timun', unit: null, unit_qty: null, base_unit: 'porsi', discount: 3000 },
+      { product_id: 2, name: 'Es Teh Manis', quantity: 2, unit_price: 5000, subtotal: 10000, notes: null, unit: null, unit_qty: null, base_unit: 'gelas', discount: 0 },
+      { product_id: 3, name: 'Air Mineral', quantity: 24, unit_price: 4167, subtotal: 100000, notes: null, unit: 'dus', unit_qty: 1, base_unit: 'botol', discount: 0 },
     ],
     payments: [
       { payment_method: 'CASH', amount_paid: 143000, tendered_amount: 150000, change_amount: 7000, qris_reference_number: null },
