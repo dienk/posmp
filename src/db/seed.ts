@@ -108,6 +108,7 @@ export function seedDatabase(db: Database): void {
     ['Choco Lava', '🍰', 22000, 10000, 'porsi', 5, 25],
   ]
   const seq: Record<number, number> = {}
+  const pid: Record<string, number> = {} // nama produk -> id (untuk komponen bundling)
   let barcodeNo = 8991234000000
   for (const [name, emoji, price, cost, unit, categoryId, stock] of products) {
     const [prefix, c1, c2] = catMeta[categoryId]
@@ -122,11 +123,43 @@ export function seedDatabase(db: Database): void {
        VALUES (?, ?, ?, ?, ?, ?, ?, 10, 1, ?, ?)`,
       [categoryId, name, sku, String(barcodeNo), price, cost, unit, img, JSON.stringify([img])],
     )
+    const productId = db.exec('SELECT last_insert_rowid() AS id')[0].values[0][0] as number
+    pid[name] = productId
     db.run(
       `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock)
-       VALUES (1, 1, last_insert_rowid(), ?)`,
-      [stock],
+       VALUES (1, 1, ?, ?)`,
+      [productId, stock],
     )
+  }
+
+  // Paket bundling contoh: produk is_bundle=1 (tanpa stok sendiri) + komponennya.
+  // Stok saat dijual dipotong dari komponen (lihat bundlesRepository/CLAUDE.md).
+  const bundles: Array<{ name: string; price: number; comps: Array<[string, number]> }> = [
+    { name: 'Paket Hemat Ayam Geprek', price: 30000, comps: [['Ayam Geprek', 1], ['Es Teh Manis', 1]] },
+    { name: 'Paket Nasi Goreng Komplit', price: 31000, comps: [['Nasi Goreng Spesial', 1], ['Es Jeruk', 1]] },
+    { name: 'Paket Bakso Mantap', price: 27000, comps: [['Bakso Urat', 1], ['Es Teh Manis', 1]] },
+    { name: 'Paket Sarapan Nusantara', price: 26000, comps: [['Nasi Uduk', 1], ['Teh Tarik', 1]] },
+    { name: 'Paket Ngopi Santai', price: 33000, comps: [['Cappuccino', 1], ['Brownies', 1]] },
+    { name: 'Paket Ngemil Berdua', price: 55000, comps: [['Kentang Goreng', 1], ['Onion Ring', 1], ['Es Coklat', 2]] },
+  ]
+  let bundleSeq = 0
+  for (const b of bundles) {
+    bundleSeq += 1
+    barcodeNo += 1
+    db.run(
+      `INSERT INTO products (category_id, name, sku, barcode, price, cost_price, unit, min_stock, is_active, image_path, images, is_bundle)
+       VALUES (NULL, ?, ?, ?, ?, 0, 'paket', 0, 1, NULL, NULL, 1)`,
+      [b.name, `PKT-${String(bundleSeq).padStart(3, '0')}`, String(barcodeNo), b.price],
+    )
+    const bundleId = db.exec('SELECT last_insert_rowid() AS id')[0].values[0][0] as number
+    for (const [cname, qty] of b.comps) {
+      if (!pid[cname]) continue
+      db.run(
+        `INSERT INTO product_bundle_items (bundle_product_id, component_product_id, quantity)
+         VALUES (?, ?, ?)`,
+        [bundleId, pid[cname], qty],
+      )
+    }
   }
 
   // Layout meja contoh (grid 4 kolom)
