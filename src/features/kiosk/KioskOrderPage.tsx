@@ -80,7 +80,7 @@ export default function KioskOrderPage() {
         <p className="text-lg font-semibold text-ink">Total dibayar {formatRupiah(done.total)}</p>
         <button
           onClick={() => setDone(null)}
-          className="mt-8 rounded-2xl bg-ink px-8 py-3 text-lg font-bold text-white hover:brightness-110"
+          className="mt-8 rounded-2xl bg-ink px-8 py-3 text-lg font-bold text-panel hover:brightness-110"
         >
           Pesan Lagi
         </button>

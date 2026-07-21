@@ -231,7 +231,7 @@ export default function MembersPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-white shadow-lg">
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-ink px-5 py-3 text-sm font-medium text-panel shadow-lg">
           {toast}
         </div>
       )}
@@ -303,7 +303,7 @@ function MemberDetail({
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             onClick={onCard}
-            className="rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-white hover:brightness-110"
+            className="rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-panel hover:brightness-110"
           >
             🪪 Kartu ID
           </button>

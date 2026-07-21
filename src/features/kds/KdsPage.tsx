@@ -47,7 +47,7 @@ export default function KdsPage() {
 
   return (
     <div className="flex h-full flex-col bg-ink/5">
-      <header className="flex items-center justify-between bg-ink px-5 py-3 text-white">
+      <header className="flex items-center justify-between bg-ink px-5 py-3 text-panel">
         <h1 className="text-lg font-bold">Kitchen Display System</h1>
         <span className="flex items-center gap-2 text-sm text-white/80">
           <span className="h-2 w-2 animate-pulse rounded-full bg-status-empty" />

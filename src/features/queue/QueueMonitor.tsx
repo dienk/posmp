@@ -39,7 +39,7 @@ export default function QueueMonitor() {
   const ready = tickets.filter((t) => t.status === 'READY')
 
   return (
-    <div className="flex h-full flex-col bg-ink text-white">
+    <div className="flex h-full flex-col bg-ink text-panel">
       <header className="flex items-center justify-between px-10 py-6">
         <div className="flex items-center gap-4">
           <img

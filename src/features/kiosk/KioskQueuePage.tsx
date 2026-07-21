@@ -60,7 +60,7 @@ export default function KioskQueuePage() {
             <p className="text-lg text-ink">Silakan tunggu, nomor Anda akan dipanggil. 🙏</p>
             <button
               onClick={() => setIssued(null)}
-              className="mt-8 rounded-2xl bg-ink px-8 py-3 text-lg font-bold text-white hover:brightness-110"
+              className="mt-8 rounded-2xl bg-ink px-8 py-3 text-lg font-bold text-panel hover:brightness-110"
             >
               Selesai
             </button>
