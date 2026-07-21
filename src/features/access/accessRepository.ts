@@ -33,14 +33,16 @@ export const PERMISSIONS: { key: string; label: string }[] = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'reports', label: 'Laporan' },
   { key: 'kiosk', label: 'Kiosk (layar mandiri)' },
+  { key: 'settings', label: 'Kelola Setelan (Persona, Peran, Koneksi Database)' },
 ]
 
 const ALL_KEYS = PERMISSIONS.map((p) => p.key)
 
 // ── Migrasi izin ────────────────────────────────────────────────────────────
-// Kunci izin yang sudah ada SEBELUM penambahan 'dashboard' & 'kiosk'. Dipakai
-// untuk mengenali peran yang dulunya full-access agar tetap dapat izin baru
-// (mencegah menu Dashboard/Kiosk hilang untuk peran Pemilik/Manajer tersimpan).
+// Kunci izin yang sudah ada SEBELUM penambahan 'dashboard'/'kiosk'/'settings'.
+// Dipakai untuk mengenali peran yang dulunya full-access agar tetap dapat izin
+// baru (mencegah menu Dashboard/Kiosk & item Setelan sensitif hilang untuk peran
+// Pemilik/Manajer tersimpan).
 const LEGACY_FULL_KEYS = [
   'kasir',
   'datamaster',
@@ -57,7 +59,7 @@ const LEGACY_FULL_KEYS = [
   'marketplace',
   'reports',
 ]
-const ADDED_KEYS = ['dashboard', 'kiosk']
+const ADDED_KEYS = ['dashboard', 'kiosk', 'settings']
 
 /** Peran yang punya SEMUA kunci lama dianggap full-access → diberi kunci baru. */
 function migratePerms(perms: string[]): string[] {

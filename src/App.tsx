@@ -31,6 +31,7 @@ import SettingsPage from './features/settings/SettingsPage'
 import ReceiptDesignPage from './features/receipt/ReceiptDesignPage'
 import PersonaPage from './features/access/PersonaPage'
 import RolesPage from './features/access/RolesPage'
+import RequirePerm from './features/access/RequirePerm'
 import ThemePage from './features/theme/ThemePage'
 import ProductsPage from './features/products/ProductsPage'
 import CategoriesPage from './features/products/CategoriesPage'
@@ -97,12 +98,33 @@ const router = createHashRouter([
       { path: 'units', element: <UnitsPage /> },
       { path: 'taxes', element: <TaxesPage /> },
       { path: 'settings', element: <SettingsPage /> },
-      { path: 'personas', element: <PersonaPage /> },
-      { path: 'roles', element: <RolesPage /> },
+      {
+        path: 'personas',
+        element: (
+          <RequirePerm perm="settings">
+            <PersonaPage />
+          </RequirePerm>
+        ),
+      },
+      {
+        path: 'roles',
+        element: (
+          <RequirePerm perm="settings">
+            <RolesPage />
+          </RequirePerm>
+        ),
+      },
       { path: 'theme', element: <ThemePage /> },
       { path: 'receipt-design', element: <ReceiptDesignPage /> },
       { path: 'card-design', element: <CardDesignPage /> },
-      { path: 'database', element: <DatabaseConnectionPage /> },
+      {
+        path: 'database',
+        element: (
+          <RequirePerm perm="settings">
+            <DatabaseConnectionPage />
+          </RequirePerm>
+        ),
+      },
       { path: 'schedule', element: <OperatingSchedulePage /> },
       { path: 'kiosk-info', element: <KioskInfoPage /> },
       { path: 'kiosk-order', element: <KioskOrderPage /> },

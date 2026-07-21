@@ -161,12 +161,12 @@ const SETTINGS_GROUP: NavGroupDef = {
   children: [
     { to: '/settings', label: 'Pengaturan', short: 'Setelan', icon: SlidersHorizontal },
     { to: '/schedule', label: 'Jadwal Operasi', short: 'Jadwal', icon: Clock },
-    { to: '/personas', label: 'Persona', short: 'Persona', icon: SquareUser },
-    { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: KeyRound },
+    { to: '/personas', label: 'Persona', short: 'Persona', icon: SquareUser, perm: 'settings' },
+    { to: '/roles', label: 'Peran & Hak Akses', short: 'Akses', icon: KeyRound, perm: 'settings' },
     { to: '/theme', label: 'Tema', short: 'Tema', icon: Palette },
     { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: Printer },
     { to: '/card-design', label: 'Desain Kartu', short: 'Kartu', icon: IdCard },
-    { to: '/database', label: 'Koneksi Database', short: 'Database', icon: Database },
+    { to: '/database', label: 'Koneksi Database', short: 'Database', icon: Database, perm: 'settings' },
   ],
 }
 
