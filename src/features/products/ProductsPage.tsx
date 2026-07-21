@@ -17,6 +17,7 @@ import {
   type ProductInput,
 } from './productsRepository'
 import { listActiveUnitNames } from '../units/unitsRepository'
+import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
 import { fileToScaledDataUrl } from '../receipt/receiptConfig'
 
 const EMPTY: ProductInput = {
@@ -42,6 +43,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [units, setUnits] = useState<string[]>([])
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([])
+  const [warehouseId, setWarehouseId] = useState<number | null>(null) // null = semua gudang
   const [keyword, setKeyword] = useState('')
   const [editingId, setEditingId] = useState<number | 'new' | null>(null)
   const [form, setForm] = useState<ProductInput>(EMPTY)
@@ -49,11 +52,12 @@ export default function ProductsPage() {
   const [toast, setToast] = useState<string | null>(null)
 
   const reload = () => {
-    setProducts(listProducts(outletId))
+    setProducts(listProducts(outletId, warehouseId ?? undefined))
     setCategories(listCategories())
     setUnits(listActiveUnitNames())
+    setWarehouses(listWarehouses(outletId))
   }
-  useEffect(reload, [outletId])
+  useEffect(reload, [outletId, warehouseId])
 
   const showToast = (m: string) => {
     setToast(m)
@@ -175,6 +179,19 @@ export default function ProductsPage() {
           placeholder="Cari nama / SKU…"
           className="field-input w-56"
         />
+        <select
+          value={warehouseId ?? ''}
+          onChange={(e) => setWarehouseId(e.target.value ? Number(e.target.value) : null)}
+          className="field-select w-48"
+          title="Filter stok per gudang"
+        >
+          <option value="">🏬 Semua Gudang</option>
+          {warehouses.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.name}
+            </option>
+          ))}
+        </select>
         <Button size="sm" onClick={startNew} className="ml-auto">
           + Produk
         </Button>
@@ -191,7 +208,9 @@ export default function ProductsPage() {
                 <th className="px-4 py-3">Kategori</th>
                 <th className="px-4 py-3 text-right">Modal</th>
                 <th className="px-4 py-3 text-right">Harga</th>
-                <th className="px-4 py-3 text-right">Stok</th>
+                <th className="px-4 py-3 text-right">
+                  Stok{warehouseId ? ` · ${warehouses.find((w) => w.id === warehouseId)?.name ?? ''}` : ''}
+                </th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>

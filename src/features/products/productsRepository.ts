@@ -51,16 +51,25 @@ const PRODUCT_COLS = `p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.
 const STOCK_SUM = `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
             WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS stock`
 
-export function listProducts(outletId: number): Product[] {
+/**
+ * Daftar produk + stok pada outlet. Bila `warehouseId` diisi, kolom stok = stok
+ * gudang tsb saja; tanpa itu = total lintas gudang.
+ */
+export function listProducts(outletId: number, warehouseId?: number): Product[] {
+  const stockCol = warehouseId
+    ? `COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
+                 WHERE os.product_id = p.id AND os.outlet_id = ? AND os.warehouse_id = ?), 0) AS stock`
+    : STOCK_SUM
+  const params: number[] = warehouseId ? [outletId, warehouseId] : [outletId]
   return query<Product>(
     `SELECT ${PRODUCT_COLS},
             c.name AS category_name,
-            ${STOCK_SUM}
+            ${stockCol}
      FROM products p
      LEFT JOIN categories c ON c.id = p.category_id
      WHERE p.is_bundle = 0
      ORDER BY p.name`,
-    [outletId],
+    params,
   )
 }
 
