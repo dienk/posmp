@@ -177,6 +177,7 @@ CREATE TABLE IF NOT EXISTS transaction_details (
     unit TEXT,                          -- label satuan terpilih (mis. 'dus'); NULL = satuan dasar
     unit_qty REAL,                      -- jumlah dalam satuan terpilih (tampilan); NULL = pakai quantity
     notes TEXT,
+    discount REAL DEFAULT 0,            -- diskon (Rp) untuk baris ini (sudah termasuk dalam subtotal)
     cooking_status TEXT DEFAULT 'PENDING', -- 'PENDING','COOKING','COOKED','SERVED'
     FOREIGN KEY(transaction_id) REFERENCES transactions(id),
     FOREIGN KEY(product_id) REFERENCES products(id)

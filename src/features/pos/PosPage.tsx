@@ -62,16 +62,33 @@ export default function PosPage() {
   const mergeBillEnabled = isModuleEnabled(settings, 'module_merge_bill')
   const showVoucher = isModuleEnabled(settings, 'pos_show_voucher')
   const showPreorder = isModuleEnabled(settings, 'pos_show_preorder')
+  const showDiscount = isModuleEnabled(settings, 'pos_enable_discount')
   const [isPreorder, setIsPreorder] = useState(false)
   const [preorderDeadline, setPreorderDeadline] = useState('')
   const [dpAmount, setDpAmount] = useState(0)
   const [scanMode, setScanMode] = useState(false)
+  // Diskon transaksi manual (Rp atau %) — di luar voucher.
+  const [manualDiscMode, setManualDiscMode] = useState<'rp' | 'pct'>('rp')
+  const [manualDiscInput, setManualDiscInput] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
 
   const loyalty = useMemo(() => getLoyaltyConfig(settings), [settings])
 
+  // Diskon transaksi manual dalam Rupiah (dari input Rp atau % atas subtotal).
+  const manualDiscount = useMemo(() => {
+    if (!showDiscount) return 0
+    const v = Number(manualDiscInput) || 0
+    if (v <= 0) return 0
+    return manualDiscMode === 'pct'
+      ? Math.round((cart.subtotal * Math.min(v, 100)) / 100)
+      : Math.round(v)
+  }, [showDiscount, manualDiscInput, manualDiscMode, cart.subtotal])
+
+  // Diskon transaksi total = voucher + diskon manual, dibatasi subtotal.
+  const txDiscount = Math.min(discount + manualDiscount, cart.subtotal)
+
   // Total tagihan berjalan (untuk modal pembayaran).
-  const orderTaxable = cart.subtotal - Math.min(discount, cart.subtotal)
+  const orderTaxable = cart.subtotal - txDiscount
   const orderService = serviceEnabled ? Math.round(orderTaxable * serviceRate) : 0
   const orderTax = taxEnabled ? Math.round((orderTaxable + orderService) * taxRate) : 0
   const orderTotal = orderTaxable + orderService + orderTax
@@ -193,7 +210,7 @@ export default function PosPage() {
         serviceRate,
         serviceEnabled,
         status,
-        discountAmount: discount,
+        discountAmount: txDiscount,
         voucherId,
         memberId: member?.id,
         loyalty,
@@ -219,6 +236,8 @@ export default function PosPage() {
   const resetOrder = () => {
     cart.clear()
     clearVoucher()
+    setManualDiscInput('')
+    setManualDiscMode('rp')
     setMember(null)
     setMemberQuery('')
     setCustomerName('')
@@ -247,7 +266,7 @@ export default function PosPage() {
         serviceRate,
         serviceEnabled,
         status: 'PREPARING',
-        discountAmount: discount,
+        discountAmount: txDiscount,
         voucherId,
         memberId: member?.id,
         sendToKitchen: false,
@@ -432,6 +451,13 @@ export default function PosPage() {
           saving={saving}
           showVoucher={showVoucher}
           showPreorder={showPreorder}
+          showDiscount={showDiscount}
+          manualDiscMode={manualDiscMode}
+          manualDiscInput={manualDiscInput}
+          manualDiscount={manualDiscount}
+          onManualDiscModeChange={setManualDiscMode}
+          onManualDiscInputChange={setManualDiscInput}
+          onItemDiscountChange={cart.setItemDiscount}
           voucherCode={voucherCode}
           discount={discount}
           voucherMessage={voucherMessage}

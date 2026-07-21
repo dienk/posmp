@@ -120,6 +120,15 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
   sedapat mungkin
   memanfaatkan kolom yang ada (mis. `parent_transaction_id`, `is_preorder`,
   `transaction_payments.voucher_id`) alih-alih menambah tabel.
+- **Diskon (item & transaksi).** Diaktifkan via toggle `pos_enable_discount`
+  (Setelan › Fitur Kasir). **Diskon item** = `CartItem.discount` (Rp) → dilipat ke
+  `lineTotal` (`useCart`/`saveOrder`) sehingga masuk ke subtotal & disimpan di
+  kolom `transaction_details.discount`; `transactions.subtotal_amount` = subtotal
+  **bersih** setelah diskon item. **Diskon transaksi** (Rp/%) = voucher + diskon
+  manual, disimpan di `transactions.discount_amount` (dipotong sebelum service &
+  pajak). Kartu kasir menampilkan subtotal kotor + rincian (diskon item / diskon
+  transaksi); struk menampilkan subtotal bersih + baris Diskon. Kedua tempat
+  memakai rumus sama (lihat `CartPanel` recompute vs `saveOrder`).
 - **Bundling (paket produk).** Paket = produk `is_bundle=1` **tanpa baris stok
   sendiri**; komponennya di `product_bundle_items` (bundle→komponen×qty). Paket
   dijual seperti produk biasa (1 baris `transaction_details`), tapi stok yang

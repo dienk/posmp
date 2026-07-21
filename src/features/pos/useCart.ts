@@ -5,6 +5,10 @@ import type { UnitOption } from '../products/productsRepository'
 /** Harga efektif per 1 satuan terpilih (fallback ke harga dasar produk). */
 export const itemUnitPrice = (it: CartItem): number => it.unitPrice ?? it.product.price
 
+/** Total 1 baris = (harga satuan × qty) − diskon item, minimal 0. */
+export const lineTotal = (it: CartItem): number =>
+  Math.max(0, itemUnitPrice(it) * it.quantity - (it.discount ?? 0))
+
 /** State keranjang dengan penggabungan item otomatis (In-Cart Item Merging). */
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([])
@@ -53,6 +57,17 @@ export function useCart() {
     )
   }, [])
 
+  /** Diskon item (Rp) untuk 1 baris; 0/negatif = tanpa diskon. */
+  const setItemDiscount = useCallback((productId: number, discount: number) => {
+    setItems((prev) =>
+      prev.map((it) =>
+        it.product.id === productId
+          ? { ...it, discount: discount > 0 ? discount : undefined }
+          : it,
+      ),
+    )
+  }, [])
+
   const removeProduct = useCallback((productId: number) => {
     setItems((prev) => prev.filter((it) => it.product.id !== productId))
   }, [])
@@ -62,10 +77,19 @@ export function useCart() {
   /** Ganti seluruh isi keranjang (mis. saat membuka draft tersimpan). */
   const replace = useCallback((next: CartItem[]) => setItems(next), [])
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, it) => sum + itemUnitPrice(it) * it.quantity, 0),
-    [items],
-  )
+  // Subtotal = jumlah total baris (sudah dikurangi diskon per item).
+  const subtotal = useMemo(() => items.reduce((sum, it) => sum + lineTotal(it), 0), [items])
 
-  return { items, addProduct, setQuantity, setUnit, setNotes, removeProduct, clear, replace, subtotal }
+  return {
+    items,
+    addProduct,
+    setQuantity,
+    setUnit,
+    setNotes,
+    setItemDiscount,
+    removeProduct,
+    clear,
+    replace,
+    subtotal,
+  }
 }

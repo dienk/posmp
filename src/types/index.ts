@@ -78,4 +78,6 @@ export interface CartItem {
   unitFactor?: number
   /** Harga jual per 1 satuan terpilih (dasar = product.price). */
   unitPrice?: number
+  /** Diskon item (Rp) untuk baris ini; kosong = tanpa diskon. */
+  discount?: number
 }

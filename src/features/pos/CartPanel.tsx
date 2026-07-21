@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { formatRupiah } from '../../lib/format'
 import type { CartItem, FacilityType } from '../../types'
 import { buildUnitOptions } from '../products/productsRepository'
-import { itemUnitPrice } from './useCart'
+import { itemUnitPrice, lineTotal } from './useCart'
 
 const FACILITIES: { value: FacilityType; label: string }[] = [
   { value: 'DINE_IN', label: 'Dine In' },
@@ -33,6 +33,13 @@ interface Props {
   showPreorder: boolean
   voucherCode: string
   discount: number
+  showDiscount: boolean
+  manualDiscMode: 'rp' | 'pct'
+  manualDiscInput: string
+  manualDiscount: number
+  onManualDiscModeChange: (m: 'rp' | 'pct') => void
+  onManualDiscInputChange: (v: string) => void
+  onItemDiscountChange: (productId: number, discount: number) => void
   voucherMessage: { ok: boolean; text: string } | null
   member: { name: string; points: number } | null
   memberQuery: string
@@ -63,8 +70,12 @@ interface Props {
 }
 
 export default function CartPanel(props: Props) {
-  const subtotal = props.items.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
-  const discount = props.showVoucher ? Math.min(props.discount, subtotal) : 0
+  const grossSubtotal = props.items.reduce((s, it) => s + itemUnitPrice(it) * it.quantity, 0)
+  const subtotal = props.items.reduce((s, it) => s + lineTotal(it), 0) // sudah − diskon item
+  const itemDiscApplied = grossSubtotal - subtotal
+  const voucherDisc = props.showVoucher ? Math.min(props.discount, subtotal) : 0
+  const manualDisc = props.showDiscount ? props.manualDiscount : 0
+  const discount = Math.min(voucherDisc + manualDisc, subtotal) // diskon transaksi (voucher+manual)
   const service = props.serviceEnabled ? Math.round((subtotal - discount) * props.serviceRate) : 0
   const tax = props.taxEnabled ? Math.round((subtotal - discount + service) * props.taxRate) : 0
   const total = subtotal - discount + service + tax
@@ -74,6 +85,7 @@ export default function CartPanel(props: Props) {
   // Kontrol tampil/sembunyi lokal.
   const [showTxNote, setShowTxNote] = useState(false)
   const [noteShownIds, setNoteShownIds] = useState<Set<number>>(new Set())
+  const [discShownIds, setDiscShownIds] = useState<Set<number>>(new Set())
   const [pickerOpen, setPickerOpen] = useState(false)
   const [actionsOpen, setActionsOpen] = useState(false)
   // Buffer teks kuantitas per item agar bisa diketik (termasuk sementara kosong) tanpa langsung menghapus item.
@@ -82,6 +94,13 @@ export default function CartPanel(props: Props) {
   const showItemNote = (id: number) => noteShownIds.has(id)
   const toggleItemNote = (id: number) =>
     setNoteShownIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  const toggleItemDisc = (id: number) =>
+    setDiscShownIds((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
       else next.add(id)
@@ -326,10 +345,52 @@ export default function CartPanel(props: Props) {
                         <span className="ml-1 text-xs text-ink-soft">{selectedUnit}</span>
                       )}
                     </div>
-                    <span className="text-sm font-bold text-ink">
-                      {formatRupiah(itemUnitPrice(it) * it.quantity)}
+                    <span className="text-right text-sm font-bold text-ink">
+                      {formatRupiah(lineTotal(it))}
+                      {(it.discount ?? 0) > 0 && (
+                        <span className="ml-1 text-[11px] font-normal text-ink-soft line-through">
+                          {formatRupiah(itemUnitPrice(it) * it.quantity)}
+                        </span>
+                      )}
                     </span>
                   </div>
+
+                  {/* Diskon item (opsional, diaktifkan di Pengaturan) */}
+                  {props.showDiscount &&
+                    (discShownIds.has(it.product.id) || (it.discount ?? 0) > 0 ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-xs font-semibold text-status-occupied">Diskon Rp</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={it.discount ?? ''}
+                          onChange={(e) =>
+                            props.onItemDiscountChange(it.product.id, Number(e.target.value) || 0)
+                          }
+                          placeholder="0"
+                          className="w-28 rounded-lg border border-line/15 bg-background/50 px-2.5 py-1.5
+                                     text-xs outline-none focus:border-brand-strong focus:bg-panel"
+                        />
+                        {(it.discount ?? 0) > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => props.onItemDiscountChange(it.product.id, 0)}
+                            className="text-xs font-semibold text-ink-soft hover:text-status-occupied"
+                          >
+                            hapus
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => toggleItemDisc(it.product.id)}
+                        className="mt-1.5 mr-3 text-xs font-semibold text-ink-soft hover:text-ink"
+                      >
+                        ＋ Diskon item
+                      </button>
+                    ))}
+
                   {noteVisible ? (
                     <input
                       autoFocus={showItemNote(it.product.id) && !(it.notes ?? '').length}
@@ -422,6 +483,40 @@ export default function CartPanel(props: Props) {
 
       {/* Ringkasan & aksi */}
       <div className="p-4">
+        {/* Diskon transaksi manual (opsional, diaktifkan di Pengaturan) */}
+        {props.showDiscount && (
+          <div className="mb-2 flex items-center gap-2 rounded-lg bg-background/60 px-2.5 py-1.5">
+            <span className="text-xs font-semibold text-ink-soft">Diskon Transaksi</span>
+            <div className="ml-auto flex items-center gap-1">
+              <div className="flex overflow-hidden rounded-md border border-line/15 text-xs font-semibold">
+                {(['rp', 'pct'] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => props.onManualDiscModeChange(m)}
+                    className={
+                      'px-2 py-1 transition ' +
+                      (props.manualDiscMode === m
+                        ? 'bg-brand-strong text-white'
+                        : 'text-ink-soft hover:bg-background')
+                    }
+                  >
+                    {m === 'rp' ? 'Rp' : '%'}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="number"
+                min={0}
+                value={props.manualDiscInput}
+                onChange={(e) => props.onManualDiscInputChange(e.target.value)}
+                placeholder="0"
+                className="w-20 rounded-md border border-line/15 bg-panel px-2 py-1 text-right text-xs
+                           outline-none focus:border-brand-strong"
+              />
+            </div>
+          </div>
+        )}
         <dl className="space-y-1 text-sm">
           <div className="flex justify-between text-ink-soft">
             <dt>Total Item</dt>
@@ -429,11 +524,17 @@ export default function CartPanel(props: Props) {
           </div>
           <div className="flex justify-between text-ink-soft">
             <dt>Subtotal</dt>
-            <dd>{formatRupiah(subtotal)}</dd>
+            <dd>{formatRupiah(grossSubtotal)}</dd>
           </div>
+          {itemDiscApplied > 0 && (
+            <div className="flex justify-between text-status-empty">
+              <dt>Diskon item</dt>
+              <dd>−{formatRupiah(itemDiscApplied)}</dd>
+            </div>
+          )}
           {discount > 0 && (
             <div className="flex justify-between text-status-empty">
-              <dt>Diskon</dt>
+              <dt>Diskon transaksi</dt>
               <dd>−{formatRupiah(discount)}</dd>
             </div>
           )}

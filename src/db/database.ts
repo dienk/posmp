@@ -245,6 +245,7 @@ function migrateSchema(db: Database): boolean {
   for (const [name, def] of [
     ['unit', 'TEXT'],
     ['unit_qty', 'REAL'],
+    ['discount', 'REAL DEFAULT 0'],
   ] as [string, string][]) {
     if (!tdCols.has(name)) {
       db.run(`ALTER TABLE transaction_details ADD COLUMN ${name} ${def}`)

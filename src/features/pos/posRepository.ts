@@ -119,8 +119,9 @@ export interface SaveOrderResult {
  */
 export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult> {
   const db = getDb()
-  // Harga efektif per satuan terpilih (fallback ke harga dasar produk).
-  const lineTotal = (it: CartItem) => (it.unitPrice ?? it.product.price) * it.quantity
+  // Total baris = (harga efektif × qty) − diskon item (minimal 0).
+  const lineTotal = (it: CartItem) =>
+    Math.max(0, (it.unitPrice ?? it.product.price) * it.quantity - (it.discount ?? 0))
   const subtotal = input.items.reduce((sum, it) => sum + lineTotal(it), 0)
   const discount = Math.min(input.discountAmount ?? 0, subtotal)
   const taxable = subtotal - discount
@@ -208,8 +209,8 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
       const basePrice = baseQty ? line / baseQty : it.unitPrice ?? it.product.price
       db.run(
         `INSERT INTO transaction_details
-           (transaction_id, product_id, quantity, unit_price, subtotal, unit, unit_qty, notes, cooking_status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           (transaction_id, product_id, quantity, unit_price, subtotal, unit, unit_qty, notes, discount, cooking_status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           transactionId,
           it.product.id,
@@ -219,6 +220,7 @@ export async function saveOrder(input: SaveOrderInput): Promise<SaveOrderResult>
           it.unit ?? null,
           it.unit ? it.quantity : null,
           it.notes ?? null,
+          it.discount ?? 0,
           initialCookStatus,
         ],
       )
@@ -356,9 +358,11 @@ export function getDraftForEdit(id: number, outletId: number): DraftDetail | nul
       unit_qty: number | null
       line_subtotal: number
       line_notes: string | null
+      line_discount: number | null
     }
   >(
     `SELECT d.quantity, d.unit AS unit_sel, d.unit_qty, d.subtotal AS line_subtotal, d.notes AS line_notes,
+            COALESCE(d.discount, 0) AS line_discount,
             p.id, p.category_id, p.name, p.sku, p.barcode, p.price, p.cost_price,
             p.unit, p.min_stock, p.description, p.is_active, p.image_path, p.unit_conversions,
             c.name AS category_name,
@@ -373,8 +377,10 @@ export function getDraftForEdit(id: number, outletId: number): DraftDetail | nul
   )
 
   const items: CartItem[] = rows.map((r) => {
-    const { quantity, unit_sel, unit_qty, line_subtotal, line_notes, ...product } = r
-    // Bila item disimpan dalam satuan turunan, pulihkan tampilan satuan terpilih.
+    const { quantity, unit_sel, unit_qty, line_subtotal, line_notes, line_discount, ...product } = r
+    const disc = line_discount && line_discount > 0 ? line_discount : undefined
+    // Bila item disimpan dalam satuan turunan, diskon sudah terserap ke unitPrice
+    // (subtotal disimpan bersih), jadi tak dipulihkan terpisah agar tak dobel.
     if (unit_sel && unit_qty && unit_qty > 0) {
       return {
         product: product as Product,
@@ -385,7 +391,8 @@ export function getDraftForEdit(id: number, outletId: number): DraftDetail | nul
         unitPrice: line_subtotal / unit_qty,
       }
     }
-    return { product: product as Product, quantity, notes: line_notes ?? undefined }
+    // Satuan dasar memakai harga produk, jadi diskon dipulihkan eksplisit.
+    return { product: product as Product, quantity, notes: line_notes ?? undefined, discount: disc }
   })
 
   return {

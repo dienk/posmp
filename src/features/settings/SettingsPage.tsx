@@ -44,6 +44,11 @@ const POS_FEATURES: { key: string; label: string; desc: string }[] = [
     label: 'Pre-Order (pesan di muka)',
     desc: 'Tampilkan opsi pre-order & uang muka di layar kasir',
   },
+  {
+    key: 'pos_enable_discount',
+    label: 'Diskon Manual',
+    desc: 'Aktifkan kontrol diskon per item & diskon transaksi (Rp/%) di layar kasir',
+  },
 ]
 
 const ALL_TOGGLES = [...MODULES, ...POS_FEATURES]
