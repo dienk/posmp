@@ -88,6 +88,27 @@
     transform: scale(0.97);
   }
 
+  /* Seragamkan seluruh textbox & combobox ke tema (ui-ux-pro-max): latar
+     permukaan, warna teks, placeholder, & daftar opsi mengikuti token tema di
+     semua tema (termasuk mode gelap). Hanya properti warna — padding/lebar/ikon
+     per-elemen tetap dari kelasnya masing-masing. */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not(
+      [type='color']
+    ):not([type='submit']):not([type='button']),
+  textarea,
+  select {
+    background-color: rgb(var(--c-panel));
+    color: rgb(var(--c-ink));
+  }
+  select option {
+    background-color: rgb(var(--c-panel));
+    color: rgb(var(--c-ink));
+  }
+  ::placeholder {
+    color: rgb(var(--c-ink-soft));
+    opacity: 1;
+  }
+
   /* Hormati preferensi "reduce motion": pangkas animasi & transisi. */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -150,5 +171,10 @@
   .field-input {
     @apply w-full rounded-lg border border-line/10 bg-panel px-3 py-2 text-sm text-ink outline-none
       transition placeholder:text-ink-soft focus:border-brand-strong;
+  }
+  /* Combobox/select terstandar (senada field-input). */
+  .field-select {
+    @apply w-full cursor-pointer rounded-lg border border-line/10 bg-panel px-3 py-2 text-sm text-ink
+      outline-none transition focus:border-brand-strong;
   }
 }
