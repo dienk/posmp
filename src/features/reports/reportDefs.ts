@@ -95,6 +95,43 @@ export const REPORTS: ReportDef[] = [
       ),
   },
   {
+    key: 'sales_items_real',
+    label: 'Item Terjual (Real)',
+    group: 'Penjualan',
+    desc: 'Item terjual dengan paket bundling dipecah ke komponen aslinya (qty real yang keluar).',
+    dateField: 'transaction_date',
+    columns: [
+      { key: 'transaction_date', label: 'Tanggal', type: 'date' },
+      { key: 'invoice_number', label: 'Invoice' },
+      { key: 'name', label: 'Produk (Real)' },
+      { key: 'source_bundle', label: 'Asal Paket' },
+      { key: 'quantity', label: 'Qty Real', type: 'number' },
+      { key: 'unit', label: 'Satuan' },
+    ],
+    // Baris produk biasa apa adanya + baris paket dipecah jadi komponennya
+    // (qty = qty paket × qty komponen per paket). Produk paket sendiri tak muncul.
+    fetch: (o) =>
+      q(
+        `SELECT t.transaction_date, t.invoice_number, p.name, '—' AS source_bundle,
+                d.quantity AS quantity, p.unit
+         FROM transaction_details d
+         JOIN transactions t ON t.id = d.transaction_id
+         JOIN products p ON p.id = d.product_id
+         WHERE t.outlet_id = ? AND t.status = 'COMPLETED' AND COALESCE(p.is_bundle,0) = 0
+         UNION ALL
+         SELECT t.transaction_date, t.invoice_number, cp.name, bp.name AS source_bundle,
+                d.quantity * bi.quantity AS quantity, cp.unit
+         FROM transaction_details d
+         JOIN transactions t ON t.id = d.transaction_id
+         JOIN products bp ON bp.id = d.product_id AND bp.is_bundle = 1
+         JOIN product_bundle_items bi ON bi.bundle_product_id = d.product_id
+         JOIN products cp ON cp.id = bi.component_product_id
+         WHERE t.outlet_id = ? AND t.status = 'COMPLETED'
+         ORDER BY transaction_date DESC, invoice_number, name`,
+        [o, o],
+      ),
+  },
+  {
     key: 'top_products',
     label: 'Produk Terlaris',
     group: 'Penjualan',
@@ -113,6 +150,42 @@ export const REPORTS: ReportDef[] = [
          WHERE t.outlet_id = ? AND t.status = 'COMPLETED'
          GROUP BY p.id ORDER BY qty DESC`,
         [o],
+      ),
+  },
+  {
+    key: 'top_products_real',
+    label: 'Produk Terjual — Real (Rekap)',
+    group: 'Penjualan',
+    desc: 'Total kuantitas real per item; paket bundling dipecah ke komponennya. (Seluruh waktu.)',
+    columns: [
+      { key: 'name', label: 'Produk' },
+      { key: 'qty_direct', label: 'Terjual Langsung', type: 'number' },
+      { key: 'qty_bundle', label: 'Dari Paket', type: 'number' },
+      { key: 'qty_real', label: 'Total Real', type: 'number' },
+    ],
+    fetch: (o) =>
+      q(
+        `SELECT p.name,
+                SUM(CASE WHEN x.src = 'direct' THEN x.qty ELSE 0 END) AS qty_direct,
+                SUM(CASE WHEN x.src = 'bundle' THEN x.qty ELSE 0 END) AS qty_bundle,
+                SUM(x.qty) AS qty_real
+         FROM (
+           SELECT d.product_id AS pid, d.quantity AS qty, 'direct' AS src
+           FROM transaction_details d
+           JOIN transactions t ON t.id = d.transaction_id
+           JOIN products pr ON pr.id = d.product_id
+           WHERE t.outlet_id = ? AND t.status = 'COMPLETED' AND COALESCE(pr.is_bundle,0) = 0
+           UNION ALL
+           SELECT bi.component_product_id AS pid, d.quantity * bi.quantity AS qty, 'bundle' AS src
+           FROM transaction_details d
+           JOIN transactions t ON t.id = d.transaction_id
+           JOIN products bp ON bp.id = d.product_id AND bp.is_bundle = 1
+           JOIN product_bundle_items bi ON bi.bundle_product_id = d.product_id
+           WHERE t.outlet_id = ? AND t.status = 'COMPLETED'
+         ) x
+         JOIN products p ON p.id = x.pid
+         GROUP BY p.id ORDER BY qty_real DESC`,
+        [o, o],
       ),
   },
   {
