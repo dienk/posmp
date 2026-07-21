@@ -34,6 +34,7 @@ export default function StockCardPage() {
   const [warehouseId, setWarehouseId] = useState<number>(0) // 0 = semua gudang
   const [scanCode, setScanCode] = useState('')
   const [search, setSearch] = useState('') // cari produk via nama/SKU
+  const [onlyLow, setOnlyLow] = useState(false) // hanya produk stok ≤ minimum
   const [open, setOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
@@ -66,13 +67,16 @@ export default function StockCardPage() {
     [productId, outletId, warehouseId, tick],
   )
   const product = useMemo(() => products.find((p) => p.id === productId) ?? null, [products, productId])
+  const isLow = (p: StockCardProduct) => p.system_stock <= p.min_stock
+  const lowCount = useMemo(() => products.filter(isLow).length, [products])
   const results = useMemo(() => {
     const k = search.trim().toLowerCase()
-    if (!k) return products
     return products.filter(
-      (p) => p.name.toLowerCase().includes(k) || (p.sku ?? '').toLowerCase().includes(k),
+      (p) =>
+        (!onlyLow || isLow(p)) &&
+        (!k || p.name.toLowerCase().includes(k) || (p.sku ?? '').toLowerCase().includes(k)),
     )
-  }, [products, search])
+  }, [products, search, onlyLow])
   const totals = useMemo(() => {
     if (!card) return { in: 0, out: 0 }
     return {
@@ -109,6 +113,22 @@ export default function StockCardPage() {
             </option>
           ))}
         </select>
+        {/* Filter: hanya produk dengan stok ≤ minimum (stok menipis) */}
+        <button
+          onClick={() => {
+            setOnlyLow((v) => !v)
+            setOpen(true)
+          }}
+          title="Tampilkan hanya produk dengan stok ≤ stok minimum"
+          className={
+            'rounded-lg px-3 py-2 text-sm font-semibold transition ' +
+            (onlyLow
+              ? 'bg-status-occupied text-white'
+              : 'border border-line/10 text-ink hover:bg-background')
+          }
+        >
+          ⚠️ Stok Menipis{lowCount > 0 ? ` · ${lowCount}` : ''}
+        </button>
         {/* Cari produk via nama atau SKU (combobox) */}
         <div className="relative min-w-64">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
@@ -148,9 +168,20 @@ export default function StockCardPage() {
                       (p.id === productId ? 'bg-brand-soft' : '')
                     }
                   >
-                    <span className="truncate font-medium text-ink">{p.name}</span>
+                    <span className="truncate font-medium text-ink">
+                      {p.name}
+                      {isLow(p) && (
+                        <span className="ml-2 rounded-full bg-status-occupied/15 px-1.5 py-0.5 text-[10px] font-semibold text-status-occupied">
+                          ≤ min
+                        </span>
+                      )}
+                    </span>
                     <span className="shrink-0 text-xs text-ink-soft">
-                      {p.sku ?? '—'} · stok {p.system_stock}
+                      {p.sku ?? '—'} · stok{' '}
+                      <b className={isLow(p) ? 'text-status-occupied' : 'text-ink'}>
+                        {p.system_stock}
+                      </b>
+                      {p.min_stock > 0 ? ` / min ${p.min_stock}` : ''}
                     </span>
                   </button>
                 </li>

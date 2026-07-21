@@ -6,13 +6,14 @@ export interface StockCardProduct {
   name: string
   sku: string | null
   unit: string | null
+  min_stock: number
   system_stock: number
 }
 
-/** Produk aktif + stok total (lintas gudang), untuk pemilih kartu stock. */
+/** Produk aktif + stok total (lintas gudang) + stok minimum, untuk pemilih kartu stock. */
 export function listStockCardProducts(outletId: number): StockCardProduct[] {
   return query<StockCardProduct>(
-    `SELECT p.id, p.name, p.sku, p.unit,
+    `SELECT p.id, p.name, p.sku, p.unit, COALESCE(p.min_stock, 0) AS min_stock,
             COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS system_stock
      FROM products p
