@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import {
@@ -207,13 +208,13 @@ export default function StockOpeningPage() {
         <span className="text-sm text-ink-soft">
           {countedIds.length} produk diisi · Saldo awal menyetel stok ke nilai ini (baseline).
         </span>
-        <button
+        <Button
           onClick={save}
           disabled={saving || countedIds.length === 0}
-          className="ml-auto rounded-xl bg-status-occupied px-6 py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-40"
+          className="ml-auto"
         >
           {saving ? 'Menyimpan…' : 'Simpan Saldo Awal'}
-        </button>
+        </Button>
       </div>
 
       {toast && (

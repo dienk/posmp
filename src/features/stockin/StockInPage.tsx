@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -271,12 +272,9 @@ export default function StockInPage() {
                 {editingEntryId ? 'Edit Penerimaan Barang' : 'Penerimaan Barang'}
               </h2>
               {editingEntryId && (
-                <button
-                  onClick={resetForm}
-                  className="rounded-lg border border-line/10 px-3 py-1 text-xs font-semibold text-ink hover:bg-background"
-                >
+                <Button variant="ghost" size="sm" onClick={resetForm}>
                   Batal Edit
-                </button>
+                </Button>
               )}
             </div>
             <div className="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -323,7 +321,7 @@ export default function StockInPage() {
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-soft">Catatan</span>
                 <input
-                  className={inputCls}
+                  className="field-input"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="mis. pembelian mingguan"
@@ -416,26 +414,23 @@ export default function StockInPage() {
               })}
             </div>
 
-            <button
+            <Button
+              size="sm"
               onClick={addLine}
               disabled={availableProducts.length === 0}
-              className="mt-3 rounded-lg border border-dashed border-brand-strong px-3 py-2 text-sm font-semibold text-ink hover:bg-brand-soft disabled:opacity-40"
+              className="mt-3"
             >
               + Tambah Item
-            </button>
+            </Button>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line/5 pt-3">
               <span className="text-sm text-ink-soft">
                 {totalQty} (satuan dasar) · Total modal:{' '}
                 <span className="font-bold text-ink">{formatRupiah(totalCost)}</span>
               </span>
-              <button
-                onClick={handleSubmit}
-                disabled={lines.length === 0}
-                className="rounded-xl bg-status-occupied px-5 py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-40"
-              >
+              <Button onClick={handleSubmit} disabled={lines.length === 0}>
                 {editingEntryId ? 'Perbarui Penerimaan' : 'Simpan Penerimaan'}
-              </button>
+              </Button>
             </div>
           </section>
         )}
@@ -448,12 +443,9 @@ export default function StockInPage() {
                 <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
                   Supplier ({allSuppliers.length})
                 </h2>
-                <button
-                  onClick={startNewSup}
-                  className="rounded-lg bg-status-occupied px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95"
-                >
+                <Button size="sm" onClick={startNewSup}>
                   + Supplier
-                </button>
+                </Button>
               </div>
               <table className="w-full text-sm">
                 <thead>
@@ -484,18 +476,12 @@ export default function StockInPage() {
                       </td>
                       <td className="px-4 py-2.5 text-right text-ink-soft">{s.entry_count}×</td>
                       <td className="px-4 py-2.5 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => startEditSup(s)}
-                          className="rounded-lg px-2 py-1 text-xs font-semibold text-ink hover:bg-brand-soft"
-                        >
+                        <Button variant="quiet" size="sm" onClick={() => startEditSup(s)}>
                           Edit
-                        </button>
-                        <button
-                          onClick={() => removeSup(s)}
-                          className="rounded-lg px-2 py-1 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                        >
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => removeSup(s)}>
                           Hapus
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -519,7 +505,7 @@ export default function StockInPage() {
                   <div className="space-y-3">
                     <Field label="Nama supplier">
                       <input
-                        className={inputCls}
+                        className="field-input"
                         value={supForm.name}
                         onChange={(e) => setSupForm((f) => ({ ...f, name: e.target.value }))}
                         placeholder="mis. CV Sumber Rejeki"
@@ -527,7 +513,7 @@ export default function StockInPage() {
                     </Field>
                     <Field label="Nama kontak">
                       <input
-                        className={inputCls}
+                        className="field-input"
                         value={supForm.contactName}
                         onChange={(e) => setSupForm((f) => ({ ...f, contactName: e.target.value }))}
                         placeholder="mis. Pak Budi"
@@ -535,7 +521,7 @@ export default function StockInPage() {
                     </Field>
                     <Field label="Telepon">
                       <input
-                        className={inputCls}
+                        className="field-input"
                         value={supForm.phone}
                         onChange={(e) => setSupForm((f) => ({ ...f, phone: e.target.value }))}
                         placeholder="mis. 0812xxxx"
@@ -559,18 +545,12 @@ export default function StockInPage() {
                       Supplier aktif
                     </label>
                     <div className="flex gap-2 pt-1">
-                      <button
-                        onClick={saveSup}
-                        className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-                      >
+                      <Button onClick={saveSup} className="flex-1">
                         Simpan
-                      </button>
-                      <button
-                        onClick={() => setSupMode(null)}
-                        className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-                      >
+                      </Button>
+                      <Button variant="ghost" onClick={() => setSupMode(null)}>
                         Batal
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </>
@@ -665,18 +645,20 @@ export default function StockInPage() {
                     </div>
                   )}
                   <div className="mt-4 flex gap-2">
-                    <button
+                    <Button
+                      variant="secondary"
                       onClick={() => startEditEntry(detail)}
-                      className="flex-1 rounded-xl border border-brand-strong bg-brand py-2.5 text-sm font-semibold text-ink hover:bg-brand-strong"
+                      className="flex-1"
                     >
                       Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="danger-outline"
                       onClick={() => handleDeleteEntry(detail)}
-                      className="flex-1 rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
+                      className="flex-1"
                     >
                       Hapus
-                    </button>
+                    </Button>
                   </div>
                   <p className="mt-2 text-center text-xs text-ink-soft">
                     Edit/Hapus akan menyesuaikan kembali stok produk terkait.
@@ -704,7 +686,7 @@ export default function StockInPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+      <span className="field-label">{label}</span>
       {children}
     </label>
   )

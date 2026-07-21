@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import type { CartItem } from '../../types'
 import { itemUnitPrice } from './useCart'
@@ -121,13 +122,9 @@ export default function SplitBillModal({
         </div>
 
         <div className="border-t border-line/5 p-4">
-          <button
-            onClick={() => onConfirm(nonEmpty)}
-            disabled={!canConfirm}
-            className="w-full rounded-xl bg-status-empty py-3.5 text-base font-bold text-white hover:brightness-95 disabled:opacity-40"
-          >
+          <Button onClick={() => onConfirm(nonEmpty)} disabled={!canConfirm} className="w-full">
             {canConfirm ? `Buat ${nonEmpty.length} Nota` : 'Bagi ke minimal 2 nota'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

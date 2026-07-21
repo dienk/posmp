@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { listOpenBills, mergeBills, type OpenBill } from './posRepository'
 
@@ -132,13 +133,9 @@ export default function MergeBillModal({
             </span>
             <span className="font-bold text-ink">{formatRupiah(estimate)}</span>
           </div>
-          <button
-            onClick={handleMerge}
-            disabled={!canMerge || busy}
-            className="w-full rounded-xl bg-status-empty py-3.5 text-base font-bold text-white hover:brightness-95 disabled:opacity-40"
-          >
+          <Button onClick={handleMerge} disabled={!canMerge || busy} className="w-full">
             {busy ? 'Menggabungkan…' : canMerge ? `Gabungkan ${selectedBills.length} Bill` : 'Pilih minimal 2 bill'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { useSettings } from '../../lib/SettingsContext'
 import { enabledPaymentMethods } from '../settings/paymentMethods'
@@ -215,13 +216,9 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
         </div>
 
         <div className="border-t border-line/5 p-4">
-          <button
-            onClick={handleConfirm}
-            disabled={!canConfirm}
-            className="w-full rounded-xl bg-status-empty py-3.5 text-base font-bold text-white transition hover:brightness-95 disabled:opacity-40"
-          >
+          <Button onClick={handleConfirm} disabled={!canConfirm} className="w-full">
             {remaining > 0 ? `Kurang ${formatRupiah(remaining)}` : 'Selesaikan Pembayaran'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
