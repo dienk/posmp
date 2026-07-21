@@ -71,15 +71,45 @@ function migratePerms(perms: string[]): string[] {
 export const DEFAULT_ROLES: Role[] = [
   { id: 'manajer', name: 'Pemilik / Manajer', perms: [...ALL_KEYS] },
   {
+    id: 'supervisor',
+    name: 'Supervisor',
+    // Operasional penuh kecuali Channel/marketplace & Kiosk.
+    perms: [
+      'kasir',
+      'datamaster',
+      'transaksi',
+      'cash_history',
+      'tables',
+      'kds',
+      'queue',
+      'members',
+      'stockin',
+      'stockopname',
+      'installments',
+      'vouchers',
+      'dashboard',
+      'reports',
+    ],
+  },
+  {
     id: 'kasir',
     name: 'Kasir & Staf Pelayanan',
     perms: ['kasir', 'transaksi', 'tables', 'queue', 'members', 'vouchers'],
+  },
+  {
+    id: 'gudang',
+    name: 'Staf Gudang',
+    perms: ['datamaster', 'stockin', 'stockopname', 'reports'],
   },
   { id: 'dapur', name: 'Staf Dapur', perms: ['kds'] },
 ]
 
 export const DEFAULT_PERSONAS: Persona[] = [
   { id: 'admin', name: 'Administrator', roleId: 'manajer' },
+  { id: 'psn_budi', name: 'Budi Santoso', roleId: 'supervisor', phone: '0812-1111-2222' },
+  { id: 'psn_sari', name: 'Sari Kasir', roleId: 'kasir', phone: '0813-3333-4444' },
+  { id: 'psn_andi', name: 'Andi Gudang', roleId: 'gudang', phone: '0814-5555-6666' },
+  { id: 'psn_dewi', name: 'Dewi Dapur', roleId: 'dapur', phone: '0815-7777-8888' },
 ]
 
 function parse<T>(raw: string | undefined, fallback: T): T {
