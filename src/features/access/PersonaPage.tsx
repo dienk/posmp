@@ -71,6 +71,23 @@ export default function PersonaPage() {
     showToast('Persona aktif diperbarui — menu menyesuaikan hak akses.')
   }
 
+  // Buffer PIN per-persona agar bisa diketik tanpa menyimpan tiap ketukan.
+  const [pinDraft, setPinDraft] = useState<Record<string, string>>({})
+  const savePin = async (id: string) => {
+    const raw = pinDraft[id]
+    if (raw === undefined) return
+    const pin = raw.replace(/\D/g, '').slice(0, 6)
+    await persist(personas.map((p) => (p.id === id ? { ...p, pin: pin || undefined } : p)))
+    setPinDraft((m) => {
+      const next = { ...m }
+      delete next[id]
+      return next
+    })
+    showToast(pin ? 'PIN disimpan.' : 'PIN dikosongkan.')
+  }
+  const togglePinKasir = (id: string) =>
+    persist(personas.map((p) => (p.id === id ? { ...p, pinKasir: !p.pinKasir } : p)))
+
   return (
     <div className="flex h-full flex-col">
       <header className="bg-panel/70 px-5 py-3 backdrop-blur">
@@ -82,45 +99,84 @@ export default function PersonaPage() {
         <section className="rounded-card bg-panel p-2 shadow-card">
           <ul className="divide-y divide-line/5">
             {personas.map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center gap-3 px-3 py-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-ink">
-                  {p.name.slice(0, 2).toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-ink">
-                    {p.name}
-                    {p.id === activeId && (
-                      <span className="ml-2 rounded-full bg-status-empty/15 px-2 py-0.5 text-xs font-semibold text-status-empty">
-                        Aktif
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-xs text-ink-soft">{p.phone ?? 'tanpa telepon'}</p>
-                </div>
-                <select
-                  value={p.roleId}
-                  onChange={(e) => changeRole(p.id, e.target.value)}
-                  className="rounded-lg border border-line/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
-                >
-                  {roles.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name}
-                    </option>
-                  ))}
-                </select>
-                {p.id === activeId ? (
-                  <span className="text-xs font-semibold text-ink-soft">terpilih</span>
-                ) : (
-                  <button
-                    onClick={() => makeActive(p.id)}
-                    className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-strong"
+              <li key={p.id} className="px-3 py-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-ink">
+                    {p.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-ink">
+                      {p.name}
+                      {p.id === activeId && (
+                        <span className="ml-2 rounded-full bg-status-empty/15 px-2 py-0.5 text-xs font-semibold text-status-empty">
+                          Aktif
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-ink-soft">{p.phone ?? 'tanpa telepon'}</p>
+                  </div>
+                  <select
+                    value={p.roleId}
+                    onChange={(e) => changeRole(p.id, e.target.value)}
+                    className="field-select w-auto"
                   >
-                    Jadikan Aktif
-                  </button>
-                )}
-                <Button variant="danger" size="sm" onClick={() => removePersona(p.id)}>
-                  Hapus
-                </Button>
+                    {roles.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                  {p.id === activeId ? (
+                    <span className="text-xs font-semibold text-ink-soft">terpilih</span>
+                  ) : (
+                    <Button variant="secondary" size="sm" onClick={() => makeActive(p.id)}>
+                      Jadikan Aktif
+                    </Button>
+                  )}
+                  <Button variant="danger" size="sm" onClick={() => removePersona(p.id)}>
+                    Hapus
+                  </Button>
+                </div>
+
+                {/* Keamanan Kasir: PIN + wajib PIN buka/tutup Kasir */}
+                <div className="mt-2 flex flex-wrap items-center gap-3 rounded-lg bg-background/60 px-3 py-2">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+                    🔒 Keamanan Kasir
+                  </span>
+                  <label className="flex items-center gap-1.5 text-xs text-ink">
+                    PIN
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      maxLength={6}
+                      placeholder={p.pin ? '••••••' : 'kosong'}
+                      value={pinDraft[p.id] ?? p.pin ?? ''}
+                      onChange={(e) =>
+                        setPinDraft((m) => ({
+                          ...m,
+                          [p.id]: e.target.value.replace(/\D/g, '').slice(0, 6),
+                        }))
+                      }
+                      onBlur={() => savePin(p.id)}
+                      className="w-24 rounded-md border border-line/10 bg-panel px-2 py-1 text-center text-sm tracking-widest outline-none focus:border-brand-strong"
+                    />
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-ink">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-brand-strong"
+                      checked={!!p.pinKasir}
+                      onChange={() => togglePinKasir(p.id)}
+                    />
+                    Wajib PIN saat buka/tutup Kasir
+                  </label>
+                  {p.pinKasir && !p.pin && (
+                    <span className="text-xs font-semibold text-status-occupied">
+                      Isi PIN dulu agar berlaku
+                    </span>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -147,7 +203,7 @@ export default function PersonaPage() {
             <label className="block">
               <span className="field-label">Peran</span>
               <select
-                className={inputCls}
+                className="field-select"
                 value={roleId}
                 onChange={(e) => setRoleId(e.target.value)}
               >
@@ -177,6 +233,3 @@ export default function PersonaPage() {
     </div>
   )
 }
-
-const inputCls =
-  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

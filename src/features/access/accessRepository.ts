@@ -11,6 +11,8 @@ export interface Persona {
   name: string
   roleId: string
   phone?: string
+  pin?: string // PIN angka (4–6 digit) opsional untuk keamanan Kasir
+  pinKasir?: boolean // true = wajib input PIN saat buka/tutup menu Kasir
 }
 
 /** Daftar izin akses (dipetakan ke bagian menu sidebar). */

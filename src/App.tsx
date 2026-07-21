@@ -6,6 +6,7 @@ import { UIProvider } from './lib/UIContext'
 import { applyTheme, parseCustomVars } from './lib/themes'
 import AppShell from './components/AppShell'
 import PosPage from './features/pos/PosPage'
+import KasirPinGate from './features/access/KasirPinGate'
 import TablesPage from './features/tables/TablesPage'
 import QueuePage from './features/queue/QueuePage'
 import QueueMonitor from './features/queue/QueueMonitor'
@@ -54,7 +55,14 @@ const router = createHashRouter([
     path: '/',
     element: <AppShell />,
     children: [
-      { index: true, element: <PosPage /> },
+      {
+        index: true,
+        element: (
+          <KasirPinGate>
+            <PosPage />
+          </KasirPinGate>
+        ),
+      },
       { path: 'tables', element: <TablesPage /> },
       { path: 'queue', element: <QueuePage /> },
       { path: 'kds', element: <KdsPage /> },
