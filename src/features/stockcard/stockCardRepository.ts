@@ -16,7 +16,7 @@ export function listStockCardProducts(outletId: number): StockCardProduct[] {
             COALESCE((SELECT SUM(os.stock) FROM outlet_stocks os
                       WHERE os.product_id = p.id AND os.outlet_id = ?), 0) AS system_stock
      FROM products p
-     WHERE p.is_active = 1
+     WHERE p.is_active = 1 AND COALESCE(p.is_bundle, 0) = 0
      ORDER BY p.name`,
     [outletId],
   )
@@ -92,6 +92,26 @@ export function stockCard(
        FROM refund_details rd
        JOIN refunds r ON r.id = rd.refund_id
        WHERE rd.product_id = ? AND r.outlet_id = ?`)
+    params.push(productId, outletId)
+
+    // Penjualan/refund saat produk ini menjadi KOMPONEN paket bundling. Qty =
+    // qty paket × qty komponen per paket (stok komponen yang benar-benar keluar).
+    // Baris paket sendiri tak berstok, jadi mutasi dicatat pada komponennya.
+    parts.push(`SELECT t.transaction_date, t.invoice_number || ' · paket ' || bp.name, 'JUAL',
+       0, td.quantity * bi.quantity
+       FROM transaction_details td
+       JOIN transactions t ON t.id = td.transaction_id
+       JOIN product_bundle_items bi ON bi.bundle_product_id = td.product_id
+       JOIN products bp ON bp.id = td.product_id
+       WHERE bi.component_product_id = ? AND t.outlet_id = ? AND t.status IN ('COMPLETED', 'REFUNDED')`)
+    params.push(productId, outletId)
+    parts.push(`SELECT r.refunded_at, r.refund_invoice_number || ' · paket ' || bp.name, 'REFUND',
+       rd.quantity_returned * bi.quantity, 0
+       FROM refund_details rd
+       JOIN refunds r ON r.id = rd.refund_id
+       JOIN product_bundle_items bi ON bi.bundle_product_id = rd.product_id
+       JOIN products bp ON bp.id = rd.product_id
+       WHERE bi.component_product_id = ? AND r.outlet_id = ?`)
     params.push(productId, outletId)
   }
 

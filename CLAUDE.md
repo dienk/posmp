@@ -128,7 +128,11 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
   mutasi stok: `posRepository.saveOrder`, `preorderRepository` (pelunasan), dan
   `historyRepository.processRefund`. Stok paket di katalog **diturunkan** dari
   komponen via `bundleAvailability` (min ⌊stok÷qty⌋), bukan `outlet_stocks`. Paket
-  dikecualikan dari `listProducts` (halaman Produk) & `listProductsForStock` (Stok).
+  dikecualikan dari `listProducts` (Produk), `listProductsForStock` (Stok), &
+  `listStockCardProducts` (Kartu Stok). **Jalur baca** juga mengatribusikan
+  pergerakan paket ke komponen: **Kartu Stok** (`stockCardRepository`) menambah
+  baris JUAL/REFUND komponen dari penjualan paket, dan **Laporan** `sales_items_real`
+  / `top_products_real` memecah paket ke komponennya — bukan menampilkan produk paket.
 - **Status transaksi**: `DRAFT` (bill tersimpan) · `PREPARING` (pre-order/antre
   aktif) · `READY` (siap) · `COMPLETED` (lunas) · `REFUNDED`. Laporan/dashboard
   hanya menghitung `COMPLETED`.
