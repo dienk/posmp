@@ -130,9 +130,40 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
 
 ## Palet & UI
 
-Warna brand didefinisikan di `tailwind.config.js` (`brand`, `background`, `surface`,
-`ink`, `status.{empty,occupied,waiting}`). Setiap halaman mengikuti pola: header
-`bg-white/70`, kartu `rounded-card bg-white shadow-card`, toast fixed di bawah-tengah.
+Warna dari token tema (CSS vars → `tailwind.config.js`): `brand{,-soft,-strong}`,
+`background`, `surface`, `panel`, `line`, `ink{,-soft}`, `status.{empty,occupied,waiting}`.
+Nilai tiap token diganti per-tema (`src/lib/themes.ts` + `[data-theme]` di `index.css`).
+
+- **`panel`** = permukaan kartu/header/modal (putih di tema terang, gelap di Oniks) —
+  **pakai `bg-panel`, JANGAN `bg-white`** agar ikut mode gelap. Header `bg-panel/70`,
+  kartu `rounded-card bg-panel shadow-card`.
+- **`line`** = warna garis/divider (`border-line/10`, `divide-line/5`) — **JANGAN
+  `border-black/*`** agar terlihat di mode gelap.
+- **`status.occupied`** (merah) hanya untuk **aksi destruktif/status**, bukan CTA umum.
+
+### Sistem komponen ui-ux-pro-max (wajib untuk UI baru)
+
+Tombol & field mengikuti standar terstandar (target sentuh ≥44px, transisi 150ms +
+`active:scale`, `:focus-visible`, warna dari token tema):
+
+- **Tombol** → komponen `Button` (`src/components/ui/Button.tsx`; impor relatif, mis.
+  dari `src/features/<modul>/` → `import Button from '../../components/ui/Button'`),
+  props `variant` & `size`:
+  - `variant`: `primary` (CTA, `brand-strong` **adaptif tema**), `secondary` (isian
+    `brand`), `ghost` (bergaris netral, mis. Batal), `quiet` (tanpa garis, mis. Edit
+    inline), `danger` (teks merah, Hapus inline), `danger-outline` (destruktif menonjol).
+  - `size`: `md` (default, 44px), `sm` (36px inline), `icon` (persegi 44px).
+  - Kelas mentah juga tersedia (`.btn-primary` dst.) bila perlu di elemen non-`<button>`.
+- **Field** → kelas `field-label` (label), `field-input` (textbox/textarea),
+  `field-select` (combobox). Textbox & combobox juga di-tema global via base-layer
+  `index.css` (latar `panel`, teks `ink`, placeholder `ink-soft`).
+- **JANGAN konversi**: toggle/switch, tab/segmented, pil filter, kartu selektor
+  (tema/produk/list-row), swatch warna, stepper, tombol ikon `✕`, tombol berwarna
+  **status semantik** (KDS/antrean "Siap"/"Minta Tagihan"), input berlayout khusus
+  (lebar kompak/ikon), dan tombol besar layar **Kiosk/Self-Order/Monitor** (sengaja
+  oversized). Toast tetap fixed di bawah-tengah.
+
+Referensi migrasi bersih: `src/features/units/UnitsPage.tsx`.
 
 ## Native (butuh toolchain lokal)
 
