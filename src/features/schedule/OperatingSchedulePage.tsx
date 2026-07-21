@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { useSettings } from '../../lib/SettingsContext'
 import { updateAppSettings } from '../settings/settingsRepository'
 import {
@@ -87,13 +88,9 @@ export default function OperatingSchedulePage() {
           ● {open ? 'Buka sekarang' : 'Tutup sekarang'}
           {cfg.shiftEnabled && shift ? ` · ${shift.name}` : ''}
         </span>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50"
-        >
+        <Button onClick={handleSave} disabled={saving} className="ml-auto">
           {saving ? 'Menyimpan…' : 'Simpan Jadwal'}
-        </button>
+        </Button>
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
@@ -170,7 +167,7 @@ export default function OperatingSchedulePage() {
                     value={s.name}
                     onChange={(e) => setShift(s.id, { name: e.target.value })}
                     placeholder="Nama shift"
-                    className={inputCls + ' min-w-0 flex-1'}
+                    className="field-input min-w-0 flex-1"
                   />
                   <input
                     type="time"
@@ -185,25 +182,23 @@ export default function OperatingSchedulePage() {
                     onChange={(e) => setShift(s.id, { to: e.target.value })}
                     className={inputCls}
                   />
-                  <button
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={() => removeShift(s.id)}
-                    className="px-2 text-status-occupied hover:opacity-70"
                     aria-label="Hapus shift"
                   >
                     ✕
-                  </button>
+                  </Button>
                 </div>
               ))}
               {cfg.shifts.length === 0 && (
                 <p className="py-2 text-center text-sm text-ink-soft">Belum ada shift.</p>
               )}
             </div>
-            <button
-              onClick={addShift}
-              className="mt-3 rounded-lg border border-dashed border-brand-strong px-3 py-2 text-sm font-semibold text-ink hover:bg-brand-soft"
-            >
+            <Button size="sm" onClick={addShift} className="mt-3">
               + Tambah Shift
-            </button>
+            </Button>
           </div>
           <p className="mt-2 text-xs text-ink-soft">
             Bila diaktifkan, shift yang sedang berjalan ditampilkan pada status di atas.

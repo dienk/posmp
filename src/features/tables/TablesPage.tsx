@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Button from '../../components/ui/Button'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
@@ -180,12 +181,9 @@ export default function TablesPage() {
             {editMode ? 'Selesai Atur' : '✎ Atur Layout'}
           </button>
           {editMode && (
-            <button
-              onClick={handleAddTable}
-              className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong"
-            >
+            <Button size="sm" onClick={handleAddTable}>
               + Tambah Meja
-            </button>
+            </Button>
           )}
         </div>
 
@@ -222,13 +220,9 @@ export default function TablesPage() {
                   placeholder="Nama ruangan"
                   className="w-32 rounded-full border border-line/10 px-3 py-1 text-xs outline-none focus:border-brand-strong"
                 />
-                <button
-                  onClick={handleAddRoom}
-                  disabled={!newRoom.trim()}
-                  className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
-                >
+                <Button size="sm" onClick={handleAddRoom} disabled={!newRoom.trim()}>
                   Simpan
-                </button>
+                </Button>
               </span>
             ) : (
               <button
@@ -239,12 +233,9 @@ export default function TablesPage() {
               </button>
             ))}
           {editMode && sections.length > 0 && (
-            <button
-              onClick={() => setManageOpen(true)}
-              className="rounded-full border border-line/10 px-3 py-1 text-xs font-semibold text-ink-soft hover:bg-brand-soft"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setManageOpen(true)}>
               ⚙ Kelola Ruangan
-            </button>
+            </Button>
           )}
         </div>
       </header>
@@ -319,26 +310,23 @@ export default function TablesPage() {
 
             {!editMode ? (
               <div className="mt-5 grid gap-2">
-                <button
+                <Button
+                  className="w-full"
                   onClick={() =>
                     navigate('/', { state: { tableNumber: selected.table_number } })
                   }
-                  className="rounded-xl bg-status-occupied py-2.5 text-sm font-semibold text-white hover:brightness-95"
                 >
                   {selected.status === 'EMPTY' ? 'Buka Pesanan' : 'Tambah Pesanan'}
-                </button>
+                </Button>
                 <button
                   onClick={() => handleSetStatus('WAITING_BILL')}
                   className="rounded-xl bg-status-waiting py-2.5 text-sm font-semibold text-white hover:brightness-95"
                 >
                   Minta Tagihan
                 </button>
-                <button
-                  onClick={() => handleSetStatus('EMPTY')}
-                  className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-                >
+                <Button variant="ghost" className="w-full" onClick={() => handleSetStatus('EMPTY')}>
                   Kosongkan Meja
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="mt-5 grid gap-3">
@@ -348,7 +336,7 @@ export default function TablesPage() {
                   <select
                     value={selected.section_name}
                     onChange={(e) => handleChangeSection(e.target.value)}
-                    className="w-full rounded-lg border border-line/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-select"
                   >
                     {sections.map((s) => (
                       <option key={s} value={s}>
@@ -357,12 +345,9 @@ export default function TablesPage() {
                     ))}
                   </select>
                 </label>
-                <button
-                  onClick={handleRemove}
-                  className="rounded-xl border border-status-occupied py-2.5 text-sm font-semibold text-status-occupied hover:bg-status-occupied/10"
-                >
+                <Button variant="danger-outline" className="w-full" onClick={handleRemove}>
                   Hapus Meja
-                </button>
+                </Button>
               </div>
             )}
           </aside>
@@ -472,42 +457,37 @@ function ManageRoomsModal({
                           if (e.key === 'Enter') saveRename(s)
                           if (e.key === 'Escape') setRenaming(null)
                         }}
-                        className="min-w-0 flex-1 rounded-lg border border-line/10 px-3 py-1.5 text-sm uppercase outline-none focus:border-brand-strong"
+                        className="field-input min-w-0 flex-1 uppercase"
                       />
-                      <button
+                      <Button
+                        size="sm"
                         onClick={() => saveRename(s)}
                         disabled={!renameValue.trim() || renameValue.trim().toUpperCase() === s}
-                        className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
                       >
                         Simpan
-                      </button>
-                      <button
-                        onClick={() => setRenaming(null)}
-                        className="rounded-lg px-2 py-1.5 text-sm font-semibold text-ink-soft hover:bg-background"
-                      >
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setRenaming(null)}>
                         Batal
-                      </button>
+                      </Button>
                     </div>
                   ) : confirmDelete === s ? (
                     <div className="flex items-center gap-2">
                       <span className="min-w-0 flex-1 text-xs text-status-occupied">
                         Hapus “{s}”{count > 0 ? ` beserta ${count} meja` : ''}?
                       </span>
-                      <button
+                      <Button
+                        variant="danger"
+                        size="sm"
                         onClick={() => {
                           onDelete(s)
                           setConfirmDelete(null)
                         }}
-                        className="rounded-lg bg-status-occupied px-3 py-1.5 text-sm font-semibold text-white hover:brightness-95"
                       >
                         Hapus
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(null)}
-                        className="rounded-lg px-2 py-1.5 text-sm font-semibold text-ink-soft hover:bg-background"
-                      >
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(null)}>
                         Batal
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">

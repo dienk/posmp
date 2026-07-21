@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -212,15 +213,16 @@ export default function HistoryPage() {
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Alasan refund (opsional)"
-                    className="mb-2 w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                    className="field-input mb-2"
                   />
-                  <button
+                  <Button
+                    variant="danger-outline"
                     onClick={handleRefund}
                     disabled={busy}
-                    className="w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-50"
+                    className="w-full"
                   >
                     {busy ? 'Memproses…' : `Refund ${formatRupiah(selected.total_amount)}`}
-                  </button>
+                  </Button>
                   <p className="mt-2 text-xs text-ink-soft">
                     Refund akan mengembalikan stok
                     {selected.points_earned > 0 && selected.member_id

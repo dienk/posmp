@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { useSettings } from '../../lib/SettingsContext'
 import type { ReceiptData, TxItem } from '../history/historyRepository'
@@ -237,12 +238,9 @@ export default function ReceiptModal({ data, onClose }: { data: ReceiptData; onC
         </div>
         <div className="space-y-3 border-t border-line/5 p-3">
           <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => printReceipt(buildReceiptHtml(data, config))}
-              className="rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-            >
+            <Button onClick={() => printReceipt(buildReceiptHtml(data, config))} className="w-full">
               🖨️ Cetak
-            </button>
+            </Button>
             <button
               onClick={() => setShowShare((v) => !v)}
               className={

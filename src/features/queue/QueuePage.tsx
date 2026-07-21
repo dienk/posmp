@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
@@ -57,12 +58,9 @@ export default function QueuePage() {
           >
             + Antrean Dine In (A)
           </button>
-          <button
-            onClick={() => handleIssue('TAKEAWAY')}
-            className="rounded-lg bg-brand-strong px-3 py-1.5 text-sm font-semibold text-white hover:brightness-95"
-          >
+          <Button size="sm" onClick={() => handleIssue('TAKEAWAY')}>
             + Take Away (B)
-          </button>
+          </Button>
           <a
             href="#/monitor"
             target="_blank"
@@ -96,12 +94,9 @@ export default function QueuePage() {
           tickets={ready}
           renderActions={(t) => (
             <div className="flex gap-2">
-              <button
-                onClick={() => callQueueNumber(t.queue_number)}
-                className="rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
-              >
+              <Button variant="ghost" size="sm" onClick={() => callQueueNumber(t.queue_number)}>
                 Panggil Ulang
-              </button>
+              </Button>
               <button
                 onClick={() => handleComplete(t)}
                 className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"

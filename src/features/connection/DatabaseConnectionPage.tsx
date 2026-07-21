@@ -17,9 +17,7 @@ import {
 } from '../../lib/realtime'
 import { useSettings } from '../../lib/SettingsContext'
 import { updateAppSettings } from '../settings/settingsRepository'
-
-const inputCls =
-  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
+import Button from '../../components/ui/Button'
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`
@@ -243,23 +241,18 @@ export default function DatabaseConnectionPage() {
           {/* Label / identitas database */}
           <div className="flex flex-wrap items-end gap-2">
             <label className="block min-w-0 flex-1">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">
+              <span className="field-label">
                 Label Database (identitas perangkat; dipakai pada nama file cadangan)
               </span>
               <input
-                className={inputCls}
+                className="field-input"
                 value={dbLabel}
                 onChange={(e) => setDbLabel(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && saveLabel()}
                 placeholder="mis. Kasir Depan / Cabang Bekasi"
               />
             </label>
-            <button
-              onClick={saveLabel}
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-ink hover:bg-brand-strong"
-            >
-              Simpan Label
-            </button>
+            <Button onClick={saveLabel}>Simpan Label</Button>
           </div>
 
           {/* Persistensi penyimpanan */}
@@ -279,12 +272,9 @@ export default function DatabaseConnectionPage() {
                 </span>
               )}
               {!storage?.persisted && (
-                <button
-                  onClick={requestPersist}
-                  className="ml-auto rounded-lg bg-status-occupied px-3 py-1.5 text-sm font-semibold text-white hover:brightness-95"
-                >
+                <Button variant="ghost" size="sm" onClick={requestPersist} className="ml-auto">
                   Minta Penyimpanan Persisten
-                </button>
+                </Button>
               )}
             </div>
             {storage && storage.quota > 0 && (
@@ -310,13 +300,9 @@ export default function DatabaseConnectionPage() {
 
           {/* Kompak / VACUUM */}
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <button
-              onClick={handleVacuum}
-              disabled={busy}
-              className="rounded-lg border border-line/10 px-4 py-2 text-sm font-semibold text-ink hover:bg-background disabled:opacity-40"
-            >
+            <Button variant="ghost" onClick={handleVacuum} disabled={busy}>
               🧹 Kompakkan Database (VACUUM)
-            </button>
+            </Button>
             <p className="text-xs text-ink-soft">
               Merapikan ruang kosong setelah banyak penghapusan agar file lebih kecil.
             </p>
@@ -348,11 +334,9 @@ export default function DatabaseConnectionPage() {
 
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="block sm:col-span-2">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">
-                Host Relay (kosong = perangkat ini)
-              </span>
+              <span className="field-label">Host Relay (kosong = perangkat ini)</span>
               <input
-                className={inputCls}
+                className="field-input"
                 value={relay.host}
                 disabled={!relay.enabled}
                 onChange={(e) => setRelay((p) => ({ ...p, host: e.target.value }))}
@@ -360,10 +344,10 @@ export default function DatabaseConnectionPage() {
               />
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Port</span>
+              <span className="field-label">Port</span>
               <input
                 type="number"
-                className={inputCls}
+                className="field-input"
                 value={relay.port}
                 disabled={!relay.enabled}
                 onChange={(e) => setRelay((p) => ({ ...p, port: Number(e.target.value) }))}
@@ -373,12 +357,9 @@ export default function DatabaseConnectionPage() {
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <code className="rounded-lg bg-background px-3 py-2 text-xs text-ink">{effectiveUrl}</code>
-            <button
-              onClick={saveRelay}
-              className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-            >
+            <Button onClick={saveRelay} className="ml-auto">
               Simpan & Sambungkan Ulang
-            </button>
+            </Button>
           </div>
           <p className="mt-2 text-xs text-ink-soft">
             Relay berjalan di salah satu perangkat LAN via{' '}
@@ -394,20 +375,12 @@ export default function DatabaseConnectionPage() {
             Cadangan & Pemulihan
           </h2>
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={handleBackup}
-              disabled={busy}
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
-            >
+            <Button onClick={handleBackup} disabled={busy}>
               ⬇️ Unduh Cadangan (.sqlite)
-            </button>
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={busy}
-              className="rounded-lg border border-line/10 px-4 py-2 text-sm font-semibold text-ink hover:bg-background disabled:opacity-40"
-            >
+            </Button>
+            <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={busy}>
               ⬆️ Pulihkan dari File
-            </button>
+            </Button>
             <input
               ref={fileRef}
               type="file"
@@ -415,13 +388,14 @@ export default function DatabaseConnectionPage() {
               className="hidden"
               onChange={handleRestoreFile}
             />
-            <button
+            <Button
+              variant="danger-outline"
               onClick={handleReset}
               disabled={busy}
-              className="ml-auto rounded-lg border border-status-occupied/40 px-4 py-2 text-sm font-semibold text-status-occupied hover:bg-status-occupied/10 disabled:opacity-40"
+              className="ml-auto"
             >
               ♻️ Reset ke Data Awal
-            </button>
+            </Button>
           </div>
           <p className="mt-2 text-xs text-ink-soft">
             Cadangan berisi seluruh data (produk, transaksi, pengaturan) sebagai satu file SQLite.
