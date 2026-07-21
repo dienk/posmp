@@ -29,28 +29,96 @@ export function seedDatabase(db: Database): void {
     ['Makanan', '#F2C6A1'],
     ['Minuman', '#CFC6D9'],
     ['Snack', '#D9ABA0'],
+    ['Kopi', '#C4A484'],
+    ['Dessert', '#F4C2D7'],
   ]
   for (const [name, color] of categories) {
     db.run('INSERT INTO categories (name, color_code) VALUES (?, ?)', [name, color])
   }
 
-  // [nama, sku, barcode, harga, modal, satuan, category_id, stok]
-  const products: Array<[string, string, string, number, number, string, number, number]> = [
-    ['Nasi Goreng Spesial', 'MKN-001', '8991234000011', 25000, 15000, 'porsi', 1, 50],
-    ['Mie Goreng', 'MKN-002', '8991234000028', 20000, 12000, 'porsi', 1, 40],
-    ['Ayam Penyet', 'MKN-003', '8991234000035', 30000, 18000, 'porsi', 1, 35],
-    ['Tahu Walik', 'SNK-001', '8991234000042', 15000, 8000, 'porsi', 3, 60],
-    ['Pisang Goreng', 'SNK-002', '8991234000059', 12000, 6000, 'porsi', 3, 45],
-    ['Es Teh Manis', 'MNM-001', '8991234000066', 5000, 2000, 'gelas', 2, 100],
-    ['Kopi Susu', 'MNM-002', '8991234000073', 15000, 7000, 'gelas', 2, 80],
-    ['Es Jeruk', 'MNM-003', '8991234000080', 10000, 4000, 'gelas', 2, 70],
-    ['Air Mineral', 'MNM-004', '8991234000097', 5000, 3000, 'botol', 2, 120],
+  // Meta gambar per kategori: [prefix SKU, warna gradien atas, warna gradien bawah].
+  const catMeta: Record<number, [string, string, string]> = {
+    1: ['MKN', '#FB923C', '#EA580C'],
+    2: ['MNM', '#60A5FA', '#2563EB'],
+    3: ['SNK', '#FBBF24', '#D97706'],
+    4: ['KOP', '#A16207', '#78350F'],
+    5: ['DST', '#F472B6', '#DB2777'],
+  }
+
+  // Gambar produk contoh: SVG data-URI mandiri (tanpa file/CDN, aman offline) —
+  // kartu gradien + emoji + nama produk.
+  function productImg(emoji: string, c1: string, c2: string, label: string): string {
+    const svg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'>` +
+      `<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>` +
+      `<stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/></linearGradient></defs>` +
+      `<rect width='400' height='400' fill='url(#g)'/>` +
+      `<text x='200' y='196' font-size='170' text-anchor='middle' dominant-baseline='central'>${emoji}</text>` +
+      `<text x='200' y='350' font-family='Nunito Sans,Segoe UI,sans-serif' font-size='30' ` +
+      `font-weight='800' fill='#ffffff' text-anchor='middle' opacity='0.95'>${label}</text>` +
+      `</svg>`
+    return 'data:image/svg+xml,' + encodeURIComponent(svg)
+  }
+
+  // [nama, emoji, harga, modal, satuan, category_id, stok]
+  const products: Array<[string, string, number, number, string, number, number]> = [
+    // Makanan
+    ['Nasi Goreng Spesial', '🍛', 25000, 15000, 'porsi', 1, 50],
+    ['Mie Goreng', '🍜', 20000, 12000, 'porsi', 1, 40],
+    ['Ayam Penyet', '🍗', 30000, 18000, 'porsi', 1, 35],
+    ['Ayam Geprek', '🌶️', 28000, 16000, 'porsi', 1, 40],
+    ['Soto Ayam', '🍲', 22000, 12000, 'porsi', 1, 30],
+    ['Bakso Urat', '🍜', 25000, 14000, 'porsi', 1, 45],
+    ['Mie Ayam', '🍜', 20000, 11000, 'porsi', 1, 40],
+    ['Nasi Uduk', '🍚', 18000, 9000, 'porsi', 1, 35],
+    ['Gado-Gado', '🥗', 20000, 10000, 'porsi', 1, 25],
+    ['Nasi Rendang', '🍛', 32000, 20000, 'porsi', 1, 30],
+    // Minuman
+    ['Es Teh Manis', '🧊', 5000, 2000, 'gelas', 2, 100],
+    ['Es Jeruk', '🍊', 10000, 4000, 'gelas', 2, 70],
+    ['Air Mineral', '💧', 5000, 3000, 'botol', 2, 120],
+    ['Teh Tarik', '🍵', 12000, 5000, 'gelas', 2, 60],
+    ['Lemon Tea', '🍋', 13000, 6000, 'gelas', 2, 50],
+    ['Es Coklat', '🍫', 15000, 7000, 'gelas', 2, 55],
+    ['Jus Alpukat', '🥑', 18000, 9000, 'gelas', 2, 40],
+    ['Jus Mangga', '🥭', 16000, 8000, 'gelas', 2, 45],
+    ['Soda Gembira', '🥤', 14000, 6000, 'gelas', 2, 40],
+    // Snack
+    ['Tahu Walik', '🧈', 15000, 8000, 'porsi', 3, 60],
+    ['Pisang Goreng', '🍌', 12000, 6000, 'porsi', 3, 45],
+    ['Kentang Goreng', '🍟', 18000, 9000, 'porsi', 3, 50],
+    ['Cireng Rujak', '🫓', 13000, 6000, 'porsi', 3, 40],
+    ['Risoles Mayo', '🥟', 14000, 7000, 'porsi', 3, 35],
+    ['Roti Bakar Coklat', '🍞', 15000, 7000, 'porsi', 3, 40],
+    ['Onion Ring', '🧅', 16000, 8000, 'porsi', 3, 30],
+    // Kopi
+    ['Espresso', '☕', 15000, 6000, 'gelas', 4, 50],
+    ['Cappuccino', '☕', 22000, 9000, 'gelas', 4, 45],
+    ['Caffe Latte', '☕', 23000, 10000, 'gelas', 4, 45],
+    ['Americano', '☕', 18000, 7000, 'gelas', 4, 40],
+    ['Kopi Tubruk', '☕', 12000, 5000, 'gelas', 4, 60],
+    ['Es Kopi Susu Aren', '🧋', 20000, 8000, 'gelas', 4, 70],
+    ['Mochaccino', '☕', 25000, 11000, 'gelas', 4, 35],
+    // Dessert
+    ['Puding Coklat', '🍮', 12000, 5000, 'porsi', 5, 40],
+    ['Es Krim Vanila', '🍨', 15000, 6000, 'porsi', 5, 45],
+    ['Brownies', '🍫', 16000, 7000, 'porsi', 5, 35],
+    ['Pancake Madu', '🥞', 20000, 9000, 'porsi', 5, 30],
+    ['Choco Lava', '🍰', 22000, 10000, 'porsi', 5, 25],
   ]
-  for (const [name, sku, barcode, price, cost, unit, categoryId, stock] of products) {
+  const seq: Record<number, number> = {}
+  let barcodeNo = 8991234000000
+  for (const [name, emoji, price, cost, unit, categoryId, stock] of products) {
+    const [prefix, c1, c2] = catMeta[categoryId]
+    seq[categoryId] = (seq[categoryId] ?? 0) + 1
+    const sku = `${prefix}-${String(seq[categoryId]).padStart(3, '0')}`
+    barcodeNo += 1
+    const label = name.length > 16 ? name.slice(0, 15) + '…' : name
+    const img = productImg(emoji, c1, c2, label)
     db.run(
-      `INSERT INTO products (category_id, name, sku, barcode, price, cost_price, unit, min_stock, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 10, 1)`,
-      [categoryId, name, sku, barcode, price, cost, unit],
+      `INSERT INTO products (category_id, name, sku, barcode, price, cost_price, unit, min_stock, is_active, image_path, images)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 10, 1, ?, ?)`,
+      [categoryId, name, sku, String(barcodeNo), price, cost, unit, img, JSON.stringify([img])],
     )
     db.run(
       `INSERT INTO outlet_stocks (outlet_id, warehouse_id, product_id, stock)
