@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from '../../components/ui/Button'
 import { useSettings } from '../../lib/SettingsContext'
 import { updateAppSettings } from '../settings/settingsRepository'
 import { MemberCard } from './MemberCard'
@@ -41,13 +42,9 @@ export default function CardDesignPage() {
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Desain Kartu Member</h1>
-        <button
-          onClick={save}
-          disabled={saving}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50"
-        >
+        <Button onClick={save} disabled={saving} className="ml-auto">
           {saving ? 'Menyimpan…' : 'Simpan Desain'}
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[360px_1fr]">
@@ -57,10 +54,10 @@ export default function CardDesignPage() {
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Teks</h2>
             <div className="space-y-3">
               <Field label="Judul">
-                <input className={inputCls} value={cfg.title} onChange={(e) => set('title', e.target.value)} />
+                <input className="field-input" value={cfg.title} onChange={(e) => set('title', e.target.value)} />
               </Field>
               <Field label="Sub-judul">
-                <input className={inputCls} value={cfg.subtitle} onChange={(e) => set('subtitle', e.target.value)} />
+                <input className="field-input" value={cfg.subtitle} onChange={(e) => set('subtitle', e.target.value)} />
               </Field>
             </div>
           </div>
@@ -141,13 +138,10 @@ export default function CardDesignPage() {
   )
 }
 
-const inputCls =
-  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
-
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+      <span className="field-label">{label}</span>
       {children}
     </label>
   )

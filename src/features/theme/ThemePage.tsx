@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from '../../components/ui/Button'
 import { useSettings } from '../../lib/SettingsContext'
 import {
   applyTheme,
@@ -159,18 +160,12 @@ export default function ThemePage() {
                 Aktif
               </span>
             )}
-            <button
-              onClick={loadFromActivePreset}
-              className="ml-auto rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
-            >
+            <Button variant="ghost" size="sm" onClick={loadFromActivePreset} className="ml-auto">
               Muat dari preset
-            </button>
-            <button
-              onClick={previewCustom}
-              className="rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-background"
-            >
+            </Button>
+            <Button variant="ghost" size="sm" onClick={previewCustom}>
               Pratinjau
-            </button>
+            </Button>
           </div>
           <p className="mb-4 text-sm text-ink-soft">
             Sesuaikan tiap peran warna. Perubahan langsung terlihat saat tema kustom aktif; tekan
@@ -241,12 +236,9 @@ export default function ThemePage() {
             </div>
           </div>
 
-          <button
-            onClick={applyCustom}
-            className="mt-4 w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95 sm:w-auto sm:px-6"
-          >
+          <Button onClick={applyCustom} className="mt-4 w-full sm:w-auto">
             Simpan Tema Kustom
-          </button>
+          </Button>
         </section>
       </div>
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { useConnection } from '../../lib/useConnection'
 import { flush, getPending, subscribeQueue, type SyncOp } from '../../lib/syncQueue'
 import {
@@ -73,9 +74,9 @@ export default function MarketplacePage() {
           </h2>
           <div className="flex flex-wrap items-end gap-3">
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Platform</span>
+              <span className="field-label">Platform</span>
               <select
-                className={inputCls}
+                className="field-select"
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value as Platform)}
               >
@@ -87,23 +88,18 @@ export default function MarketplacePage() {
               </select>
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Shop ID</span>
-              <input className={inputCls} value={shopId} onChange={(e) => setShopId(e.target.value)} />
+              <span className="field-label">Shop ID</span>
+              <input className="field-input" value={shopId} onChange={(e) => setShopId(e.target.value)} />
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Nama Toko</span>
+              <span className="field-label">Nama Toko</span>
               <input
-                className={inputCls}
+                className="field-input"
                 value={shopName}
                 onChange={(e) => setShopName(e.target.value)}
               />
             </label>
-            <button
-              onClick={handleAdd}
-              className="rounded-xl bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-            >
-              + Hubungkan
-            </button>
+            <Button onClick={handleAdd}>+ Hubungkan</Button>
           </div>
         </section>
 
@@ -146,24 +142,18 @@ export default function MarketplacePage() {
                     >
                       {c.is_active ? 'Aktif' : 'Nonaktif'}
                     </span>
-                    <button
-                      onClick={() => handleSync(c)}
-                      className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-strong"
-                    >
+                    <Button size="sm" onClick={() => handleSync(c)}>
                       Sinkron Stok
-                    </button>
+                    </Button>
                     <button
                       onClick={() => toggleChannel(c.id, !c.is_active).then(reload)}
                       className="rounded-lg border border-line/10 px-3 py-1.5 text-xs font-semibold text-ink hover:bg-panel"
                     >
                       {c.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                     </button>
-                    <button
-                      onClick={() => removeChannel(c.id).then(reload)}
-                      className="rounded-lg px-2 py-1.5 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                    >
+                    <Button variant="danger" size="sm" onClick={() => removeChannel(c.id).then(reload)}>
                       Hapus
-                    </button>
+                    </Button>
                   </li>
                 )
               })}
@@ -234,6 +224,3 @@ export default function MarketplacePage() {
     </div>
   )
 }
-
-const inputCls =
-  'rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

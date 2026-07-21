@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Button from '../../components/ui/Button'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { getOutlet, saveSettings } from './settingsRepository'
@@ -130,13 +131,9 @@ export default function SettingsPage() {
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Pengaturan</h1>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50"
-        >
+        <Button onClick={handleSave} disabled={saving} className="ml-auto">
           {saving ? 'Menyimpan…' : 'Simpan Perubahan'}
-        </button>
+        </Button>
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
@@ -145,20 +142,20 @@ export default function SettingsPage() {
           <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Outlet</h2>
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Nama Outlet</span>
-              <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
+              <span className="field-label">Nama Outlet</span>
+              <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} />
             </label>
             <label className="block sm:col-span-2">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Alamat</span>
+              <span className="field-label">Alamat</span>
               <input
-                className={inputCls}
+                className="field-input"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Telepon</span>
-              <input className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <span className="field-label">Telepon</span>
+              <input className="field-input" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </label>
           </div>
         </section>
@@ -203,7 +200,7 @@ export default function SettingsPage() {
               <span className="text-sm text-ink">Service charge aktif</span>
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">
+              <span className="field-label">
                 Tarif Service Charge (%)
               </span>
               <input
@@ -211,7 +208,7 @@ export default function SettingsPage() {
                 min={0}
                 step={0.5}
                 disabled={!serviceEnabled}
-                className={inputCls + (serviceEnabled ? '' : ' opacity-50')}
+                className={'field-input' + (serviceEnabled ? '' : ' opacity-50')}
                 value={serviceRatePct}
                 onChange={(e) => setServiceRatePct(Number(e.target.value))}
               />
@@ -243,19 +240,19 @@ export default function SettingsPage() {
           <div className={loyalty.enabled ? '' : 'pointer-events-none opacity-50'}>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Rp per 1 poin</span>
+                <span className="field-label">Rp per 1 poin</span>
                 <input
                   type="number"
                   min={0}
-                  className={inputCls}
+                  className="field-input"
                   value={loyalty.perAmount}
                   onChange={(e) => setLoy('perAmount', Number(e.target.value))}
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Dasar hitung</span>
+                <span className="field-label">Dasar hitung</span>
                 <select
-                  className={inputCls}
+                  className="field-select"
                   value={loyalty.basis}
                   onChange={(e) => setLoy('basis', e.target.value as LoyaltyConfig['basis'])}
                 >
@@ -264,9 +261,9 @@ export default function SettingsPage() {
                 </select>
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Pembulatan</span>
+                <span className="field-label">Pembulatan</span>
                 <select
-                  className={inputCls}
+                  className="field-select"
                   value={loyalty.rounding}
                   onChange={(e) => setLoy('rounding', e.target.value as LoyaltyConfig['rounding'])}
                 >
@@ -275,25 +272,25 @@ export default function SettingsPage() {
                 </select>
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">
+                <span className="field-label">
                   Min. transaksi (Rp)
                 </span>
                 <input
                   type="number"
                   min={0}
-                  className={inputCls}
+                  className="field-input"
                   value={loyalty.minPurchase}
                   onChange={(e) => setLoy('minPurchase', Number(e.target.value))}
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">
+                <span className="field-label">
                   Maks. poin / transaksi (0 = tanpa batas)
                 </span>
                 <input
                   type="number"
                   min={0}
-                  className={inputCls}
+                  className="field-input"
                   value={loyalty.maxPerTransaction}
                   onChange={(e) => setLoy('maxPerTransaction', Number(e.target.value))}
                 />
@@ -307,13 +304,13 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {MEMBER_TIERS.map((t) => (
                   <label key={t} className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">{t}</span>
+                    <span className="field-label">{t}</span>
                     <div className="flex items-center gap-1">
                       <input
                         type="number"
                         min={0}
                         step={0.25}
-                        className={inputCls}
+                        className="field-input"
                         value={loyalty.tierMultiplier[t]}
                         onChange={(e) => setTierMult(t, Number(e.target.value))}
                       />
@@ -349,7 +346,7 @@ export default function SettingsPage() {
             </span>
             <div className="flex gap-2">
               <input
-                className={inputCls}
+                className="field-input"
                 value={callText}
                 onChange={(e) => setCallText(e.target.value)}
                 placeholder={DEFAULT_QUEUE_CALL_TEXT}
@@ -447,13 +444,14 @@ export default function SettingsPage() {
                       Bawaan
                     </span>
                   ) : (
-                    <button
+                    <Button
+                      variant="danger"
+                      size="sm"
                       onClick={() => removeMethod(m.key)}
-                      className="text-xs font-semibold text-status-occupied hover:opacity-70"
                       title="Hapus metode"
                     >
                       Hapus
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <input
@@ -469,9 +467,9 @@ export default function SettingsPage() {
           {/* Tambah metode kustom */}
           <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-line/5 pt-3">
             <label className="block w-16">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Ikon</span>
+              <span className="field-label">Ikon</span>
               <input
-                className={inputCls + ' text-center'}
+                className="field-input text-center"
                 value={newIcon}
                 onChange={(e) => setNewIcon(e.target.value)}
                 maxLength={2}
@@ -479,24 +477,20 @@ export default function SettingsPage() {
               />
             </label>
             <label className="block min-w-0 flex-1">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">
+              <span className="field-label">
                 Metode baru (mis. GoPay, OVO, Transfer BCA)
               </span>
               <input
-                className={inputCls}
+                className="field-input"
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addMethod()}
                 placeholder="Nama metode pembayaran"
               />
             </label>
-            <button
-              onClick={addMethod}
-              disabled={!newLabel.trim()}
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-ink hover:bg-brand-strong disabled:opacity-40"
-            >
+            <Button size="sm" onClick={addMethod} disabled={!newLabel.trim()}>
               + Tambah
-            </button>
+            </Button>
           </div>
           <p className="mt-2 text-xs text-ink-soft">
             Metode aktif muncul di layar bayar kasir. Metode kustom cukup mencatat nominal
@@ -513,6 +507,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-
-const inputCls =
-  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'

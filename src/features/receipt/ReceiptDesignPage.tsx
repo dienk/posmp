@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { getOutlet, updateAppSettings } from '../settings/settingsRepository'
@@ -141,13 +142,9 @@ export default function ReceiptDesignPage() {
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Desain Struk</h1>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50"
-        >
+        <Button onClick={handleSave} disabled={saving} className="ml-auto">
           {saving ? 'Menyimpan…' : 'Simpan Desain'}
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[380px_1fr]">
@@ -173,7 +170,7 @@ export default function ReceiptDesignPage() {
             <select
               value={selectedId}
               onChange={(e) => setSelectedId(e.target.value)}
-              className={inputCls + ' mb-2'}
+              className="field-select mb-2"
             >
               {templates.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -183,31 +180,27 @@ export default function ReceiptDesignPage() {
               ))}
             </select>
             <input
-              className={inputCls}
+              className="field-input"
               value={selected.name}
               onChange={(e) => renameSelected(e.target.value)}
               placeholder="Nama template"
             />
             <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                onClick={addTemplate}
-                className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-ink hover:bg-brand-strong"
-              >
+              <Button variant="secondary" size="sm" onClick={addTemplate}>
                 ＋ Baru
-              </button>
-              <button
-                onClick={duplicateTemplate}
-                className="rounded-lg border border-line/10 px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
-              >
+              </Button>
+              <Button variant="ghost" size="sm" onClick={duplicateTemplate}>
                 ⧉ Duplikat
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger-outline"
+                size="sm"
                 onClick={removeTemplate}
                 disabled={templates.length <= 1}
-                className="ml-auto rounded-lg border border-status-occupied/40 px-3 py-1.5 text-sm font-semibold text-status-occupied hover:bg-status-occupied/10 disabled:opacity-40"
+                className="ml-auto"
               >
                 Hapus
-              </button>
+              </Button>
             </div>
             <p className="mt-2 text-[11px] text-ink-soft">
               Template <b>Aktif</b> yang dipakai saat mencetak struk. Ubah lalu “Simpan Desain”.
@@ -243,10 +236,10 @@ export default function ReceiptDesignPage() {
               </div>
             </div>
             <div className="mt-3">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Logo dari URL</span>
+              <span className="field-label">Logo dari URL</span>
               <div className="flex gap-2">
                 <input
-                  className={inputCls}
+                  className="field-input"
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogoUrl()}
@@ -288,7 +281,7 @@ export default function ReceiptDesignPage() {
               <Field label="Tagline (boleh beberapa baris)">
                 <textarea
                   rows={2}
-                  className={inputCls}
+                  className="field-input resize-none"
                   value={cfg.tagline}
                   onChange={(e) => set('tagline', e.target.value)}
                   placeholder="mis. Kopi & Dapur Nusantara"
@@ -297,7 +290,7 @@ export default function ReceiptDesignPage() {
               <Field label="Ucapan Penutup (boleh beberapa baris)">
                 <textarea
                   rows={2}
-                  className={inputCls}
+                  className="field-input resize-none"
                   value={cfg.footer}
                   onChange={(e) => set('footer', e.target.value)}
                 />
@@ -305,7 +298,7 @@ export default function ReceiptDesignPage() {
               <Field label="Catatan Tambahan (kecil, boleh beberapa baris)">
                 <textarea
                   rows={2}
-                  className={inputCls}
+                  className="field-input resize-none"
                   value={cfg.note}
                   onChange={(e) => set('note', e.target.value)}
                   placeholder={'mis. IG @posmerahputih\nWA 0812xxxx'}
@@ -322,7 +315,7 @@ export default function ReceiptDesignPage() {
             <div className="space-y-3">
               <Field label="🌐 Website">
                 <input
-                  className={inputCls}
+                  className="field-input"
                   value={cfg.website}
                   onChange={(e) => set('website', e.target.value)}
                   placeholder="mis. www.posmerahputih.id"
@@ -330,7 +323,7 @@ export default function ReceiptDesignPage() {
               </Field>
               <Field label="🛍️ Shopee">
                 <input
-                  className={inputCls}
+                  className="field-input"
                   value={cfg.shopee}
                   onChange={(e) => set('shopee', e.target.value)}
                   placeholder="mis. shopee.co.id/posmerahputih"
@@ -338,7 +331,7 @@ export default function ReceiptDesignPage() {
               </Field>
               <Field label="🎵 TikTok">
                 <input
-                  className={inputCls}
+                  className="field-input"
                   value={cfg.tiktok}
                   onChange={(e) => set('tiktok', e.target.value)}
                   placeholder="mis. @posmerahputih"
@@ -346,7 +339,7 @@ export default function ReceiptDesignPage() {
               </Field>
               <Field label="🛒 Tokopedia">
                 <input
-                  className={inputCls}
+                  className="field-input"
                   value={cfg.tokopedia}
                   onChange={(e) => set('tokopedia', e.target.value)}
                   placeholder="mis. tokopedia.com/posmerahputih"
@@ -431,9 +424,6 @@ export default function ReceiptDesignPage() {
   )
 }
 
-const inputCls =
-  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
-
 const segBtn = (active: boolean) =>
   'flex-1 rounded-lg py-2 text-sm font-semibold transition ' +
   (active ? 'bg-status-occupied text-white' : 'bg-background text-ink hover:bg-brand-soft')
@@ -441,7 +431,7 @@ const segBtn = (active: boolean) =>
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+      <span className="field-label">{label}</span>
       {children}
     </label>
   )

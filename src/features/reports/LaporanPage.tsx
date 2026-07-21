@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
 import { useRealtime } from '../../lib/useRealtime'
@@ -26,9 +27,6 @@ import {
 } from './reportOutput'
 
 type Row = Record<string, unknown>
-
-const inputCls =
-  'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 export default function LaporanPage() {
   const { settings, reloadSettings } = useSettings()
@@ -159,26 +157,28 @@ export default function LaporanPage() {
             >
               ✎ Template
             </button>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => downloadText(`${fileBase}.csv`, toCSV(def, filteredRows, tpl), 'text/csv')}
-              className="rounded-lg border border-line/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
             >
               ⬇ CSV
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() =>
                 downloadText(`${fileBase}.json`, toJSON(def, filteredRows, tpl), 'application/json')
               }
-              className="rounded-lg border border-line/10 px-3 py-2 text-sm font-semibold text-ink hover:bg-background"
             >
               ⬇ JSON
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
               onClick={() => printReportHtml(buildReportHtml(def, filteredRows, tpl))}
-              className="rounded-lg bg-status-occupied px-3 py-2 text-sm font-bold text-white hover:brightness-95"
             >
               🖨️ Cetak / PDF
-            </button>
+            </Button>
           </div>
         </header>
 
@@ -191,25 +191,25 @@ export default function LaporanPage() {
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <label className="block lg:col-span-2">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Judul</span>
+                  <span className="field-label">Judul</span>
                   <input
-                    className={inputCls}
+                    className="field-input"
                     value={tpl.title}
                     onChange={(e) => setT('title', e.target.value)}
                   />
                 </label>
                 <label className="block lg:col-span-2">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Sub-judul</span>
+                  <span className="field-label">Sub-judul</span>
                   <input
-                    className={inputCls}
+                    className="field-input"
                     value={tpl.subtitle}
                     onChange={(e) => setT('subtitle', e.target.value)}
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Ukuran Kertas</span>
+                  <span className="field-label">Ukuran Kertas</span>
                   <select
-                    className={inputCls}
+                    className="field-select"
                     value={tpl.paper}
                     onChange={(e) => setT('paper', e.target.value as PaperSize)}
                   >
@@ -221,9 +221,9 @@ export default function LaporanPage() {
                   </select>
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Orientasi</span>
+                  <span className="field-label">Orientasi</span>
                   <select
-                    className={inputCls}
+                    className="field-select"
                     value={tpl.orientation}
                     onChange={(e) => setT('orientation', e.target.value as Orientation)}
                   >
@@ -232,9 +232,9 @@ export default function LaporanPage() {
                   </select>
                 </label>
                 <label className="block lg:col-span-2">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Catatan Kaki</span>
+                  <span className="field-label">Catatan Kaki</span>
                   <input
-                    className={inputCls}
+                    className="field-input"
                     value={tpl.footer}
                     onChange={(e) => setT('footer', e.target.value)}
                   />
@@ -263,12 +263,9 @@ export default function LaporanPage() {
                   })}
                 </div>
               </div>
-              <button
-                onClick={saveTemplate}
-                className="mt-4 rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-              >
+              <Button onClick={saveTemplate} className="mt-4">
                 Simpan Template
-              </button>
+              </Button>
             </section>
           )}
 
@@ -352,9 +349,9 @@ export default function LaporanPage() {
               {def.dateField ? (
                 <>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-ink-soft">Periode</span>
+                    <span className="field-label">Periode</span>
                     <select
-                      className={inputCls}
+                      className="field-select"
                       value={filter.preset}
                       onChange={(e) =>
                         setFilter((f) => ({ ...f, preset: e.target.value as ReportFilter['preset'] }))
@@ -375,7 +372,7 @@ export default function LaporanPage() {
                         value={filter.from}
                         max={filter.to || undefined}
                         onChange={(e) => setFilter((f) => ({ ...f, from: e.target.value }))}
-                        className={inputCls}
+                        className="field-input"
                       />
                       <span className="text-xs text-ink-soft">s/d</span>
                       <input
@@ -383,7 +380,7 @@ export default function LaporanPage() {
                         value={filter.to}
                         min={filter.from || undefined}
                         onChange={(e) => setFilter((f) => ({ ...f, to: e.target.value }))}
-                        className={inputCls}
+                        className="field-input"
                       />
                     </div>
                   )}
@@ -395,12 +392,12 @@ export default function LaporanPage() {
               )}
 
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Kata Kunci</span>
+                <span className="field-label">Kata Kunci</span>
                 <input
                   value={filter.keyword}
                   onChange={(e) => setFilter((f) => ({ ...f, keyword: e.target.value }))}
                   placeholder="cari di semua kolom…"
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
 
@@ -411,18 +408,10 @@ export default function LaporanPage() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setFilter(DEFAULT_FILTER)}
-                className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-              >
+              <Button variant="secondary" onClick={() => setFilter(DEFAULT_FILTER)}>
                 Reset
-              </button>
-              <button
-                onClick={() => setShowFilter(false)}
-                className="rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-              >
-                Terapkan
-              </button>
+              </Button>
+              <Button onClick={() => setShowFilter(false)}>Terapkan</Button>
             </div>
           </div>
         </div>

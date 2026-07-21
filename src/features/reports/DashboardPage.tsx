@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting, isModuleEnabled } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -140,12 +141,9 @@ export default function DashboardPage() {
           Ringkasan · {formatRangeLabel(range)}
         </span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setShowConfig(true)}
-            className="rounded-lg border border-line/10 bg-panel px-3 py-1.5 text-sm font-semibold text-ink hover:bg-background"
-          >
+          <Button variant="ghost" size="sm" onClick={() => setShowConfig(true)}>
             ⚙ Atur Widget
-          </button>
+          </Button>
           <span className="text-xs font-medium text-ink-soft">📅 Periode</span>
           <select
             value={preset}
@@ -373,18 +371,13 @@ export default function DashboardPage() {
               ))}
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setEnabled(new Set(DASHBOARD_WIDGETS.map((w) => w.key)))}
-                className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
               >
                 Pilih Semua
-              </button>
-              <button
-                onClick={saveConfig}
-                className="rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-              >
-                Simpan
-              </button>
+              </Button>
+              <Button onClick={saveConfig}>Simpan</Button>
             </div>
           </div>
         </div>
