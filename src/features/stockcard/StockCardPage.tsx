@@ -33,6 +33,8 @@ export default function StockCardPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
   const [warehouseId, setWarehouseId] = useState<number>(0) // 0 = semua gudang
   const [scanCode, setScanCode] = useState('')
+  const [search, setSearch] = useState('') // cari produk via nama/SKU
+  const [open, setOpen] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
 
@@ -64,6 +66,13 @@ export default function StockCardPage() {
     [productId, outletId, warehouseId, tick],
   )
   const product = useMemo(() => products.find((p) => p.id === productId) ?? null, [products, productId])
+  const results = useMemo(() => {
+    const k = search.trim().toLowerCase()
+    if (!k) return products
+    return products.filter(
+      (p) => p.name.toLowerCase().includes(k) || (p.sku ?? '').toLowerCase().includes(k),
+    )
+  }, [products, search])
   const totals = useMemo(() => {
     if (!card) return { in: 0, out: 0 }
     return {
@@ -100,19 +109,55 @@ export default function StockCardPage() {
             </option>
           ))}
         </select>
-        <select
-          value={productId ?? ''}
-          onChange={(e) => setProductId(Number(e.target.value))}
-          className="min-w-56 rounded-lg border border-line/10 bg-panel px-3 py-2 text-sm outline-none focus:border-brand-strong"
-        >
-          {products.length === 0 && <option value="">Tidak ada produk</option>}
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-              {p.sku ? ` · ${p.sku}` : ''}
-            </option>
-          ))}
-        </select>
+        {/* Cari produk via nama atau SKU (combobox) */}
+        <div className="relative min-w-64">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft">
+            🔍
+          </span>
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setOpen(true)
+            }}
+            onFocus={() => setOpen(true)}
+            onBlur={() => window.setTimeout(() => setOpen(false), 150)}
+            placeholder={
+              product
+                ? `${product.name}${product.sku ? ` · ${product.sku}` : ''}`
+                : 'Cari nama / SKU produk…'
+            }
+            className="w-full rounded-lg border border-line/10 bg-panel py-2 pl-9 pr-3 text-sm text-ink outline-none placeholder:text-ink placeholder:opacity-100 focus:border-brand-strong focus:placeholder:opacity-50"
+          />
+          {open && (
+            <ul className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-line/10 bg-panel py-1 shadow-card">
+              {results.length === 0 && (
+                <li className="px-3 py-2 text-sm text-ink-soft">Tidak ada produk cocok.</li>
+              )}
+              {results.map((p) => (
+                <li key={p.id}>
+                  <button
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setProductId(p.id)
+                      setSearch('')
+                      setOpen(false)
+                    }}
+                    className={
+                      'flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition hover:bg-background ' +
+                      (p.id === productId ? 'bg-brand-soft' : '')
+                    }
+                  >
+                    <span className="truncate font-medium text-ink">{p.name}</span>
+                    <span className="shrink-0 text-xs text-ink-soft">
+                      {p.sku ?? '—'} · stok {p.system_stock}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
