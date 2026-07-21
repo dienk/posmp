@@ -162,6 +162,48 @@ export function seedDatabase(db: Database): void {
     }
   }
 
+  // Contact contoh — Pelanggan (member), Pemasok (supplier), Penjual (seller).
+  const sampleMembers: Array<[string, string, string | null, number, string]> = [
+    // [nama, no HP, email, poin, tier]
+    ['Andi Wijaya', '081234567890', 'andi.w@email.com', 1250, 'GOLD'],
+    ['Siti Rahmawati', '081298765432', 'siti.r@email.com', 640, 'SILVER'],
+    ['Budi Hartono', '082133445566', 'budi.h@email.com', 3100, 'PLATINUM'],
+    ['Dewi Anggraini', '085611223344', 'dewi.a@email.com', 480, 'SILVER'],
+    ['Rudi Setiawan', '087855667788', null, 90, 'SILVER'],
+  ]
+  let memberSeq = 0
+  for (const [name, phone, email, points, tier] of sampleMembers) {
+    memberSeq += 1
+    db.run(
+      `INSERT INTO members (name, phone, email, points, member_number, tier, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE')`,
+      [name, phone, email, points, `MBR-${String(memberSeq).padStart(4, '0')}`, tier],
+    )
+  }
+
+  const sampleSuppliers: Array<[string, string, string, string]> = [
+    // [nama, nama kontak, telepon, alamat]
+    ['CV Sumber Pangan', 'Pak Joko', '02155512340', 'Jl. Pasar Induk No. 12, Jakarta'],
+    ['PT Kopi Nusantara', 'Bu Rina', '081277788899', 'Jl. Braga No. 5, Bandung'],
+    ['Toko Grosir Sejahtera', 'Pak Hendra', '081311122233', 'Jl. Pahlawan No. 88, Surabaya'],
+    ['UD Segar Buah Malang', 'Bu Wati', '085633344455', 'Jl. Ijen No. 21, Malang'],
+  ]
+  for (const [name, contactName, phone, address] of sampleSuppliers) {
+    db.run(
+      `INSERT INTO suppliers (name, contact_name, phone, address, is_active) VALUES (?, ?, ?, ?, 1)`,
+      [name, contactName, phone, address],
+    )
+  }
+
+  const sampleSellers = [
+    { id: 'slr_seed_1', name: 'Agen Reseller Jaya', phone: '081122233344', note: 'Reseller wilayah Jakarta' },
+    { id: 'slr_seed_2', name: 'Sales Keliling Bimo', phone: '082244455566', note: 'Sales area kampus & kantor' },
+    { id: 'slr_seed_3', name: 'Mitra Ojek Online', phone: '081900011122', note: 'Kemitraan pengantaran' },
+  ]
+  db.run(`INSERT INTO app_settings (setting_key, setting_value) VALUES ('master_sellers', ?)`, [
+    JSON.stringify(sampleSellers),
+  ])
+
   // Layout meja contoh (grid 4 kolom)
   for (let i = 1; i <= 8; i++) {
     db.run(
