@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import {
   generateVouchers,
@@ -84,11 +85,11 @@ export default function VoucherPage() {
           </h2>
           <div className="space-y-3">
             <Field label="Nama Kampanye">
-              <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
+              <input className="field-input" value={name} onChange={(e) => setName(e.target.value)} />
             </Field>
             <Field label="Awalan Kode (Prefix)">
               <input
-                className={inputCls}
+                className="field-input"
                 value={prefix}
                 onChange={(e) => setPrefix(e.target.value)}
                 placeholder="MILAD10"
@@ -112,7 +113,7 @@ export default function VoucherPage() {
               <Field label={type === 'PERCENTAGE' ? 'Nilai (%)' : 'Nilai (Rp)'}>
                 <input
                   type="number"
-                  className={inputCls}
+                  className="field-input"
                   value={value}
                   onChange={(e) => setValue(Number(e.target.value))}
                 />
@@ -120,7 +121,7 @@ export default function VoucherPage() {
               <Field label="Min. Belanja (Rp)">
                 <input
                   type="number"
-                  className={inputCls}
+                  className="field-input"
                   value={minPurchase}
                   onChange={(e) => setMinPurchase(Number(e.target.value))}
                 />
@@ -130,7 +131,7 @@ export default function VoucherPage() {
               <Field label="Maks. Diskon (Rp)">
                 <input
                   type="number"
-                  className={inputCls}
+                  className="field-input"
                   value={maxDiscount}
                   onChange={(e) => setMaxDiscount(Number(e.target.value))}
                 />
@@ -140,7 +141,7 @@ export default function VoucherPage() {
               <Field label="Batas Pakai / kode">
                 <input
                   type="number"
-                  className={inputCls}
+                  className="field-input"
                   value={usageLimit}
                   onChange={(e) => setUsageLimit(Number(e.target.value))}
                 />
@@ -148,19 +149,15 @@ export default function VoucherPage() {
               <Field label="Jumlah Kode">
                 <input
                   type="number"
-                  className={inputCls}
+                  className="field-input"
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
                 />
               </Field>
             </div>
-            <button
-              onClick={handleGenerate}
-              disabled={busy}
-              className="w-full rounded-xl bg-status-occupied py-3 text-sm font-bold text-white hover:brightness-95 disabled:opacity-50"
-            >
+            <Button onClick={handleGenerate} disabled={busy} className="w-full">
               {busy ? 'Membuat…' : `Generate ${quantity} Voucher`}
-            </button>
+            </Button>
           </div>
         </section>
 
@@ -243,7 +240,7 @@ const inputCls =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+      <span className="field-label">{label}</span>
       {children}
     </label>
   )

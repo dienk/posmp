@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -198,7 +199,7 @@ export default function CashBalancePage() {
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">
+                <span className="field-label">
                   Saldo Fisik Saat Tutup (Rp)
                 </span>
                 <input
@@ -206,25 +207,25 @@ export default function CashBalancePage() {
                   min={0}
                   value={closingBalance}
                   onChange={(e) => setClosingBalance(Number(e.target.value))}
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Waktu Tutup</span>
+                <span className="field-label">Waktu Tutup</span>
                 <input
                   type="datetime-local"
                   value={closedAtInput}
                   onChange={(e) => setClosedAtInput(e.target.value)}
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Catatan (opsional)</span>
+                <span className="field-label">Catatan (opsional)</span>
                 <input
                   value={closeNote}
                   onChange={(e) => setCloseNote(e.target.value)}
                   placeholder="mis. selisih receh, setoran"
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
             </div>
@@ -246,13 +247,9 @@ export default function CashBalancePage() {
                 </b>{' '}
                 <span className="text-xs">(fisik − ekspektasi)</span>
               </span>
-              <button
-                onClick={handleClose}
-                disabled={saving}
-                className="ml-auto rounded-xl bg-status-occupied px-6 py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-40"
-              >
+              <Button onClick={handleClose} disabled={saving} className="ml-auto">
                 {saving ? 'Menutup…' : 'Tutup Kas'}
-              </button>
+              </Button>
             </div>
           </section>
         ) : (
@@ -261,27 +258,27 @@ export default function CashBalancePage() {
             <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">Buka Kas</h2>
             <div className="grid gap-3 sm:grid-cols-3">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Saldo Awal (Rp)</span>
+                <span className="field-label">Saldo Awal (Rp)</span>
                 <input
                   type="number"
                   min={0}
                   value={openingBalance}
                   onChange={(e) => setOpeningBalance(Number(e.target.value))}
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Waktu Buka</span>
+                <span className="field-label">Waktu Buka</span>
                 <input
                   type="datetime-local"
                   value={openedAtInput}
                   onChange={(e) => setOpenedAtInput(e.target.value)}
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
               {schedule.shiftEnabled && (
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-ink-soft">Shift</span>
+                  <span className="field-label">Shift</span>
                   <select
                     value={shiftName}
                     onChange={(e) => setShiftName(e.target.value)}
@@ -297,22 +294,18 @@ export default function CashBalancePage() {
                 </label>
               )}
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Catatan (opsional)</span>
+                <span className="field-label">Catatan (opsional)</span>
                 <input
                   value={openNote}
                   onChange={(e) => setOpenNote(e.target.value)}
                   placeholder="mis. modal kas awal"
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
             </div>
-            <button
-              onClick={handleOpen}
-              disabled={saving}
-              className="mt-4 rounded-xl bg-status-occupied px-6 py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-40"
-            >
+            <Button onClick={handleOpen} disabled={saving} className="mt-4">
               {saving ? 'Membuka…' : 'Buka Kas'}
-            </button>
+            </Button>
           </section>
         )}
 
@@ -409,18 +402,12 @@ export default function CashBalancePage() {
                     <td className="px-4 py-2.5 text-right">
                       {i === 0 ? (
                         <div className="flex justify-end gap-3">
-                          <button
-                            onClick={() => setEditing(s)}
-                            className="text-xs font-semibold text-status-occupied hover:underline"
-                          >
+                          <Button variant="quiet" size="sm" onClick={() => setEditing(s)}>
                             Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(s)}
-                            className="text-xs font-semibold text-status-occupied hover:underline"
-                          >
+                          </Button>
+                          <Button variant="danger" size="sm" onClick={() => handleDelete(s)}>
                             Hapus
-                          </button>
+                          </Button>
                         </div>
                       ) : (
                         <span className="text-xs text-ink-soft">—</span>
@@ -512,54 +499,54 @@ function EditSessionModal({
         </div>
         <div className="space-y-3">
           <label className="block">
-            <span className="mb-1 block text-xs font-medium text-ink-soft">Shift (opsional)</span>
-            <input value={shift} onChange={(e) => setShift(e.target.value)} className={inputCls} />
+            <span className="field-label">Shift (opsional)</span>
+            <input value={shift} onChange={(e) => setShift(e.target.value)} className="field-input" />
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Waktu Buka</span>
+              <span className="field-label">Waktu Buka</span>
               <input
                 type="datetime-local"
                 value={openedAt}
                 onChange={(e) => setOpenedAt(e.target.value)}
-                className={inputCls}
+                className="field-input"
               />
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Saldo Awal (Rp)</span>
+              <span className="field-label">Saldo Awal (Rp)</span>
               <input
                 type="number"
                 value={opening}
                 onChange={(e) => setOpening(Number(e.target.value))}
-                className={inputCls}
+                className="field-input"
               />
             </label>
           </div>
           {closed && (
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Waktu Tutup</span>
+                <span className="field-label">Waktu Tutup</span>
                 <input
                   type="datetime-local"
                   value={closedAt}
                   onChange={(e) => setClosedAt(e.target.value)}
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Saldo Fisik (Rp)</span>
+                <span className="field-label">Saldo Fisik (Rp)</span>
                 <input
                   type="number"
                   value={closing}
                   onChange={(e) => setClosing(Number(e.target.value))}
-                  className={inputCls}
+                  className="field-input"
                 />
               </label>
             </div>
           )}
           <label className="block">
-            <span className="mb-1 block text-xs font-medium text-ink-soft">Catatan</span>
-            <input value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} />
+            <span className="field-label">Catatan</span>
+            <input value={note} onChange={(e) => setNote(e.target.value)} className="field-input" />
           </label>
           <p className="text-[11px] text-ink-soft">
             Ekspektasi & selisih dihitung ulang otomatis dari saldo awal + penjualan tunai pada
@@ -568,19 +555,12 @@ function EditSessionModal({
           {err && <p className="text-xs text-status-occupied">{err}</p>}
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <button
-            onClick={save}
-            disabled={busy}
-            className="rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-40"
-          >
+          <Button onClick={save} disabled={busy}>
             {busy ? 'Menyimpan…' : 'Simpan'}
-          </button>
-          <button
-            onClick={onClose}
-            className="rounded-xl border border-line/10 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-          >
+          </Button>
+          <Button variant="ghost" onClick={onClose}>
             Batal
-          </button>
+          </Button>
         </div>
       </div>
     </div>

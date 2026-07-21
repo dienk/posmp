@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -87,7 +88,7 @@ export default function InstallmentsPage() {
           </h2>
           <div className="space-y-3">
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Member</span>
+              <span className="field-label">Member</span>
               <select
                 className={inputCls}
                 value={memberId}
@@ -102,29 +103,29 @@ export default function InstallmentsPage() {
               </select>
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Pokok (Rp)</span>
+              <span className="field-label">Pokok (Rp)</span>
               <input
                 type="number"
-                className={inputCls}
+                className="field-input"
                 value={principal}
                 onChange={(e) => setPrincipal(Number(e.target.value))}
               />
             </label>
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Tenor (bulan)</span>
+                <span className="field-label">Tenor (bulan)</span>
                 <input
                   type="number"
-                  className={inputCls}
+                  className="field-input"
                   value={tenure}
                   onChange={(e) => setTenure(Number(e.target.value))}
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Bunga (%/bln)</span>
+                <span className="field-label">Bunga (%/bln)</span>
                 <input
                   type="number"
-                  className={inputCls}
+                  className="field-input"
                   value={interest}
                   onChange={(e) => setInterest(Number(e.target.value))}
                 />
@@ -142,12 +143,9 @@ export default function InstallmentsPage() {
               </div>
             </div>
 
-            <button
-              onClick={handleCreate}
-              className="w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-            >
+            <Button onClick={handleCreate} className="w-full">
               Buat Cicilan
-            </button>
+            </Button>
           </div>
         </section>
 
@@ -191,12 +189,9 @@ export default function InstallmentsPage() {
                         / {formatRupiah(p.total_payable)}
                       </span>
                       {p.status !== 'PAID' && (
-                        <button
-                          onClick={() => handlePay(p)}
-                          className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-strong"
-                        >
+                        <Button size="sm" onClick={() => handlePay(p)}>
                           Bayar {formatRupiah(Math.min(p.monthly_installment, p.remaining_balance))}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </li>

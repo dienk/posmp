@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -132,13 +133,14 @@ export default function DraftsPage() {
                 </div>
               )}
 
-              <button
+              <Button
+                variant="danger-outline"
                 onClick={() => handleDelete(selected)}
                 disabled={busy}
-                className="mt-4 w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95 disabled:opacity-50"
+                className="mt-4 w-full"
               >
                 {busy ? 'Memproses…' : 'Batalkan Draft'}
-              </button>
+              </Button>
               <p className="mt-2 text-center text-xs text-ink-soft">
                 Membatalkan draft menghapusnya & mengosongkan meja terkait.
               </p>

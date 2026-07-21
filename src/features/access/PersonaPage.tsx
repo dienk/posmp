@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { useSettings } from '../../lib/SettingsContext'
 import {
   genId,
@@ -117,12 +118,9 @@ export default function PersonaPage() {
                     Jadikan Aktif
                   </button>
                 )}
-                <button
-                  onClick={() => removePersona(p.id)}
-                  className="rounded-lg px-2 py-1.5 text-xs font-semibold text-status-occupied hover:bg-status-occupied/10"
-                >
+                <Button variant="danger" size="sm" onClick={() => removePersona(p.id)}>
                   Hapus
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -135,19 +133,19 @@ export default function PersonaPage() {
           </h2>
           <div className="space-y-3">
             <input
-              className={inputCls}
+              className="field-input"
               placeholder="Nama"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <input
-              className={inputCls}
+              className="field-input"
               placeholder="Telepon (opsional)"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
             <label className="block">
-              <span className="mb-1 block text-xs font-medium text-ink-soft">Peran</span>
+              <span className="field-label">Peran</span>
               <select
                 className={inputCls}
                 value={roleId}
@@ -160,12 +158,9 @@ export default function PersonaPage() {
                 ))}
               </select>
             </label>
-            <button
-              onClick={addPersona}
-              className="w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
-            >
+            <Button onClick={addPersona} className="w-full">
               Simpan Persona
-            </button>
+            </Button>
             <p className="text-xs text-ink-soft">
               Peran ditentukan di <b>Setelan › Peran & Hak Akses</b>. Persona yang aktif menentukan
               menu yang tampil di sidebar.

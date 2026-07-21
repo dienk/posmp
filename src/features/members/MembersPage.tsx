@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { useSettings } from '../../lib/SettingsContext'
 import { MemberCardModal } from '../membercard/MemberCard'
@@ -149,14 +150,11 @@ export default function MembersPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="Cari nama / HP / no. kartu…"
-          className="w-64 rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+          className="field-input w-64"
         />
-        <button
-          onClick={startNew}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
+        <Button size="sm" onClick={startNew} className="ml-auto">
           + Member
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[320px_1fr]">
@@ -318,18 +316,10 @@ function MemberDetail({
           >
             🔗 Kirim Link
           </button>
-          <button
-            onClick={onEdit}
-            className="rounded-xl bg-status-occupied px-5 py-2.5 text-sm font-bold text-white hover:brightness-95"
-          >
-            Edit
-          </button>
-          <button
-            onClick={onDelete}
-            className="rounded-xl border border-status-occupied px-4 py-2.5 text-sm font-semibold text-status-occupied hover:bg-status-occupied/10"
-          >
+          <Button onClick={onEdit}>Edit</Button>
+          <Button variant="danger-outline" onClick={onDelete}>
             Hapus
-          </button>
+          </Button>
         </div>
         {showShare && (
           <div className="mt-3">
@@ -482,18 +472,10 @@ function MemberForm({
       </FormSection>
 
       <div className="mt-4 flex gap-2">
-        <button
-          onClick={onSave}
-          className="rounded-xl bg-status-occupied px-6 py-2.5 text-sm font-bold text-white hover:brightness-95"
-        >
-          Simpan
-        </button>
-        <button
-          onClick={onCancel}
-          className="rounded-xl border border-line/10 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-background"
-        >
+        <Button onClick={onSave}>Simpan</Button>
+        <Button variant="ghost" onClick={onCancel}>
           Batal
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -504,7 +486,7 @@ const inputCls =
   'w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong'
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <span className="mb-1 block text-xs font-medium text-ink-soft">{children}</span>
+  return <span className="field-label">{children}</span>
 }
 function Input({
   label,
@@ -524,7 +506,7 @@ function Input({
       <Label>{label}</Label>
       <input
         type={type}
-        className={inputCls}
+        className="field-input"
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}

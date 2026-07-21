@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting } from '../../lib/settings'
 import { getLoyaltyConfig } from '../../lib/loyalty'
@@ -127,12 +128,12 @@ export default function PreorderPage() {
                 </div>
               </dl>
 
-              <button
+              <Button
                 onClick={() => setShowPay(true)}
-                className="mt-4 w-full rounded-xl bg-status-occupied py-2.5 text-sm font-bold text-white hover:brightness-95"
+                className="mt-4 w-full"
               >
                 Lunasi & Ambil ({formatRupiah(selected.remaining)})
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="flex h-40 items-center justify-center rounded-card bg-panel text-sm text-ink-soft shadow-card">

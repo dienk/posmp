@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import Button from '../../components/ui/Button'
 import { useSettings } from '../../lib/SettingsContext'
 import {
   genId,
@@ -67,12 +68,9 @@ export default function RolesPage() {
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Peran & Hak Akses</h1>
-        <button
-          onClick={addRole}
-          className="ml-auto rounded-lg bg-status-occupied px-4 py-2 text-sm font-semibold text-white hover:brightness-95"
-        >
+        <Button size="sm" onClick={addRole} className="ml-auto">
           + Peran
-        </button>
+        </Button>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[280px_1fr]">
@@ -101,9 +99,9 @@ export default function RolesPage() {
           {selected ? (
             <div className="rounded-card bg-panel p-5 shadow-card">
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">Nama Peran</span>
+                <span className="field-label">Nama Peran</span>
                 <input
-                  className="w-full rounded-lg border border-line/10 px-3 py-2 text-sm outline-none focus:border-brand-strong"
+                  className="field-input"
                   value={selected.name}
                   onChange={(e) => updateSelected({ name: e.target.value })}
                 />
@@ -133,12 +131,9 @@ export default function RolesPage() {
               </p>
 
               <div className="mt-4 flex justify-end">
-                <button
-                  onClick={deleteRole}
-                  className="rounded-lg border border-status-occupied px-3 py-2 text-sm font-semibold text-status-occupied hover:bg-status-occupied/10"
-                >
+                <Button variant="danger-outline" onClick={deleteRole}>
                   Hapus Peran
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
