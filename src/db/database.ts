@@ -2,6 +2,7 @@ import initSqlJs, { type Database, type SqlValue } from 'sql.js'
 // Vite resolves the wasm binary to a local URL so the DB engine works 100% offline.
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
 import schemaSql from './schema.sql?raw'
+import { PRODUCT_PHOTOS } from './productPhotos'
 import { seedDatabase } from './seed'
 
 const IDB_NAME = 'posmerahputih'
@@ -423,6 +424,25 @@ function migrateSchema(db: Database): boolean {
       FOREIGN KEY(component_product_id) REFERENCES products(id),
       UNIQUE(bundle_product_id, component_product_id)
     )`)
+    changed = true
+  }
+
+  // Backfill foto produk real (sekali jalan, ditandai flag). Hanya mengganti
+  // placeholder SVG bawaan — foto unggahan pengguna (non-SVG) tidak tersentuh.
+  const photoFlag = db.exec(
+    `SELECT 1 FROM app_settings WHERE setting_key = 'product_photos_v1'`,
+  )
+  if (!photoFlag.length) {
+    for (const [name, uri] of Object.entries(PRODUCT_PHOTOS)) {
+      db.run(
+        `UPDATE products SET image_path = ?, images = ?
+         WHERE name = ? AND (image_path IS NULL OR image_path LIKE 'data:image/svg%')`,
+        [uri, JSON.stringify([uri]), name],
+      )
+    }
+    db.run(
+      `INSERT INTO app_settings (setting_key, setting_value) VALUES ('product_photos_v1', '1')`,
+    )
     changed = true
   }
   return changed

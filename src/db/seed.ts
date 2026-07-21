@@ -1,4 +1,5 @@
 import type { Database } from 'sql.js'
+import { PRODUCT_PHOTOS } from './productPhotos'
 
 /**
  * Data awal untuk demo Milestone 1: satu outlet, kategori F&B,
@@ -114,7 +115,8 @@ export function seedDatabase(db: Database): void {
     const sku = `${prefix}-${String(seq[categoryId]).padStart(3, '0')}`
     barcodeNo += 1
     const label = name.length > 16 ? name.slice(0, 15) + '…' : name
-    const img = productImg(emoji, c1, c2, label)
+    // Foto real (Wikimedia Commons, ditanam) bila tersedia; selain itu placeholder SVG.
+    const img = PRODUCT_PHOTOS[name] ?? productImg(emoji, c1, c2, label)
     db.run(
       `INSERT INTO products (category_id, name, sku, barcode, price, cost_price, unit, min_stock, is_active, image_path, images)
        VALUES (?, ?, ?, ?, ?, ?, ?, 10, 1, ?, ?)`,
