@@ -87,16 +87,20 @@ export const THEMES: Theme[] = [
     vars: t('51 65 85', '30 41 59', '71 85 105', '15 23 42', '27 35 54', '248 250 252', '148 163 184'),
   },
   {
+    // Mode gelap biru. Permukaan --c-panel/--c-border di-override via
+    // [data-theme="safir"] di index.css.
     id: 'safir',
     name: 'Safir',
-    desc: 'Biru tegas & dalam',
-    vars: t('147 197 253', '219 234 254', '29 78 216', '239 246 255', '219 234 254', '30 58 138', '100 116 139'),
+    desc: 'Biru gelap (mode gelap)',
+    vars: t('30 64 175', '27 46 77', '37 99 235', '12 27 51', '19 39 65', '241 245 249', '148 163 184'),
   },
   {
+    // Mode gelap hijau. Permukaan --c-panel/--c-border di-override via
+    // [data-theme="zamrud"] di index.css.
     id: 'zamrud',
     name: 'Zamrud',
-    desc: 'Hijau zamrud pekat',
-    vars: t('167 243 208', '209 250 229', '4 120 87', '236 253 245', '209 250 229', '6 78 59', '100 116 139'),
+    desc: 'Hijau gelap (mode gelap)',
+    vars: t('6 95 70', '20 53 42', '4 120 87', '11 33 26', '18 50 39', '240 253 244', '148 163 184'),
   },
 ]
 

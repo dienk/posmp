@@ -31,6 +31,18 @@
   --c-border: 255 255 255;
 }
 
+/* Safir: mode gelap biru — permukaan biru-gelap + garis putih tipis. */
+:root[data-theme='safir'] {
+  --c-panel: 19 39 65;
+  --c-border: 255 255 255;
+}
+
+/* Zamrud: mode gelap hijau — permukaan hijau-gelap + garis putih tipis. */
+:root[data-theme='zamrud'] {
+  --c-panel: 18 50 39;
+  --c-border: 255 255 255;
+}
+
 @layer base {
   html,
   body,
