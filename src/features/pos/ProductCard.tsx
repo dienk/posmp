@@ -1,9 +1,12 @@
 import { formatRupiah } from '../../lib/format'
 import type { Product } from '../../types'
 
+export type ItemMode = 'grid' | 'list'
+
 interface Props {
   product: Product
   onSelect: (product: Product) => void
+  mode?: ItemMode
 }
 
 /** Inisial produk sebagai placeholder gambar (belum ada foto katalog). */
@@ -15,8 +18,39 @@ function initials(name: string): string {
     .join('')
 }
 
-export default function ProductCard({ product, onSelect }: Props) {
+export default function ProductCard({ product, onSelect, mode = 'grid' }: Props) {
   const soldOut = (product.stock ?? 0) <= 0
+
+  // Mode daftar: baris ringkas (gambar kecil + nama + harga) untuk katalog padat.
+  if (mode === 'list') {
+    return (
+      <button
+        type="button"
+        disabled={soldOut}
+        onClick={() => onSelect(product)}
+        className="flex w-full items-center gap-3 rounded-xl bg-panel px-3 py-2 text-left shadow-card
+                   transition hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-surface/60">
+          {product.image_path ? (
+            <img src={product.image_path} alt={product.name} className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-sm font-bold text-white/90">{initials(product.name)}</span>
+          )}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold text-ink">{product.name}</span>
+          <span className="block text-xs text-ink-soft">
+            {soldOut ? 'Stok habis' : `Stok: ${product.stock}`}
+          </span>
+        </span>
+        <span className="shrink-0 text-sm font-bold text-status-occupied">
+          {formatRupiah(product.price)}
+        </span>
+      </button>
+    )
+  }
+
   return (
     <button
       type="button"

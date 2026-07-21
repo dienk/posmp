@@ -7,7 +7,7 @@ import { useSettings } from '../../lib/SettingsContext'
 import { useUI } from '../../lib/UIContext'
 import type { Category, FacilityType, Product } from '../../types'
 import CartPanel from './CartPanel'
-import ProductCard from './ProductCard'
+import ProductCard, { type ItemMode } from './ProductCard'
 import {
   fetchCategories,
   fetchProducts,
@@ -67,6 +67,22 @@ export default function PosPage() {
   const [preorderDeadline, setPreorderDeadline] = useState('')
   const [dpAmount, setDpAmount] = useState(0)
   const [scanMode, setScanMode] = useState(false)
+  // Mode tampilan item katalog (grid/daftar), diingat di localStorage.
+  const [itemMode, setItemMode] = useState<ItemMode>(() => {
+    try {
+      return (localStorage.getItem('pos_item_mode') as ItemMode) === 'list' ? 'list' : 'grid'
+    } catch {
+      return 'grid'
+    }
+  })
+  const changeItemMode = (m: ItemMode) => {
+    setItemMode(m)
+    try {
+      localStorage.setItem('pos_item_mode', m)
+    } catch {
+      /* localStorage tak tersedia — abaikan */
+    }
+  }
   // Diskon transaksi manual (Rp atau %) — di luar voucher.
   const [manualDiscMode, setManualDiscMode] = useState<'rp' | 'pct'>('rp')
   const [manualDiscInput, setManualDiscInput] = useState('')
@@ -399,8 +415,8 @@ export default function PosPage() {
           </div>
         </header>
 
-        {/* Kategori pills */}
-        <nav className="flex flex-wrap gap-2 px-4 py-3">
+        {/* Kategori pills + switch mode tampilan item */}
+        <nav className="flex flex-wrap items-center gap-2 px-4 py-3">
           {categoryPills.map((c) => {
             const active = activeCategory === c.id
             return (
@@ -418,6 +434,27 @@ export default function PosPage() {
               </button>
             )
           })}
+          <div className="ml-auto flex overflow-hidden rounded-lg border border-line/10">
+            {([
+              ['grid', '▦', 'Tampilan grid'],
+              ['list', '☰', 'Tampilan daftar'],
+            ] as const).map(([m, icon, title]) => (
+              <button
+                key={m}
+                onClick={() => changeItemMode(m)}
+                title={title}
+                aria-label={title}
+                className={
+                  'px-3 py-1.5 text-sm transition ' +
+                  (itemMode === m
+                    ? 'bg-brand-strong text-white'
+                    : 'text-ink-soft hover:bg-background')
+                }
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
         </nav>
 
         {/* Grid produk */}
@@ -425,9 +462,15 @@ export default function PosPage() {
           {products.length === 0 ? (
             <p className="mt-10 text-center text-sm text-ink-soft">Produk tidak ditemukan.</p>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div
+              className={
+                itemMode === 'list'
+                  ? 'grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3'
+                  : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+              }
+            >
               {products.map((p) => (
-                <ProductCard key={p.id} product={p} onSelect={handleAddProduct} />
+                <ProductCard key={p.id} product={p} onSelect={handleAddProduct} mode={itemMode} />
               ))}
             </div>
           )}
