@@ -28,10 +28,42 @@ export const PERMISSIONS: { key: string; label: string }[] = [
   { key: 'installments', label: 'Cicilan' },
   { key: 'vouchers', label: 'Voucher' },
   { key: 'marketplace', label: 'Marketplace / Channel' },
+  { key: 'dashboard', label: 'Dashboard' },
   { key: 'reports', label: 'Laporan' },
+  { key: 'kiosk', label: 'Kiosk (layar mandiri)' },
 ]
 
 const ALL_KEYS = PERMISSIONS.map((p) => p.key)
+
+// ── Migrasi izin ────────────────────────────────────────────────────────────
+// Kunci izin yang sudah ada SEBELUM penambahan 'dashboard' & 'kiosk'. Dipakai
+// untuk mengenali peran yang dulunya full-access agar tetap dapat izin baru
+// (mencegah menu Dashboard/Kiosk hilang untuk peran Pemilik/Manajer tersimpan).
+const LEGACY_FULL_KEYS = [
+  'kasir',
+  'datamaster',
+  'transaksi',
+  'cash_history',
+  'tables',
+  'kds',
+  'queue',
+  'members',
+  'stockin',
+  'stockopname',
+  'installments',
+  'vouchers',
+  'marketplace',
+  'reports',
+]
+const ADDED_KEYS = ['dashboard', 'kiosk']
+
+/** Peran yang punya SEMUA kunci lama dianggap full-access → diberi kunci baru. */
+function migratePerms(perms: string[]): string[] {
+  if (!LEGACY_FULL_KEYS.every((k) => perms.includes(k))) return perms
+  const set = new Set(perms)
+  for (const k of ADDED_KEYS) set.add(k)
+  return Array.from(set)
+}
 
 // Peran default mengikuti persona pada PRD.
 export const DEFAULT_ROLES: Role[] = [
@@ -59,7 +91,9 @@ function parse<T>(raw: string | undefined, fallback: T): T {
 
 export function loadRoles(settings: Record<string, string>): Role[] {
   const roles = parse<Role[]>(settings.access_roles, DEFAULT_ROLES)
-  return roles.length ? roles : DEFAULT_ROLES
+  const list = roles.length ? roles : DEFAULT_ROLES
+  // Migrasi: peran full-access lama otomatis dapat izin baru (dashboard/kiosk).
+  return list.map((r) => ({ ...r, perms: migratePerms(r.perms) }))
 }
 
 export function loadPersonas(settings: Record<string, string>): Persona[] {

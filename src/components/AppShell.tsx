@@ -144,6 +144,7 @@ const LOYALTY_GROUP: NavGroupDef = {
 const KIOSK_GROUP: NavGroupDef = {
   label: 'Kiosk',
   icon: Monitor,
+  perm: 'kiosk',
   children: [
     { to: '/kiosk-info', label: 'Kiosk Informasi', short: 'Info', icon: Megaphone },
     { to: '/kiosk-order', label: 'Kiosk Pemesanan & Pembayaran', short: 'Pesan', icon: ShoppingCart },
@@ -174,7 +175,7 @@ const SIDEBAR: NavEntry[] = [
   { kind: 'group', group: LOYALTY_GROUP },
   { kind: 'group', group: STOCK_GROUP },
   { kind: 'link', item: { to: '/marketplace', label: 'Channel', icon: ShoppingBag, moduleKey: 'module_marketplace', perm: 'marketplace' } },
-  { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, perm: 'reports' } },
+  { kind: 'link', item: { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, perm: 'dashboard' } },
   { kind: 'link', item: { to: '/reports', label: 'Laporan', icon: ScrollText, perm: 'reports' } },
   { kind: 'group', group: KIOSK_GROUP },
   { kind: 'group', group: SETTINGS_GROUP },
