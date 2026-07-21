@@ -67,6 +67,17 @@
     font-family: 'Rubik Variable', 'Nunito Sans Variable', system-ui, sans-serif;
   }
 
+  /* ── Zebra striping untuk SELURUH daftar data ───────────────────────────── */
+  /* Baris genap diberi overlay warna teks yang sangat tipis → di tema terang
+     tampak sedikit lebih gelap, di tema gelap sedikit lebih terang (otomatis
+     ikut tema). Berlaku untuk tabel (<tbody>) & list ber-`divide-y` (ul/li).
+     Baris dengan latar khusus atau :hover memakai utility Tailwind sehingga
+     tetap menang atas aturan base ini. */
+  tbody tr:nth-child(even),
+  [class*='divide-y'] > *:nth-child(even) {
+    background-color: rgb(var(--c-ink) / 0.05);
+  }
+
   /* ── Fondasi UX (panduan ui-ux-pro-max) ─────────────────────────────────── */
 
   /* Kursor menandai elemen interaktif; status nonaktif jelas tak bisa diklik. */

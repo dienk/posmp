@@ -157,6 +157,11 @@ Nilai tiap token diganti per-tema (`src/lib/themes.ts` + `[data-theme]` di `inde
 - **`line`** = warna garis/divider (`border-line/10`, `divide-line/5`) — **JANGAN
   `border-black/*`** agar terlihat di mode gelap.
 - **`status.occupied`** (merah) hanya untuk **aksi destruktif/status**, bukan CTA umum.
+- **Zebra striping** otomatis untuk semua daftar data via aturan base di `index.css`
+  (`tbody tr:nth-child(even)` & `[class*='divide-y'] > *:nth-child(even)` → overlay
+  `rgb(var(--c-ink)/0.05)`, ikut tema). Baris `:hover`/latar khusus pakai utility
+  Tailwind sehingga tetap menang. Daftar non-data (nav, dropdown/combobox) sengaja
+  **tidak** pakai `divide-y` agar tak ikut ter-strip.
 
 ### Sistem komponen ui-ux-pro-max (wajib untuk UI baru)
 
