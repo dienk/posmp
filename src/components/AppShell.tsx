@@ -51,6 +51,7 @@ import {
   UserCog,
   type LucideIcon,
 } from 'lucide-react'
+import SmartwatchClock from './SmartwatchClock'
 import { useSettings } from '../lib/SettingsContext'
 import { isModuleEnabled } from '../lib/settings'
 import { useConnection } from '../lib/useConnection'
@@ -293,33 +294,32 @@ export default function AppShell() {
   )
 }
 
-/** Jam waktu-nyata di sidebar (tampil di semua menu). Berdetak tiap detik. */
+/** Jam smartwatch di sidebar (tampil di semua menu). Menyempit → jam:menit ringkas. */
 function SidebarClock({ open }: { open: boolean }) {
+  if (open) {
+    return (
+      <div className="mb-2">
+        <SmartwatchClock size="sm" />
+      </div>
+    )
+  }
+  return <MiniClock />
+}
+
+/** Jam ringkas (jam:menit) untuk sidebar menyempit. */
+function MiniClock() {
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
     const t = window.setInterval(() => setNow(new Date()), 1000)
     return () => window.clearInterval(t)
   }, [])
-  const time = now.toLocaleTimeString('id-ID', { hour12: false })
-  if (!open) {
-    // Sidebar menyempit: jam ringkas (jam:menit) bertumpuk.
-    return (
-      <div
-        title={time}
-        className="mb-2 w-16 rounded-lg bg-background py-1 text-center font-mono text-xs font-bold tabular-nums text-ink"
-      >
-        {now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}
-      </div>
-    )
-  }
+  const hm = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })
   return (
-    <div className="mb-2 rounded-xl bg-background px-3 py-2">
-      <p className="font-mono text-lg font-extrabold tabular-nums tracking-tight text-ink">
-        {time}
-      </p>
-      <p className="truncate text-[11px] text-ink-soft">
-        {now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-      </p>
+    <div
+      title={now.toLocaleTimeString('id-ID', { hour12: false })}
+      className="mb-2 w-16 rounded-lg bg-gradient-to-b from-slate-700 to-slate-950 py-1 text-center font-mono text-xs font-bold tabular-nums text-white ring-1 ring-brand-strong/50"
+    >
+      {hm}
     </div>
   )
 }
