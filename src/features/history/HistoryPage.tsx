@@ -7,6 +7,12 @@ import { publish } from '../../lib/realtime'
 import { useRealtime } from '../../lib/useRealtime'
 import ReceiptModal from '../receipt/ReceiptModal'
 import {
+  computeRange,
+  formatRangeLabel,
+  RANGE_PRESETS,
+  type RangePreset,
+} from '../reports/dateRange'
+import {
   getReceipt,
   listTransactions,
   processRefund,
@@ -34,6 +40,13 @@ const SOURCE_LABEL: Record<string, string> = {
   TIKTOK: 'TikTok',
 }
 
+// Periode sama seperti Dashboard, plus opsi "Semua" (default Riwayat = tanpa filter).
+type HistPreset = RangePreset | 'all'
+const HIST_PRESETS: { key: HistPreset; label: string }[] = [
+  { key: 'all', label: 'Semua Tanggal' },
+  ...RANGE_PRESETS,
+]
+
 export default function HistoryPage() {
   const { settings } = useSettings()
   const outletId = getNumberSetting(settings, 'active_outlet_id', 1)
@@ -46,10 +59,16 @@ export default function HistoryPage() {
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
-  // Filter daftar: pencarian invoice/member + rentang tanggal.
+  // Filter daftar: pencarian invoice/member + periode tanggal (seperti Dashboard).
   const [keyword, setKeyword] = useState('')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
+  const [preset, setPreset] = useState<HistPreset>('all')
+  const today = useMemo(() => computeRange('day').from, [])
+  const [customFrom, setCustomFrom] = useState(today)
+  const [customTo, setCustomTo] = useState(today)
+  const range = useMemo(
+    () => (preset === 'all' ? null : computeRange(preset, { from: customFrom, to: customTo })),
+    [preset, customFrom, customTo],
+  )
 
   const reload = useCallback(() => setTxs(listTransactions(outletId)), [outletId])
   useEffect(reload, [reload])
@@ -63,13 +82,12 @@ export default function HistoryPage() {
 
   const selected = useMemo(() => txs.find((t) => t.id === selectedId) ?? null, [txs, selectedId])
 
-  // Terapkan filter tanggal (YYYY-MM-DD) & kata kunci (invoice/member/sumber).
+  // Terapkan filter periode (YYYY-MM-DD, inklusif) & kata kunci (invoice/member/sumber).
   const filtered = useMemo(() => {
     const k = keyword.trim().toLowerCase()
     return txs.filter((t) => {
       const day = (t.transaction_date ?? '').slice(0, 10)
-      if (dateFrom && day < dateFrom) return false
-      if (dateTo && day > dateTo) return false
+      if (range && (day < range.from || day > range.to)) return false
       if (
         k &&
         !(
@@ -81,8 +99,8 @@ export default function HistoryPage() {
         return false
       return true
     })
-  }, [txs, keyword, dateFrom, dateTo])
-  const filterOn = !!(keyword || dateFrom || dateTo)
+  }, [txs, keyword, range])
+  const filterOn = !!keyword || preset !== 'all'
 
   const showToast = (m: string) => {
     setToast(m)
@@ -118,32 +136,45 @@ export default function HistoryPage() {
           placeholder="🔍 Cari invoice / member…"
           className="field-input w-56"
         />
-        <label className="flex items-center gap-1.5 text-xs text-ink-soft">
-          Dari
-          <input
-            type="date"
-            value={dateFrom}
-            max={dateTo || undefined}
-            onChange={(e) => setDateFrom(e.target.value)}
-            className="field-input w-40 py-1.5"
-          />
-        </label>
-        <label className="flex items-center gap-1.5 text-xs text-ink-soft">
-          s/d
-          <input
-            type="date"
-            value={dateTo}
-            min={dateFrom || undefined}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="field-input w-40 py-1.5"
-          />
-        </label>
+        <span className="text-xs font-medium text-ink-soft">📅 Periode</span>
+        <select
+          value={preset}
+          onChange={(e) => setPreset(e.target.value as HistPreset)}
+          className="rounded-lg border border-line/10 bg-panel px-3 py-1.5 text-sm outline-none focus:border-brand-strong"
+        >
+          {HIST_PRESETS.map((p) => (
+            <option key={p.key} value={p.key}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+        {preset === 'custom' && (
+          <div className="flex items-center gap-1.5">
+            <input
+              type="date"
+              value={customFrom}
+              max={customTo || undefined}
+              onChange={(e) => setCustomFrom(e.target.value)}
+              className="rounded-lg border border-line/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+            />
+            <span className="text-xs text-ink-soft">s/d</span>
+            <input
+              type="date"
+              value={customTo}
+              min={customFrom || undefined}
+              onChange={(e) => setCustomTo(e.target.value)}
+              className="rounded-lg border border-line/10 bg-panel px-2 py-1.5 text-sm outline-none focus:border-brand-strong"
+            />
+          </div>
+        )}
+        {range && (
+          <span className="hidden text-xs text-ink-soft sm:inline">{formatRangeLabel(range)}</span>
+        )}
         {filterOn && (
           <button
             onClick={() => {
               setKeyword('')
-              setDateFrom('')
-              setDateTo('')
+              setPreset('all')
             }}
             className="text-xs font-semibold text-status-occupied hover:underline"
           >
