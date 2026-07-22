@@ -52,9 +52,9 @@ export const THEMES: Theme[] = [
   },
   {
     id: 'klasik',
-    name: 'Klasik',
-    desc: 'Krem & emas elegan',
-    vars: t('253 230 138', '254 243 199', '133 77 14', '250 250 249', '255 251 235', '28 25 23', '120 113 108'),
+    name: 'Silver Modern',
+    desc: 'Abu-abu perak bersih modern',
+    vars: t('203 213 225', '241 245 249', '71 85 105', '248 250 252', '241 245 249', '15 23 42', '71 85 105'),
   },
   {
     id: 'laut',
