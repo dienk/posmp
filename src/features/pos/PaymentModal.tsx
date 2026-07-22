@@ -66,6 +66,8 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
   }
 
   const handleConfirm = () => {
+    // Validasi: uang diterima tidak boleh kurang dari total tagihan.
+    if (paid < total || total <= 0) return
     // Alokasikan amountPaid berurutan; kelebihan menjadi kembalian (biasanya tunai).
     let rem = total
     const payments: PaymentInput[] = rows
@@ -216,6 +218,16 @@ export default function PaymentModal({ total, onCancel, onConfirm, onCheckVouche
         </div>
 
         <div className="border-t border-line/5 p-4">
+          {remaining > 0 && (
+            <p className="mb-2 flex items-start gap-1.5 rounded-lg bg-status-occupied/10 px-3 py-2
+                          text-xs font-semibold text-status-occupied">
+              <span aria-hidden>⚠️</span>
+              <span>
+                Uang diterima kurang {formatRupiah(remaining)} dari total tagihan. Lengkapi nominal
+                atau tambah metode pembayaran.
+              </span>
+            </p>
+          )}
           <Button onClick={handleConfirm} disabled={!canConfirm} className="w-full">
             {remaining > 0 ? `Kurang ${formatRupiah(remaining)}` : 'Selesaikan Pembayaran'}
           </Button>
