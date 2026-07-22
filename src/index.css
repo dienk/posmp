@@ -11,7 +11,8 @@
   --c-background: 249 250 251;
   --c-surface: 254 215 215;
   --c-ink: 51 65 85;
-  --c-ink-soft: 148 163 184;
+  /* Muted foreground slate-600 (#475569) — lulus WCAG AA ≥4.5:1 di latar terang. */
+  --c-ink-soft: 71 85 105;
   /* Permukaan kartu/header/modal. Putih pada tema terang; ditimpa gelap
      untuk tema mode-gelap (Oniks). Bukan bagian registri tema (JS). */
   --c-panel: 255 255 255;

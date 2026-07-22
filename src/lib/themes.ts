@@ -39,14 +39,16 @@ function t(
 
 // Palet mengikuti standar ui-ux-pro-max (colors.csv): brand-strong = Primary
 // (kontras teks putih ≥4.5:1), background/ink dari Background/Foreground
-// bernuansa hue, ink-soft = Muted Foreground #64748B. brand/brand-soft = tint
+// bernuansa hue, ink-soft = Muted Foreground slate-600 #475569 (71 85 105) —
+// lulus WCAG AA ≥4.5:1 di atas latar bernuansa terang. brand/brand-soft = tint
 // terang (200/100) untuk pil & sorotan.
+// Kontras seluruh pasangan teks/latar diverifikasi lulus WCAG 2.1 AA (≥4.5:1).
 export const THEMES: Theme[] = [
   {
     id: 'merahputih',
     name: 'Merah Putih',
     desc: 'Putih bersih beraksen merah (bawaan)',
-    vars: t('254 202 202', '254 226 226', '220 38 38', '254 242 242', '254 226 226', '69 10 10', '100 116 139'),
+    vars: t('254 202 202', '254 226 226', '220 38 38', '254 242 242', '254 226 226', '69 10 10', '71 85 105'),
   },
   {
     id: 'klasik',
@@ -58,25 +60,25 @@ export const THEMES: Theme[] = [
     id: 'laut',
     name: 'Laut',
     desc: 'Biru sejuk',
-    vars: t('191 219 254', '219 234 254', '37 99 235', '239 246 255', '219 234 254', '30 41 59', '100 116 139'),
+    vars: t('191 219 254', '219 234 254', '37 99 235', '239 246 255', '219 234 254', '30 41 59', '71 85 105'),
   },
   {
     id: 'hutan',
     name: 'Hutan',
     desc: 'Hijau segar',
-    vars: t('187 247 208', '220 252 231', '21 128 61', '240 253 244', '220 252 231', '20 83 45', '100 116 139'),
+    vars: t('187 247 208', '220 252 231', '21 128 61', '240 253 244', '220 252 231', '20 83 45', '71 85 105'),
   },
   {
     id: 'senja',
     name: 'Senja',
     desc: 'Oranye hangat',
-    vars: t('254 215 170', '255 237 213', '234 88 12', '255 247 237', '255 237 213', '67 20 7', '100 116 139'),
+    vars: t('254 215 170', '255 237 213', '194 65 12', '255 247 237', '255 237 213', '67 20 7', '71 85 105'),
   },
   {
     id: 'anggur',
     name: 'Anggur',
     desc: 'Ungu elegan',
-    vars: t('221 214 254', '237 233 254', '124 58 237', '250 245 255', '243 232 255', '46 16 101', '100 116 139'),
+    vars: t('221 214 254', '237 233 254', '124 58 237', '250 245 255', '243 232 255', '46 16 101', '71 85 105'),
   },
   {
     // Tema gelap sejati (dark mode). Permukaan --c-panel di-override gelap via
