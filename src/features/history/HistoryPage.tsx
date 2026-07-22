@@ -46,6 +46,10 @@ export default function HistoryPage() {
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  // Filter daftar: pencarian invoice/member + rentang tanggal.
+  const [keyword, setKeyword] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   const reload = useCallback(() => setTxs(listTransactions(outletId)), [outletId])
   useEffect(reload, [reload])
@@ -58,6 +62,27 @@ export default function HistoryPage() {
   }, [selectedId])
 
   const selected = useMemo(() => txs.find((t) => t.id === selectedId) ?? null, [txs, selectedId])
+
+  // Terapkan filter tanggal (YYYY-MM-DD) & kata kunci (invoice/member/sumber).
+  const filtered = useMemo(() => {
+    const k = keyword.trim().toLowerCase()
+    return txs.filter((t) => {
+      const day = (t.transaction_date ?? '').slice(0, 10)
+      if (dateFrom && day < dateFrom) return false
+      if (dateTo && day > dateTo) return false
+      if (
+        k &&
+        !(
+          t.invoice_number.toLowerCase().includes(k) ||
+          (t.member_name ?? '').toLowerCase().includes(k) ||
+          (SOURCE_LABEL[t.order_source] ?? t.order_source).toLowerCase().includes(k)
+        )
+      )
+        return false
+      return true
+    })
+  }, [txs, keyword, dateFrom, dateTo])
+  const filterOn = !!(keyword || dateFrom || dateTo)
 
   const showToast = (m: string) => {
     setToast(m)
@@ -85,18 +110,61 @@ export default function HistoryPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="bg-panel/70 px-5 py-3 backdrop-blur">
+      <header className="flex flex-wrap items-center gap-3 bg-panel/70 px-5 py-3 backdrop-blur">
         <h1 className="text-lg font-bold text-ink">Riwayat Transaksi & Refund</h1>
+        <input
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          placeholder="🔍 Cari invoice / member…"
+          className="field-input w-56"
+        />
+        <label className="flex items-center gap-1.5 text-xs text-ink-soft">
+          Dari
+          <input
+            type="date"
+            value={dateFrom}
+            max={dateTo || undefined}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="field-input w-40 py-1.5"
+          />
+        </label>
+        <label className="flex items-center gap-1.5 text-xs text-ink-soft">
+          s/d
+          <input
+            type="date"
+            value={dateTo}
+            min={dateFrom || undefined}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="field-input w-40 py-1.5"
+          />
+        </label>
+        {filterOn && (
+          <button
+            onClick={() => {
+              setKeyword('')
+              setDateFrom('')
+              setDateTo('')
+            }}
+            className="text-xs font-semibold text-status-occupied hover:underline"
+          >
+            Reset
+          </button>
+        )}
+        <span className="ml-auto text-xs text-ink-soft">
+          {filterOn ? `${filtered.length} dari ${txs.length}` : `${txs.length}`} transaksi
+        </span>
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 lg:grid-cols-[1fr_360px]">
         {/* Daftar transaksi */}
         <section className="rounded-card bg-panel p-2 shadow-card">
-          {txs.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ink-soft">Belum ada transaksi.</p>
+          {filtered.length === 0 ? (
+            <p className="py-8 text-center text-sm text-ink-soft">
+              {txs.length === 0 ? 'Belum ada transaksi.' : 'Tidak ada transaksi yang cocok.'}
+            </p>
           ) : (
             <ul className="divide-y divide-line/5">
-              {txs.map((t) => (
+              {filtered.map((t) => (
                 <li key={t.id}>
                   <button
                     onClick={() => setSelectedId(t.id)}
