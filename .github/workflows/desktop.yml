@@ -11,6 +11,10 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
+# tauri-action perlu contents:write untuk membuat GitHub Release dari tag.
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -62,6 +66,7 @@ jobs:
           prerelease: false
 
       - name: Upload installers as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: posmp-${{ matrix.platform }}
