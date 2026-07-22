@@ -20,3 +20,16 @@ export function getNumberSetting(
 export function isModuleEnabled(settings: Record<string, string>, key: string): boolean {
   return settings[key] === '1'
 }
+
+/**
+ * Apakah proses opname wajib melewati persetujuan (approval)? Default AKTIF
+ * (dinonaktifkan hanya bila setelan bernilai eksplisit '0').
+ */
+export function isOpnameApprovalRequired(settings: Record<string, string>): boolean {
+  return settings.require_opname_approval !== '0'
+}
+
+/** Apakah transfer stok wajib melewati persetujuan? Default nonaktif. */
+export function isTransferApprovalRequired(settings: Record<string, string>): boolean {
+  return settings.require_transfer_approval === '1'
+}

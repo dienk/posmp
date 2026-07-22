@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import { getNumberSetting } from '../../lib/settings'
+import { sanitizeInvoicePrefix } from '../../lib/format'
 import { useSettings } from '../../lib/SettingsContext'
 import { getOutlet, saveSettings } from './settingsRepository'
 import { defaultTax } from '../taxes/taxesRepository'
@@ -61,6 +62,9 @@ export default function SettingsPage() {
   const [name, setName] = useState(outlet?.name ?? '')
   const [address, setAddress] = useState(outlet?.address ?? '')
   const [phone, setPhone] = useState(outlet?.phone ?? '')
+  const [invoicePrefix, setInvoicePrefix] = useState(settings.invoice_prefix ?? 'INV')
+  const [opnameApproval, setOpnameApproval] = useState(settings.require_opname_approval !== '0')
+  const [transferApproval, setTransferApproval] = useState(settings.require_transfer_approval === '1')
   const taxRatePct = getNumberSetting(settings, 'tax_rate', 0.1) * 100
   const activeTax = useMemo(() => defaultTax(), [])
   const [taxEnabled, setTaxEnabled] = useState(settings.tax_enabled === '1')
@@ -114,6 +118,9 @@ export default function SettingsPage() {
     setSaving(true)
     try {
       const next: Record<string, string> = {
+        invoice_prefix: sanitizeInvoicePrefix(invoicePrefix),
+        require_opname_approval: opnameApproval ? '1' : '0',
+        require_transfer_approval: transferApproval ? '1' : '0',
         tax_enabled: taxEnabled ? '1' : '0',
         service_charge_enabled: serviceEnabled ? '1' : '0',
         service_charge_rate: String(Math.max(0, serviceRatePct) / 100),
@@ -162,6 +169,57 @@ export default function SettingsPage() {
               <span className="field-label">Telepon</span>
               <input className="field-input" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </label>
+          </div>
+        </section>
+
+        {/* Nomor Invoice & Persetujuan */}
+        <section className="rounded-card bg-panel p-5 shadow-card">
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+            Nomor Invoice & Persetujuan
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="field-label">Prefix Nomor Invoice</span>
+              <input
+                className="field-input uppercase"
+                value={invoicePrefix}
+                maxLength={8}
+                onChange={(e) => setInvoicePrefix(e.target.value)}
+                placeholder="INV"
+              />
+              <span className="mt-1 block text-xs text-ink-soft">
+                Contoh: <b>{sanitizeInvoicePrefix(invoicePrefix)}-260722-101530-01</b>. Huruf/angka,
+                maks 8 karakter.
+              </span>
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={opnameApproval}
+                  onChange={(e) => setOpnameApproval(e.target.checked)}
+                  className="h-4 w-4 accent-status-empty"
+                />
+                <span className="text-sm text-ink">
+                  Wajib persetujuan untuk <b>Stock Opname</b>
+                </span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={transferApproval}
+                  onChange={(e) => setTransferApproval(e.target.checked)}
+                  className="h-4 w-4 accent-status-empty"
+                />
+                <span className="text-sm text-ink">
+                  Wajib persetujuan untuk <b>Transfer Stok</b>
+                </span>
+              </label>
+              <p className="text-xs text-ink-soft">
+                Bila aktif, aksi masuk antrean <b>Persetujuan</b> dan baru dijalankan setelah
+                disetujui.
+              </p>
+            </div>
           </div>
         </section>
 

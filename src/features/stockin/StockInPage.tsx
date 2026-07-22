@@ -8,6 +8,7 @@ import {
   createSupplier,
   deleteStockEntry,
   deleteSupplier,
+  lastPurchaseCosts,
   listProductsForStock,
   listStockEntries,
   listSuppliers,
@@ -23,6 +24,43 @@ import {
 } from './stockInRepository'
 import { listWarehouses, type Warehouse } from '../warehouses/warehousesRepository'
 import { buildUnitOptions } from '../products/productsRepository'
+
+/** Baca file gambar → data-URI JPEG terkompres (maks sisi 1280px) untuk lampiran. */
+function fileToCompressedDataUri(file: File, maxSide = 1280, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const img = new Image()
+      img.onload = () => {
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height))
+        const w = Math.round(img.width * scale)
+        const h = Math.round(img.height * scale)
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return reject(new Error('Kanvas tidak didukung.'))
+        ctx.drawImage(img, 0, 0, w, h)
+        resolve(canvas.toDataURL('image/jpeg', quality))
+      }
+      img.onerror = () => reject(new Error('Gambar tidak valid.'))
+      img.src = reader.result as string
+    }
+    reader.onerror = () => reject(new Error('Gagal membaca file.'))
+    reader.readAsDataURL(file)
+  })
+}
+
+/** Aman-parse JSON array data-URI lampiran. */
+function parseAttachments(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  try {
+    const arr = JSON.parse(raw)
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === 'string') : []
+  } catch {
+    return []
+  }
+}
 
 /** Waktu sekarang dalam format input datetime-local (YYYY-MM-DDTHH:MM). */
 function nowLocalInput(): string {
@@ -74,6 +112,10 @@ export default function StockInPage() {
   const [entryDate, setEntryDate] = useState(nowLocalInput)
   const [lines, setLines] = useState<Line[]>([])
   const [editingEntryId, setEditingEntryId] = useState<number | null>(null)
+  // Lampiran bukti (data-URI) & harga beli terakhir per produk (untuk isi otomatis modal).
+  const [attachments, setAttachments] = useState<string[]>([])
+  const [lastCosts, setLastCosts] = useState<Record<number, number>>({})
+  const [uploading, setUploading] = useState(false)
 
   // Supplier CRUD
   const [supMode, setSupMode] = useState<SupMode>(null)
@@ -88,6 +130,7 @@ export default function StockInPage() {
     setAllSuppliers(listSuppliersWithUsage())
     setProducts(listProductsForStock(outletId))
     setEntries(listStockEntries(outletId))
+    setLastCosts(lastPurchaseCosts())
   }
   useEffect(reloadRefs, [outletId])
   useEffect(() => {
@@ -112,10 +155,20 @@ export default function StockInPage() {
   const addLine = () => {
     const first = availableProducts[0]
     if (!first) return
-    setLines((prev) => [...prev, { productId: first.id, quantity: 1, costPrice: 0 }])
+    // Isi otomatis harga modal dari harga beli terakhir produk (bila ada).
+    setLines((prev) => [...prev, { productId: first.id, quantity: 1, costPrice: lastCosts[first.id] ?? 0 }])
   }
   const updateLine = (idx: number, patch: Partial<Line>) =>
-    setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)))
+    setLines((prev) =>
+      prev.map((l, i) => {
+        if (i !== idx) return l
+        // Ganti produk → isi otomatis modal dari harga beli terakhir produk baru.
+        if (patch.productId != null && patch.productId !== l.productId) {
+          return { ...l, ...patch, costPrice: lastCosts[patch.productId] ?? 0 }
+        }
+        return { ...l, ...patch }
+      }),
+    )
   const removeLine = (idx: number) => setLines((prev) => prev.filter((_, i) => i !== idx))
   // Faktor konversi satuan sebuah baris (dasar = 1).
   const lineFactor = (l: Line): number => {
@@ -134,10 +187,40 @@ export default function StockInPage() {
     setEntryDate(nowLocalInput())
     setWarehouseId(warehouses[0]?.id ?? 0)
     setEditingEntryId(null)
+    setAttachments([])
+  }
+
+  const handleAddFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    setUploading(true)
+    try {
+      const uris: string[] = []
+      for (const f of Array.from(files)) {
+        if (!f.type.startsWith('image/')) continue
+        uris.push(await fileToCompressedDataUri(f))
+      }
+      setAttachments((prev) => [...prev, ...uris])
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal memproses gambar')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleSubmit = async () => {
     if (lines.length === 0) return showToast('Tambahkan minimal satu item.')
+    // Konfirmasi bila ada item berjumlah > 0 tapi harga modal 0 (kemungkinan lupa isi).
+    const zeroCost = lines.filter((l) => l.quantity > 0 && l.costPrice <= 0)
+    if (zeroCost.length > 0) {
+      const names = zeroCost
+        .map((l) => products.find((p) => p.id === l.productId)?.name ?? '?')
+        .join(', ')
+      const ok = window.confirm(
+        `${zeroCost.length} item punya harga modal Rp 0 padahal jumlahnya > 0:\n${names}\n\n` +
+          'Harga modal (HPP) akan dianggap 0 dan memengaruhi laba/nilai stok. Tetap simpan?',
+      )
+      if (!ok) return
+    }
     // Simpan dalam satuan DASAR: qty × faktor; modal per satuan dasar = modal ÷ faktor
     // (subtotal tetap qty × modal). Detail penerimaan konsisten dengan stok.
     const payloadLines = lines.map((l) => {
@@ -148,6 +231,7 @@ export default function StockInPage() {
         costPrice: factor > 1 ? l.costPrice / factor : l.costPrice,
       }
     })
+    const attJson = attachments.length ? JSON.stringify(attachments) : undefined
     try {
       if (editingEntryId) {
         await updateStockEntry(editingEntryId, outletId, {
@@ -156,6 +240,7 @@ export default function StockInPage() {
           entryDate: toSqlDatetime(entryDate),
           warehouseId,
           lines: payloadLines,
+          attachments: attJson,
         })
         showToast('Penerimaan diperbarui.')
       } else {
@@ -166,6 +251,7 @@ export default function StockInPage() {
           payloadLines,
           toSqlDatetime(entryDate),
           warehouseId,
+          attJson,
         )
         showToast(`Stok masuk tercatat · ${ref}`)
       }
@@ -182,6 +268,7 @@ export default function StockInPage() {
     setEntryDate(sqlToLocalInput(d.entry_date))
     setWarehouseId(d.warehouse_id ?? warehouses[0]?.id ?? 0)
     setLines(d.lines.map((l) => ({ productId: l.product_id, quantity: l.quantity, costPrice: l.cost_price ?? 0 })))
+    setAttachments(parseAttachments(d.attachments))
     setEditingEntryId(d.id)
     setTab('penerimaan')
   }
@@ -423,6 +510,55 @@ export default function StockInPage() {
               + Tambah Item
             </Button>
 
+            {/* Lampiran bukti pendukung (foto nota / surat jalan) */}
+            <div className="mt-4 border-t border-line/5 pt-3">
+              <div className="mb-2 flex items-center gap-2">
+                <span className="text-xs font-semibold text-ink-soft">
+                  📎 Bukti Pendukung (foto nota / surat jalan)
+                </span>
+                <label className="cursor-pointer rounded-lg border border-line/10 bg-background px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-soft">
+                  {uploading ? 'Memproses…' : '+ Lampirkan Foto'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => {
+                      handleAddFiles(e.target.files)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+              </div>
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {attachments.map((uri, i) => (
+                    <div key={i} className="group relative">
+                      <a href={uri} target="_blank" rel="noreferrer">
+                        <img
+                          src={uri}
+                          alt={`Bukti ${i + 1}`}
+                          className="h-20 w-20 rounded-lg border border-line/10 object-cover"
+                        />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => setAttachments((prev) => prev.filter((_, j) => j !== i))}
+                        className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-status-occupied text-xs text-white shadow"
+                        aria-label="Hapus lampiran"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="mt-1.5 text-[11px] text-ink-soft">
+                Foto dikompres otomatis & disimpan bersama penerimaan (lokal, di perangkat).
+              </p>
+            </div>
+
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line/5 pt-3">
               <span className="text-sm text-ink-soft">
                 {totalQty} (satuan dasar) · Total modal:{' '}
@@ -642,6 +778,24 @@ export default function StockInPage() {
                         Catatan
                       </p>
                       <p className="text-sm text-ink">{detail.notes}</p>
+                    </div>
+                  )}
+                  {parseAttachments(detail.attachments).length > 0 && (
+                    <div className="mt-3">
+                      <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-ink-soft">
+                        📎 Bukti Pendukung
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {parseAttachments(detail.attachments).map((uri, i) => (
+                          <a key={i} href={uri} target="_blank" rel="noreferrer">
+                            <img
+                              src={uri}
+                              alt={`Bukti ${i + 1}`}
+                              className="h-20 w-20 rounded-lg border border-line/10 object-cover transition hover:opacity-80"
+                            />
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   )}
                   <div className="mt-4 flex gap-2">

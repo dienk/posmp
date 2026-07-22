@@ -56,6 +56,7 @@ export interface StockEntryLine {
 
 export interface StockEntryDetail extends StockEntrySummary {
   status: string
+  attachments: string | null // JSON array data-URI bukti (foto nota/surat jalan)
   lines: StockEntryLine[]
 }
 
@@ -133,6 +134,34 @@ export function listProductsForStock(outletId: number): StockProduct[] {
   )
 }
 
+/**
+ * Harga beli (modal) terakhir per produk dari penerimaan stok — dipakai untuk
+ * mengisi otomatis kolom Harga Modal saat menambah item penerimaan baru.
+ * Mengembalikan map productId → cost_price (per satuan dasar).
+ */
+export function lastPurchaseCosts(): Record<number, number> {
+  const rows = query<{ product_id: number; cost_price: number }>(
+    `SELECT d.product_id, d.cost_price
+     FROM stock_entry_details d
+     JOIN stock_entries e ON e.id = d.stock_entry_id
+     WHERE d.cost_price IS NOT NULL AND d.cost_price > 0
+     ORDER BY e.entry_date ASC, e.id ASC`,
+  )
+  // Iterasi menaik → nilai terakhir (terbaru) menimpa; hasil = harga beli terakhir.
+  const map: Record<number, number> = {}
+  for (const r of rows) map[r.product_id] = r.cost_price
+  return map
+}
+
+/** Perbarui harga modal (cost_price) produk ke harga beli terakhir (>0 saja). */
+function updateProductCosts(db: ReturnType<typeof getDb>, lines: StockLineInput[]): void {
+  for (const l of lines) {
+    if (l.costPrice > 0) {
+      db.run('UPDATE products SET cost_price = ? WHERE id = ?', [l.costPrice, l.productId])
+    }
+  }
+}
+
 // --- Penerimaan stok ---------------------------------------------------------
 
 function referenceNumber(now: Date): string {
@@ -155,6 +184,7 @@ export async function createStockEntry(
   lines: StockLineInput[],
   entryDate?: string, // "YYYY-MM-DD HH:MM:SS"; kosong = waktu saat ini
   warehouseId?: number,
+  attachments?: string, // JSON array data-URI bukti; kosong = tanpa lampiran
 ): Promise<string> {
   const valid = lines.filter((l) => l.quantity > 0)
   if (valid.length === 0) throw new Error('Tidak ada item untuk diterima.')
@@ -162,19 +192,20 @@ export async function createStockEntry(
   const db = getDb()
   const reference = referenceNumber(new Date())
   const whId = warehouseId ?? defaultWarehouseId(outletId)
+  const att = attachments?.trim() || null
   db.run('BEGIN')
   try {
     if (entryDate) {
       db.run(
-        `INSERT INTO stock_entries (outlet_id, warehouse_id, supplier_id, reference_number, notes, status, entry_date)
-         VALUES (?, ?, ?, ?, ?, 'COMPLETED', ?)`,
-        [outletId, whId, supplierId, reference, notes.trim() || null, entryDate],
+        `INSERT INTO stock_entries (outlet_id, warehouse_id, supplier_id, reference_number, notes, status, entry_date, attachments)
+         VALUES (?, ?, ?, ?, ?, 'COMPLETED', ?, ?)`,
+        [outletId, whId, supplierId, reference, notes.trim() || null, entryDate, att],
       )
     } else {
       db.run(
-        `INSERT INTO stock_entries (outlet_id, warehouse_id, supplier_id, reference_number, notes, status)
-         VALUES (?, ?, ?, ?, ?, 'COMPLETED')`,
-        [outletId, whId, supplierId, reference, notes.trim() || null],
+        `INSERT INTO stock_entries (outlet_id, warehouse_id, supplier_id, reference_number, notes, status, attachments)
+         VALUES (?, ?, ?, ?, ?, 'COMPLETED', ?)`,
+        [outletId, whId, supplierId, reference, notes.trim() || null, att],
       )
     }
     const entryId = query<{ id: number }>('SELECT last_insert_rowid() AS id')[0].id
@@ -191,6 +222,8 @@ export async function createStockEntry(
         [outletId, whId, l.productId, l.quantity],
       )
     }
+    // Harga modal produk mengikuti harga beli terakhir.
+    updateProductCosts(db, valid)
     db.run('COMMIT')
   } catch (err) {
     db.run('ROLLBACK')
@@ -207,6 +240,7 @@ export interface StockEntryUpdate {
   entryDate: string
   warehouseId: number
   lines: StockLineInput[]
+  attachments?: string // JSON array data-URI bukti
 }
 
 function entryWarehouseId(id: number, outletId: number): number {
@@ -255,8 +289,8 @@ export async function updateStockEntry(
   db.run('BEGIN')
   try {
     db.run(
-      'UPDATE stock_entries SET supplier_id = ?, warehouse_id = ?, notes = ?, entry_date = ? WHERE id = ?',
-      [input.supplierId, newWh, input.notes.trim() || null, input.entryDate, id],
+      'UPDATE stock_entries SET supplier_id = ?, warehouse_id = ?, notes = ?, entry_date = ?, attachments = ? WHERE id = ?',
+      [input.supplierId, newWh, input.notes.trim() || null, input.entryDate, input.attachments?.trim() || null, id],
     )
     // Kembalikan qty lama dari gudang lama.
     for (const [pid, qty] of oldMap) {
@@ -279,6 +313,7 @@ export async function updateStockEntry(
         [outletId, newWh, l.productId, l.quantity],
       )
     }
+    updateProductCosts(db, valid)
     db.run('COMMIT')
   } catch (err) {
     db.run('ROLLBACK')
@@ -352,8 +387,8 @@ export function listStockEntries(outletId: number, limit = 30): StockEntrySummar
 
 /** Detail satu penerimaan: header + baris item (produk, qty, modal, subtotal). */
 export function stockEntryDetail(id: number): StockEntryDetail | null {
-  const head = query<StockEntrySummary & { status: string }>(
-    `SELECT e.id, e.reference_number, e.entry_date, e.notes, e.status, e.warehouse_id,
+  const head = query<StockEntrySummary & { status: string; attachments: string | null }>(
+    `SELECT e.id, e.reference_number, e.entry_date, e.notes, e.status, e.warehouse_id, e.attachments,
             s.name AS supplier_name, w.name AS warehouse_name,
             COALESCE(SUM(d.quantity), 0) AS total_qty,
             COUNT(d.id) AS line_count,

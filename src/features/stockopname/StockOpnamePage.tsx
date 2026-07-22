@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Button from '../../components/ui/Button'
-import { getNumberSetting } from '../../lib/settings'
+import { getNumberSetting, isOpnameApprovalRequired } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
+import { getActivePersona } from '../access/accessRepository'
+import { createApproval } from '../approvals/approvalsRepository'
 import {
   applyOpname,
   findOpnameProduct,
@@ -115,6 +117,9 @@ export default function StockOpnamePage() {
     [products, counts, units],
   )
 
+  const needApproval = isOpnameApprovalRequired(settings)
+  const warehouseName = warehouses.find((w) => w.id === warehouseId)?.name ?? '—'
+
   const save = async () => {
     if (saving) return
     const items = Object.entries(counts).map(([id, physical]) => {
@@ -127,10 +132,23 @@ export default function StockOpnamePage() {
     }
     setSaving(true)
     try {
-      const res = await applyOpname(outletId, warehouseId, items)
-      setCounts({})
-      reload()
-      showToast(`Opname disimpan · ${res.adjusted} item · selisih ${res.totalDiff >= 0 ? '+' : ''}${res.totalDiff}`)
+      if (needApproval) {
+        await createApproval({
+          outletId,
+          type: 'OPNAME',
+          title: `Penyesuaian opname · ${warehouseName}`,
+          summary: `${items.length} item · selisih total ${totalDiff >= 0 ? '+' : ''}${totalDiff}`,
+          payload: { outletId, warehouseId, warehouseName, counts: items },
+          requestedBy: getActivePersona(settings)?.name ?? 'Admin',
+        })
+        setCounts({})
+        showToast(`Opname diajukan untuk persetujuan · ${items.length} item`)
+      } else {
+        const res = await applyOpname(outletId, warehouseId, items)
+        setCounts({})
+        reload()
+        showToast(`Opname disimpan · ${res.adjusted} item · selisih ${res.totalDiff >= 0 ? '+' : ''}${res.totalDiff}`)
+      }
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Gagal menyimpan opname')
     } finally {
@@ -309,7 +327,11 @@ export default function StockOpnamePage() {
           disabled={saving || countedIds.length === 0}
           className="ml-auto"
         >
-          {saving ? 'Menyimpan…' : 'Simpan Opname & Sesuaikan Stok'}
+          {saving
+            ? 'Menyimpan…'
+            : needApproval
+              ? 'Ajukan Opname untuk Persetujuan'
+              : 'Simpan Opname & Sesuaikan Stok'}
         </Button>
       </div>
 

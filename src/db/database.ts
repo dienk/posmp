@@ -428,6 +428,57 @@ function migrateSchema(db: Database): boolean {
     changed = true
   }
 
+  // Kolom lampiran bukti pendukung (foto nota/surat jalan) pada penerimaan stok.
+  if (tableExists('stock_entries') && !columnsOf('stock_entries').has('attachments')) {
+    db.run('ALTER TABLE stock_entries ADD COLUMN attachments TEXT')
+    changed = true
+  }
+
+  // Transfer stok antar gudang (header + detail).
+  if (!tableExists('stock_transfers')) {
+    db.run(`CREATE TABLE IF NOT EXISTS stock_transfers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id INTEGER NOT NULL,
+      reference_number TEXT UNIQUE NOT NULL,
+      from_warehouse_id INTEGER NOT NULL,
+      to_warehouse_id INTEGER NOT NULL,
+      note TEXT,
+      status TEXT NOT NULL DEFAULT 'COMPLETED',
+      transfer_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+    )`)
+    db.run(`CREATE TABLE IF NOT EXISTS stock_transfer_details (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      transfer_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      FOREIGN KEY(transfer_id) REFERENCES stock_transfers(id),
+      FOREIGN KEY(product_id) REFERENCES products(id)
+    )`)
+    changed = true
+  }
+
+  // Antrean persetujuan (approval) untuk aksi sensitif (opname, transfer stok, dll).
+  if (!tableExists('approvals')) {
+    db.run(`CREATE TABLE IF NOT EXISTS approvals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      summary TEXT,
+      payload TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'PENDING',
+      requested_by TEXT,
+      requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      decided_by TEXT,
+      decided_at DATETIME,
+      decision_note TEXT,
+      result_ref TEXT,
+      FOREIGN KEY(outlet_id) REFERENCES outlets(id)
+    )`)
+    changed = true
+  }
+
   // Backfill foto produk real (sekali jalan, ditandai flag). Hanya mengganti
   // placeholder SVG bawaan — foto unggahan pengguna (non-SVG) tidak tersentuh.
   const photoFlag = db.exec(

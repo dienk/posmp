@@ -68,7 +68,9 @@ capacitor.config.ts        # konfigurasi mobile (Capacitor)
 Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `vouchers`,
 `marketplace`, `members`, `reports`, `stockin`, `history` (refund), `preorder`,
 `installments`, `settings`, `products`, `contacts`, `outlets`, `cashiers`,
-`access`, `theme`, `membercard`, `backup` (cadangan otomatis terjadwal).
+`access`, `theme`, `membercard`, `backup` (cadangan otomatis terjadwal),
+`stocktransfer` (transfer stok antar gudang), `approvals` (persetujuan aksi
+sensitif), `errors` (halaman error/404 branded).
 
 ## Menambah rute/modul baru
 
@@ -161,6 +163,33 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
   tiap 5 menit (due-check ringan via timestamp). Retensi memangkas cadangan
   **otomatis** terlama; cadangan **manual** tak dipangkas. Pulihkan = `importDatabase`
   + `location.reload`.
+- **Prefix nomor invoice.** `generateInvoiceNumber` memakai prefix modul-level di
+  `lib/format.ts` (`setInvoicePrefix`/`sanitizeInvoicePrefix`, default `INV`, huruf/
+  angka maks 8). Disinkron dari `app_settings.invoice_prefix` via `ThemeApplier`
+  di `App.tsx` agar repositori (yang tak punya akses SettingsContext) tetap memakai
+  prefix terkini. Setel di Setelan › Pengaturan.
+- **Harga modal (cost_price) = harga beli terakhir.** Saat penerimaan Stok Masuk
+  disimpan, `products.cost_price` di-update ke modal baris (>0). `lastPurchaseCosts()`
+  (`stockinRepository`) mengisi otomatis kolom Harga Modal saat menambah item.
+  Penerimaan dengan item qty>0 tapi modal 0 memicu konfirmasi.
+- **Approval (persetujuan).** Modul `approvals` (tabel `approvals`: type/payload JSON/
+  status). Aksi sensitif membuat permintaan `createApproval(...)` alih-alih langsung
+  dijalankan; `approveApproval` **menjalankan** payload via dispatcher per tipe
+  (`OPNAME`→`applyOpname`, `STOCK_TRANSFER`→`applyStockTransfer`) lebih dulu (bila
+  gagal, status tetap PENDING), lalu menandai APPROVED. Diaktifkan per aksi lewat
+  setelan `require_opname_approval` (default ON) & `require_transfer_approval`
+  (default off) — helper `isOpnameApprovalRequired`/`isTransferApprovalRequired` di
+  `lib/settings.ts`. Approver = persona aktif.
+- **Transfer stok (`stocktransfer`).** Pindah stok antar gudang dalam outlet:
+  `applyStockTransfer` mengurangi gudang asal & menambah gudang tujuan dalam satu
+  transaksi, divalidasi stok asal cukup & asal≠tujuan. Tabel `stock_transfers`+
+  `stock_transfer_details`. Bisa lewat approval bila disetel.
+- **Lampiran bukti Stok Masuk.** `stock_entries.attachments` = JSON array data-URI
+  (foto nota/surat jalan), dikompres kanvas (maks 1280px, JPEG) di `StockInPage`
+  sebelum disimpan — tetap local-first.
+- **Halaman error/404.** `features/errors/ErrorPage` dipakai sebagai `errorElement`
+  root router (menangkap error render/loader) & rute catch-all `*` (404), memakai
+  logo + token tema agar konsisten branding.
 - **Status transaksi**: `DRAFT` (bill tersimpan) · `PREPARING` (pre-order/antre
   aktif) · `READY` (siap) · `COMPLETED` (lunas) · `REFUNDED`. Laporan/dashboard
   hanya menghitung `COMPLETED`.

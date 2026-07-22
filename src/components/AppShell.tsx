@@ -3,6 +3,8 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Archive,
   Armchair,
+  ArrowLeftRight,
+  BadgeCheck,
   Banknote,
   Bell,
   Boxes,
@@ -129,8 +131,10 @@ const STOCK_GROUP: NavGroupDef = {
   children: [
     { to: '/stock-opening', label: 'Saldo Awal', short: 'Saldo', icon: Flag },
     { to: '/stockin', label: 'Stok Masuk', short: 'Masuk', icon: PackagePlus },
+    { to: '/stock-transfer', label: 'Transfer Stok', short: 'Transfer', icon: ArrowLeftRight },
     { to: '/stock-opname', label: 'Stock Opname', short: 'Opname', icon: ClipboardList },
     { to: '/stock-card', label: 'Kartu Stock', short: 'Kartu', icon: Archive },
+    { to: '/approvals', label: 'Persetujuan', short: 'Approval', icon: BadgeCheck },
   ],
 }
 

@@ -35,6 +35,10 @@ import RequirePerm from './features/access/RequirePerm'
 import ThemePage from './features/theme/ThemePage'
 import BackupPage from './features/backup/BackupPage'
 import { runScheduledBackup } from './features/backup/backupRepository'
+import StockTransferPage from './features/stocktransfer/StockTransferPage'
+import ApprovalPage from './features/approvals/ApprovalPage'
+import ErrorPage from './features/errors/ErrorPage'
+import { setInvoicePrefix } from './lib/format'
 import ProductsPage from './features/products/ProductsPage'
 import BundlesPage from './features/bundles/BundlesPage'
 import CategoriesPage from './features/products/CategoriesPage'
@@ -65,6 +69,7 @@ const router = createHashRouter([
         <AppShell />
       </RequireLogin>
     ),
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
@@ -82,8 +87,17 @@ const router = createHashRouter([
       { path: 'members', element: <MembersPage /> },
       { path: 'stockin', element: <StockInPage /> },
       { path: 'stock-opname', element: <StockOpnamePage /> },
+      { path: 'stock-transfer', element: <StockTransferPage /> },
       { path: 'stock-card', element: <StockCardPage /> },
       { path: 'stock-opening', element: <StockOpeningPage /> },
+      {
+        path: 'approvals',
+        element: (
+          <RequirePerm perm="stockin">
+            <ApprovalPage />
+          </RequirePerm>
+        ),
+      },
       { path: 'preorder', element: <PreorderPage /> },
       { path: 'installments', element: <InstallmentsPage /> },
       { path: 'cash-balance', element: <CashBalancePage /> },
@@ -141,6 +155,8 @@ const router = createHashRouter([
       { path: 'kiosk-info', element: <KioskInfoPage /> },
       { path: 'kiosk-order', element: <KioskOrderPage /> },
       { path: 'kiosk-queue', element: <KioskQueuePage /> },
+      // 404 dalam shell — halaman tak dikenal.
+      { path: '*', element: <ErrorPage notFound /> },
     ],
   },
   // Tampilan tanpa shell/navigasi (layar publik & pelanggan).
@@ -207,6 +223,10 @@ function ThemeApplier() {
   useEffect(() => {
     applyTheme(settings.theme, parseCustomVars(settings.theme_custom))
   }, [settings.theme, settings.theme_custom])
+  // Sinkronkan prefix nomor invoice (dipakai lintas repositori tanpa akses setelan).
+  useEffect(() => {
+    setInvoicePrefix(settings.invoice_prefix)
+  }, [settings.invoice_prefix])
   return null
 }
 
