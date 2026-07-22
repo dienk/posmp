@@ -33,6 +33,8 @@ import PersonaPage from './features/access/PersonaPage'
 import RolesPage from './features/access/RolesPage'
 import RequirePerm from './features/access/RequirePerm'
 import ThemePage from './features/theme/ThemePage'
+import BackupPage from './features/backup/BackupPage'
+import { runScheduledBackup } from './features/backup/backupRepository'
 import ProductsPage from './features/products/ProductsPage'
 import BundlesPage from './features/bundles/BundlesPage'
 import CategoriesPage from './features/products/CategoriesPage'
@@ -127,6 +129,14 @@ const router = createHashRouter([
           </RequirePerm>
         ),
       },
+      {
+        path: 'backup',
+        element: (
+          <RequirePerm perm="settings">
+            <BackupPage />
+          </RequirePerm>
+        ),
+      },
       { path: 'schedule', element: <OperatingSchedulePage /> },
       { path: 'kiosk-info', element: <KioskInfoPage /> },
       { path: 'kiosk-order', element: <KioskOrderPage /> },
@@ -183,6 +193,7 @@ export default function App() {
   return (
     <SettingsProvider>
       <ThemeApplier />
+      <BackupScheduler />
       <UIProvider>
         <RouterProvider router={router} />
       </UIProvider>
@@ -196,5 +207,30 @@ function ThemeApplier() {
   useEffect(() => {
     applyTheme(settings.theme, parseCustomVars(settings.theme_custom))
   }, [settings.theme, settings.theme_custom])
+  return null
+}
+
+/**
+ * Penjadwal cadangan otomatis: cek saat muat lalu berkala (tiap 5 menit) apakah
+ * sudah melewati interval; bila ya, buat snapshot & pangkas retensi. Ringan —
+ * hanya membaca timestamp localStorage kecuali benar-benar jatuh tempo.
+ */
+function BackupScheduler() {
+  const { settings } = useSettings()
+  useEffect(() => {
+    let alive = true
+    const tick = () => {
+      if (!alive) return
+      runScheduledBackup(settings).catch(() => {
+        /* abaikan kegagalan cadangan agar tak mengganggu aplikasi */
+      })
+    }
+    tick()
+    const timer = window.setInterval(tick, 5 * 60_000)
+    return () => {
+      alive = false
+      window.clearInterval(timer)
+    }
+  }, [settings])
   return null
 }

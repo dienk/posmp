@@ -20,6 +20,36 @@ export interface TopProduct {
   revenue: number
 }
 
+export interface ProfitLoss {
+  revenue: number // penjualan item (SUM subtotal, sudah dikurangi diskon item)
+  discount: number // diskon transaksi (voucher + manual)
+  netRevenue: number // penjualan bersih = revenue − discount (belum termasuk pajak/servis)
+  cogs: number // HPP / modal barang terjual (dari cost_price; paket dipecah ke komponen)
+  grossProfit: number // laba kotor = netRevenue − cogs
+  margin: number // grossProfit / netRevenue × 100 (%)
+}
+
+export interface ProductProfit {
+  name: string
+  qty: number
+  revenue: number
+  cogs: number
+  profit: number
+  margin: number
+}
+
+/**
+ * Ekspresi SQL HPP per satu unit produk (dasar). Untuk paket (is_bundle=1),
+ * modal = Σ(qty komponen × cost_price komponen); selain itu = cost_price produk.
+ * Dipakai bersama alias tabel `p` (products) pada query detail transaksi.
+ */
+const UNIT_COST_SQL = `CASE WHEN COALESCE(p.is_bundle,0) = 1
+  THEN COALESCE((SELECT SUM(bi.quantity * COALESCE(cp.cost_price,0))
+                 FROM product_bundle_items bi
+                 JOIN products cp ON cp.id = bi.component_product_id
+                 WHERE bi.bundle_product_id = p.id), 0)
+  ELSE COALESCE(p.cost_price,0) END`
+
 /** Rentang default = hari ini (waktu lokal) bila filter tak diberikan. */
 const TODAY = `date('now','localtime')`
 
@@ -85,6 +115,74 @@ export function topProducts(outletId: number, range?: DateRange, limit = 5): Top
      LIMIT ?`,
     [outletId, ...r.params, limit],
   )
+}
+
+/**
+ * Laporan laba rugi (estimasi) untuk rentang tanggal: menghubungkan modal
+ * produk (cost_price) dengan harga jual. Hanya transaksi COMPLETED. HPP memakai
+ * cost_price produk saat ini (paket dipecah ke komponen).
+ */
+export function profitLoss(outletId: number, range?: DateRange): ProfitLoss {
+  const rd = rangeClause('t.transaction_date', range)
+  const line = query<{ revenue: number; cogs: number }>(
+    `SELECT COALESCE(SUM(d.subtotal),0) AS revenue,
+            COALESCE(SUM(d.quantity * (${UNIT_COST_SQL})),0) AS cogs
+     FROM transaction_details d
+     JOIN transactions t ON t.id = d.transaction_id
+     JOIN products p ON p.id = d.product_id
+     WHERE t.outlet_id = ? AND t.status = 'COMPLETED' AND ${rd.sql}`,
+    [outletId, ...rd.params],
+  )[0]
+  const rt = rangeClause('transaction_date', range)
+  const disc = query<{ discount: number }>(
+    `SELECT COALESCE(SUM(discount_amount),0) AS discount
+     FROM transactions
+     WHERE outlet_id = ? AND status = 'COMPLETED' AND ${rt.sql}`,
+    [outletId, ...rt.params],
+  )[0]
+  const revenue = line?.revenue ?? 0
+  const cogs = line?.cogs ?? 0
+  const discount = disc?.discount ?? 0
+  const netRevenue = revenue - discount
+  const grossProfit = netRevenue - cogs
+  return {
+    revenue,
+    discount,
+    netRevenue,
+    cogs,
+    grossProfit,
+    margin: netRevenue > 0 ? (grossProfit / netRevenue) * 100 : 0,
+  }
+}
+
+/** Produk paling menguntungkan (laba = penjualan − HPP) untuk rentang tanggal. */
+export function topProfitProducts(outletId: number, range?: DateRange, limit = 5): ProductProfit[] {
+  const r = rangeClause('t.transaction_date', range)
+  const rows = query<{ name: string; qty: number; revenue: number; cogs: number }>(
+    `SELECT p.name,
+            SUM(d.quantity) AS qty,
+            SUM(d.subtotal) AS revenue,
+            SUM(d.quantity * (${UNIT_COST_SQL})) AS cogs
+     FROM transaction_details d
+     JOIN transactions t ON t.id = d.transaction_id
+     JOIN products p ON p.id = d.product_id
+     WHERE t.outlet_id = ? AND t.status = 'COMPLETED' AND ${r.sql}
+     GROUP BY p.id
+     ORDER BY (SUM(d.subtotal) - SUM(d.quantity * (${UNIT_COST_SQL}))) DESC
+     LIMIT ?`,
+    [outletId, ...r.params, limit],
+  )
+  return rows.map((x) => {
+    const profit = x.revenue - x.cogs
+    return {
+      name: x.name,
+      qty: x.qty,
+      revenue: x.revenue,
+      cogs: x.cogs,
+      profit,
+      margin: x.revenue > 0 ? (profit / x.revenue) * 100 : 0,
+    }
+  })
 }
 
 interface ExportRow {

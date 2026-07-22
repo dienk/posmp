@@ -68,7 +68,7 @@ capacitor.config.ts        # konfigurasi mobile (Capacitor)
 Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `vouchers`,
 `marketplace`, `members`, `reports`, `stockin`, `history` (refund), `preorder`,
 `installments`, `settings`, `products`, `contacts`, `outlets`, `cashiers`,
-`access`, `theme`, `membercard`.
+`access`, `theme`, `membercard`, `backup` (cadangan otomatis terjadwal).
 
 ## Menambah rute/modul baru
 
@@ -146,6 +146,21 @@ Modul di `src/features/`: `pos`, `tables`, `kds`, `queue`, `selforder`, `voucher
   pergerakan paket ke komponen: **Kartu Stok** (`stockCardRepository`) menambah
   baris JUAL/REFUND komponen dari penjualan paket, dan **Laporan** `sales_items_real`
   / `top_products_real` memecah paket ke komponennya — bukan menampilkan produk paket.
+- **Laba Rugi / HPP (dashboard).** Widget `profit_loss` menghubungkan modal
+  (`products.cost_price`) dengan harga jual. HPP = Σ(`transaction_details.quantity`
+  × modal/unit); **paket bundling dipecah ke modal komponen** via `UNIT_COST_SQL`
+  di `reportsRepository` (bundle tak bermodal sendiri). Memakai `cost_price` produk
+  **saat ini** (bukan historis — detail transaksi tak menyimpan modal). Laba kotor =
+  (Σ`subtotal` − Σ`discount_amount` transaksi) − HPP; belum termasuk pajak/servis/opex.
+- **Cadangan otomatis (`features/backup`).** Snapshot `.sqlite` disimpan di store
+  IndexedDB yang sama (kunci `backup:<dbId>:<id>`, via helper blob generik
+  `idbSaveBlob`/`idbLoadBlob`/`idbDeleteBlob` di `database.ts`). Metadata + waktu
+  cadangan terakhir di **localStorage** (per-slot DB), konfigurasi
+  (`backup_auto_enabled`/`backup_interval_hours`/`backup_keep`) di **app_settings**.
+  Hook `BackupScheduler` di `App.tsx` menjalankan `runScheduledBackup` saat muat &
+  tiap 5 menit (due-check ringan via timestamp). Retensi memangkas cadangan
+  **otomatis** terlama; cadangan **manual** tak dipangkas. Pulihkan = `importDatabase`
+  + `location.reload`.
 - **Status transaksi**: `DRAFT` (bill tersimpan) · `PREPARING` (pre-order/antre
   aktif) · `READY` (siap) · `COMPLETED` (lunas) · `REFUNDED`. Laporan/dashboard
   hanya menghitung `COMPLETED`.

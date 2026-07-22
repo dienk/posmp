@@ -14,6 +14,7 @@ import {
   Contact,
   CreditCard,
   Database,
+  DatabaseBackup,
   FileText,
   Flag,
   FolderTree,
@@ -168,6 +169,7 @@ const SETTINGS_GROUP: NavGroupDef = {
     { to: '/receipt-design', label: 'Desain Struk', short: 'Struk', icon: Printer },
     { to: '/card-design', label: 'Desain Kartu', short: 'Kartu', icon: IdCard },
     { to: '/database', label: 'Koneksi Database', short: 'Database', icon: Database, perm: 'settings' },
+    { to: '/backup', label: 'Cadangan Otomatis', short: 'Cadangan', icon: DatabaseBackup, perm: 'settings' },
   ],
 }
 

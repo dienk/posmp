@@ -488,6 +488,48 @@ export function exportDatabase(): Uint8Array {
   return getDb().export()
 }
 
+// ── Penyimpanan blob generik (dipakai fitur backup otomatis) ─────────────────
+// Menyimpan snapshot .sqlite bernama-kunci di store IndexedDB yang sama.
+
+/** Simpan blob byte di IndexedDB dengan kunci sembarang. */
+export async function idbSaveBlob(key: string, bytes: Uint8Array): Promise<void> {
+  // Salin ke ArrayBuffer standar agar tersimpan lepas dari memori WASM.
+  const copy = new Uint8Array(bytes.length)
+  copy.set(bytes)
+  await writeBlob(key, copy)
+}
+/** Muat blob byte dari IndexedDB; null bila tak ada. */
+export async function idbLoadBlob(key: string): Promise<Uint8Array | null> {
+  const idb = await openIndexedDb()
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readonly')
+    const req = tx.objectStore(IDB_STORE).get(key)
+    req.onsuccess = () => resolve((req.result as Uint8Array) ?? null)
+    req.onerror = () => reject(req.error)
+  })
+}
+/** Hapus blob byte dari IndexedDB. */
+export async function idbDeleteBlob(key: string): Promise<void> {
+  const idb = await openIndexedDb()
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite')
+    tx.objectStore(IDB_STORE).delete(key)
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+}
+function writeBlob(key: string, bytes: Uint8Array): Promise<void> {
+  return openIndexedDb().then(
+    (idb) =>
+      new Promise((resolve, reject) => {
+        const tx = idb.transaction(IDB_STORE, 'readwrite')
+        tx.objectStore(IDB_STORE).put(bytes, key)
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => reject(tx.error)
+      }),
+  )
+}
+
 /**
  * Kompakkan database (VACUUM) untuk merapikan ruang kosong setelah banyak
  * hapus/ubah, lalu persist. Mengembalikan ukuran (byte) sebelum & sesudah.

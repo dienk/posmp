@@ -9,6 +9,7 @@ export interface WidgetDef {
 
 export const DASHBOARD_WIDGETS: WidgetDef[] = [
   { key: 'kpi_sales', label: 'Ringkasan Penjualan', desc: 'Penjualan, transaksi, item, rata-rata/nota' },
+  { key: 'profit_loss', label: 'Laba Rugi (Modal vs Jual)', desc: 'HPP/modal, laba kotor, margin & produk paling untung' },
   { key: 'store_status', label: 'Status Toko', desc: 'Buka/tutup & shift berjalan' },
   { key: 'by_source', label: 'Penjualan per Sumber', desc: 'Grafik penjualan per kanal' },
   { key: 'top_products', label: 'Produk Terlaris', desc: 'Peringkat produk terjual' },

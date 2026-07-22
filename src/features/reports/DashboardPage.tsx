@@ -7,9 +7,13 @@ import { useRealtime } from '../../lib/useRealtime'
 import { updateAppSettings } from '../settings/settingsRepository'
 import { currentShift, getScheduleConfig, isOpenNow } from '../schedule/scheduleConfig'
 import {
+  profitLoss,
   salesBySource,
   salesSummary,
   topProducts,
+  topProfitProducts,
+  type ProductProfit,
+  type ProfitLoss,
   type SalesSummary,
   type SourceRow,
   type TopProduct,
@@ -60,6 +64,8 @@ export default function DashboardPage() {
   const schedule = useMemo(() => getScheduleConfig(settings), [settings])
 
   const [summary, setSummary] = useState<SalesSummary | null>(null)
+  const [pl, setPl] = useState<ProfitLoss | null>(null)
+  const [topProfit, setTopProfit] = useState<ProductProfit[]>([])
   const [sources, setSources] = useState<SourceRow[]>([])
   const [top, setTop] = useState<TopProduct[]>([])
   const [pays, setPays] = useState<PaymentRow[]>([])
@@ -87,6 +93,8 @@ export default function DashboardPage() {
 
   const reload = useCallback(() => {
     setSummary(salesSummary(outletId, range))
+    setPl(profitLoss(outletId, range))
+    setTopProfit(topProfitProducts(outletId, range))
     setSources(salesBySource(outletId, range))
     setTop(topProducts(outletId, range))
     setPays(paymentsBreakdown(outletId, range))
@@ -187,6 +195,87 @@ export default function DashboardPage() {
             <Kpi label="Item Terjual" value={String(summary?.items_sold ?? 0)} />
             <Kpi label="Rata-rata / Nota" value={formatRupiah(summary?.avg_ticket ?? 0)} />
           </div>
+        )}
+
+        {/* Laba Rugi — modal vs harga jual */}
+        {has('profit_loss') && pl && (
+          <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_1fr]">
+            {/* Ringkasan laba rugi */}
+            <div className="rounded-card bg-panel p-5 shadow-card">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="text-sm font-bold uppercase tracking-wide text-ink-soft">
+                  Laba Rugi (Estimasi)
+                </h2>
+                <span
+                  className={
+                    'rounded-full px-2.5 py-0.5 text-xs font-bold ' +
+                    (pl.grossProfit >= 0
+                      ? 'bg-status-empty/15 text-status-empty'
+                      : 'bg-status-occupied/15 text-status-occupied')
+                  }
+                >
+                  Margin {pl.margin.toFixed(1)}%
+                </span>
+              </div>
+              <dl className="space-y-1.5 text-sm">
+                <PlRow label="Penjualan (item)" value={formatRupiah(pl.revenue)} />
+                {pl.discount > 0 && (
+                  <PlRow label="Diskon transaksi" value={`− ${formatRupiah(pl.discount)}`} soft />
+                )}
+                <PlRow label="Penjualan bersih" value={formatRupiah(pl.netRevenue)} />
+                <PlRow label="HPP / Modal" value={`− ${formatRupiah(pl.cogs)}`} soft />
+                <div className="mt-1 flex items-baseline justify-between border-t border-line/10 pt-2">
+                  <dt className="text-sm font-bold text-ink">Laba Kotor</dt>
+                  <dd
+                    className={
+                      'text-xl font-extrabold ' +
+                      (pl.grossProfit >= 0 ? 'text-status-empty' : 'text-status-occupied')
+                    }
+                  >
+                    {formatRupiah(pl.grossProfit)}
+                  </dd>
+                </div>
+              </dl>
+              <p className="mt-2 text-[11px] text-ink-soft">
+                Estimasi memakai modal (cost_price) produk saat ini. Paket bundling dihitung dari
+                modal komponennya. Belum termasuk pajak, biaya layanan & biaya operasional.
+              </p>
+            </div>
+
+            {/* Produk paling menguntungkan */}
+            <div className="rounded-card bg-panel p-5 shadow-card">
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-soft">
+                Produk Paling Menguntungkan
+              </h2>
+              {topProfit.length === 0 ? (
+                <p className="py-6 text-center text-sm text-ink-soft">Belum ada data.</p>
+              ) : (
+                <ul className="divide-y divide-line/5">
+                  {topProfit.map((p) => (
+                    <li key={p.name} className="flex items-center justify-between gap-2 py-2 text-sm">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-ink">{p.name}</p>
+                        <p className="text-xs text-ink-soft">
+                          {p.qty} terjual · omzet {formatRupiah(p.revenue)}
+                        </p>
+                      </div>
+                      <div className="whitespace-nowrap text-right">
+                        <p
+                          className={
+                            'font-semibold ' +
+                            (p.profit >= 0 ? 'text-status-empty' : 'text-status-occupied')
+                          }
+                        >
+                          {formatRupiah(p.profit)}
+                        </p>
+                        <p className="text-xs text-ink-soft">margin {p.margin.toFixed(0)}%</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
         )}
 
         {/* Kartu ringkasan modul */}
@@ -391,6 +480,15 @@ function Kpi({ label, value, accent }: { label: string; value: string; accent?: 
     <div className={`rounded-card p-4 shadow-card ${accent ? 'bg-status-occupied text-white' : 'bg-panel'}`}>
       <p className={`text-xs ${accent ? 'text-white/80' : 'text-ink-soft'}`}>{label}</p>
       <p className={`mt-1 text-xl font-extrabold ${accent ? 'text-white' : 'text-ink'}`}>{value}</p>
+    </div>
+  )
+}
+
+function PlRow({ label, value, soft }: { label: string; value: string; soft?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <dt className="text-ink-soft">{label}</dt>
+      <dd className={soft ? 'text-ink-soft' : 'font-semibold text-ink'}>{value}</dd>
     </div>
   )
 }
