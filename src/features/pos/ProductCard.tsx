@@ -44,7 +44,7 @@ export default function ProductCard({ product, onSelect, mode = 'grid' }: Props)
             {soldOut ? 'Stok habis' : `Stok: ${product.stock}`}
           </span>
         </span>
-        <span className="shrink-0 text-sm font-bold text-status-occupied">
+        <span className="shrink-0 text-sm font-bold text-brand-strong">
           {formatRupiah(product.price)}
         </span>
       </button>
@@ -73,7 +73,7 @@ export default function ProductCard({ product, onSelect, mode = 'grid' }: Props)
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <p className="line-clamp-2 text-sm font-semibold text-ink">{product.name}</p>
-        <p className="mt-auto text-base font-bold text-status-occupied">
+        <p className="mt-auto text-base font-bold text-brand-strong">
           {formatRupiah(product.price)}
         </p>
         <p className="text-xs text-ink-soft">

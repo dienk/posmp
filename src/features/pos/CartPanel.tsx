@@ -552,7 +552,7 @@ export default function CartPanel(props: Props) {
           )}
           <div className="flex items-baseline justify-between pt-1">
             <dt className="text-base font-semibold text-ink">TOTAL</dt>
-            <dd className="text-2xl font-extrabold text-status-occupied">{formatRupiah(total)}</dd>
+            <dd className="text-2xl font-extrabold text-brand-strong">{formatRupiah(total)}</dd>
           </div>
           {props.showPreorder && props.isPreorder && (
             <>
@@ -686,7 +686,7 @@ export default function CartPanel(props: Props) {
             type="button"
             disabled={empty || props.saving}
             onClick={props.onPay}
-            className="flex-1 rounded-xl bg-status-occupied py-3.5 text-base font-bold text-white
+            className="flex-1 rounded-xl bg-brand-strong py-3.5 text-base font-bold text-white
                        shadow transition hover:brightness-95 disabled:opacity-40"
           >
             {props.saving
