@@ -114,6 +114,16 @@ export default function DashboardPage() {
   const maxPay = useMemo(() => Math.max(1, ...pays.map((p) => p.total)), [pays])
   const now = useMemo(() => new Date(), [])
 
+  // Jam waktu-nyata untuk widget jam (berdetak tiap detik saat widget aktif).
+  const clockOn = enabled.has('clock')
+  const [clock, setClock] = useState(() => new Date())
+  useEffect(() => {
+    if (!clockOn) return
+    setClock(new Date())
+    const t = window.setInterval(() => setClock(new Date()), 1000)
+    return () => window.clearInterval(t)
+  }, [clockOn])
+
   // Tampil bila widget aktif & modulnya (jika ada) aktif.
   const has = (key: string): boolean => {
     if (!enabled.has(key)) return false
@@ -187,6 +197,28 @@ export default function DashboardPage() {
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+        {/* Jam & tanggal (waktu nyata) */}
+        {has('clock') && (
+          <section className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-panel p-5 shadow-card">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-ink-soft">
+                Waktu Setempat
+              </p>
+              <p className="text-sm text-ink-soft">
+                {clock.toLocaleDateString('id-ID', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </p>
+            </div>
+            <p className="font-mono text-4xl font-extrabold tabular-nums tracking-tight text-ink">
+              {clock.toLocaleTimeString('id-ID', { hour12: false })}
+            </p>
+          </section>
+        )}
+
         {/* KPI penjualan */}
         {has('kpi_sales') && (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
