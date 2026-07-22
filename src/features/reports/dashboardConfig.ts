@@ -8,7 +8,6 @@ export interface WidgetDef {
 }
 
 export const DASHBOARD_WIDGETS: WidgetDef[] = [
-  { key: 'clock', label: 'Jam & Tanggal', desc: 'Jam waktu nyata & tanggal hari ini' },
   { key: 'kpi_sales', label: 'Ringkasan Penjualan', desc: 'Penjualan, transaksi, item, rata-rata/nota' },
   { key: 'profit_loss', label: 'Laba Rugi (Modal vs Jual)', desc: 'HPP/modal, laba kotor, margin & produk paling untung' },
   { key: 'store_status', label: 'Status Toko', desc: 'Buka/tutup & shift berjalan' },

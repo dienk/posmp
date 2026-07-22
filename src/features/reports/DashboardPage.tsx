@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Button from '../../components/ui/Button'
-import SmartwatchClock from '../../components/SmartwatchClock'
 import { formatRupiah } from '../../lib/format'
 import { getNumberSetting, isModuleEnabled } from '../../lib/settings'
 import { useSettings } from '../../lib/SettingsContext'
@@ -188,13 +187,6 @@ export default function DashboardPage() {
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
-        {/* Jam bergaya smartwatch (hari · jam · tanggal) */}
-        {has('clock') && (
-          <section className="flex justify-center rounded-card bg-panel p-5 shadow-card">
-            <SmartwatchClock size="lg" />
-          </section>
-        )}
-
         {/* KPI penjualan */}
         {has('kpi_sales') && (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

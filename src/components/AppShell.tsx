@@ -324,11 +324,11 @@ function MiniClock() {
         month: 'long',
         year: 'numeric',
       }) + ' · ' + now.toLocaleTimeString('id-ID', { hour12: false })}
-      className="mb-2 w-16 rounded-lg bg-gradient-to-b from-slate-700 to-slate-950 px-1 py-1.5 text-center ring-1 ring-brand-strong/50"
+      className="mb-2 w-16 rounded-lg bg-background px-1 py-1.5 text-center ring-1 ring-brand-strong/40"
     >
-      <p className="text-[9px] font-bold uppercase leading-none tracking-wide text-red-400">{day}</p>
-      <p className="my-0.5 font-mono text-xs font-bold leading-none tabular-nums text-white">{hm}</p>
-      <p className="text-[9px] leading-none text-slate-300">{date}</p>
+      <p className="text-[9px] font-bold uppercase leading-none tracking-wide text-ink-soft">{day}</p>
+      <p className="my-0.5 font-mono text-xs font-bold leading-none tabular-nums text-ink">{hm}</p>
+      <p className="text-[9px] leading-none text-ink-soft">{date}</p>
     </div>
   )
 }
