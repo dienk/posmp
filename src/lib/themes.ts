@@ -64,21 +64,21 @@ export const THEMES: Theme[] = [
   },
   {
     id: 'hutan',
-    name: 'Hutan',
-    desc: 'Hijau segar',
-    vars: t('187 247 208', '220 252 231', '21 128 61', '240 253 244', '220 252 231', '20 83 45', '71 85 105'),
+    name: 'Pink Pastel',
+    desc: 'Pink lembut pastel',
+    vars: t('251 207 232', '252 231 243', '190 24 93', '253 242 248', '252 231 243', '80 7 36', '71 85 105'),
   },
   {
     id: 'senja',
-    name: 'Senja',
-    desc: 'Oranye hangat',
-    vars: t('254 215 170', '255 237 213', '194 65 12', '255 247 237', '255 237 213', '67 20 7', '71 85 105'),
+    name: 'Hijau Pastel',
+    desc: 'Hijau lembut pastel',
+    vars: t('187 247 208', '220 252 231', '21 128 61', '240 253 244', '220 252 231', '20 83 45', '71 85 105'),
   },
   {
     id: 'anggur',
-    name: 'Anggur',
-    desc: 'Ungu elegan',
-    vars: t('221 214 254', '237 233 254', '124 58 237', '250 245 255', '243 232 255', '46 16 101', '71 85 105'),
+    name: 'Ungu Pastel',
+    desc: 'Ungu lembut pastel',
+    vars: t('233 213 255', '243 232 255', '126 34 206', '250 245 255', '243 232 255', '59 7 100', '71 85 105'),
   },
   {
     // Tema gelap sejati (dark mode). Permukaan --c-panel di-override gelap via
