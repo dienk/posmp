@@ -306,20 +306,29 @@ function SidebarClock({ open }: { open: boolean }) {
   return <MiniClock />
 }
 
-/** Jam ringkas (jam:menit) untuk sidebar menyempit. */
+/** Jam ringkas (hari · jam · tanggal) untuk sidebar menyempit — gaya smartwatch. */
 function MiniClock() {
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
     const t = window.setInterval(() => setNow(new Date()), 1000)
     return () => window.clearInterval(t)
   }, [])
+  const day = now.toLocaleDateString('id-ID', { weekday: 'short' }).toUpperCase()
   const hm = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })
+  const date = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })
   return (
     <div
-      title={now.toLocaleTimeString('id-ID', { hour12: false })}
-      className="mb-2 w-16 rounded-lg bg-gradient-to-b from-slate-700 to-slate-950 py-1 text-center font-mono text-xs font-bold tabular-nums text-white ring-1 ring-brand-strong/50"
+      title={now.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }) + ' · ' + now.toLocaleTimeString('id-ID', { hour12: false })}
+      className="mb-2 w-16 rounded-lg bg-gradient-to-b from-slate-700 to-slate-950 px-1 py-1.5 text-center ring-1 ring-brand-strong/50"
     >
-      {hm}
+      <p className="text-[9px] font-bold uppercase leading-none tracking-wide text-red-400">{day}</p>
+      <p className="my-0.5 font-mono text-xs font-bold leading-none tabular-nums text-white">{hm}</p>
+      <p className="text-[9px] leading-none text-slate-300">{date}</p>
     </div>
   )
 }
