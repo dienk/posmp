@@ -226,6 +226,9 @@ export default function AppShell() {
           </button>
         </div>
 
+        {/* Jam global — tampil di semua menu */}
+        <SidebarClock open={sidebarOpen} />
+
         <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
           {SIDEBAR.map((entry, i) => {
             if (entry.kind === 'group') {
@@ -286,6 +289,37 @@ export default function AppShell() {
       <main className="min-w-0 flex-1">
         <Outlet />
       </main>
+    </div>
+  )
+}
+
+/** Jam waktu-nyata di sidebar (tampil di semua menu). Berdetak tiap detik. */
+function SidebarClock({ open }: { open: boolean }) {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(new Date()), 1000)
+    return () => window.clearInterval(t)
+  }, [])
+  const time = now.toLocaleTimeString('id-ID', { hour12: false })
+  if (!open) {
+    // Sidebar menyempit: jam ringkas (jam:menit) bertumpuk.
+    return (
+      <div
+        title={time}
+        className="mb-2 w-16 rounded-lg bg-background py-1 text-center font-mono text-xs font-bold tabular-nums text-ink"
+      >
+        {now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })}
+      </div>
+    )
+  }
+  return (
+    <div className="mb-2 rounded-xl bg-background px-3 py-2">
+      <p className="font-mono text-lg font-extrabold tabular-nums tracking-tight text-ink">
+        {time}
+      </p>
+      <p className="truncate text-[11px] text-ink-soft">
+        {now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+      </p>
     </div>
   )
 }
