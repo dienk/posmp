@@ -7,6 +7,23 @@ native (Tauri / Capacitor).
 
 > Versi PRD acuan: **1.5** · Stack: **React (Vite) + SQLite (local-first) + Tailwind CSS**
 
+## 📦 Installer (macOS · Windows · Android)
+
+Aplikasi tersedia sebagai installer native mandiri (offline):
+
+| Platform | Format | Teknologi |
+|----------|--------|-----------|
+| macOS    | `.dmg` (universal) & `.app` | Tauri v2 |
+| Windows  | `.msi` & setup `.exe` (NSIS) | Tauri v2 |
+| Android  | `.apk` (sideload) & `.aab` (Play Store) | Capacitor 6 |
+
+- **Mengunduh & memasang** → [`docs/INSTALL.md`](docs/INSTALL.md)
+- **Membangun installer sendiri** (lokal atau via GitHub Actions) → [`docs/BUILD.md`](docs/BUILD.md)
+
+Cara tercepat menghasilkan ketiga installer: push tag `vX.Y.Z` — GitHub Actions
+(`.github/workflows/desktop.yml` & `android.yml`) membangunnya di runner macOS/Windows/
+Linux, lalu unduh dari **Actions → Artifacts** atau halaman **Releases**.
+
 ## Fitur pada foundation ini (Milestone 1)
 
 - ⚙️ Inisialisasi database SQLite lokal dengan **29 tabel** (lihat `src/db/schema.sql`),
