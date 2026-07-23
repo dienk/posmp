@@ -11,6 +11,10 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
+# Diperlukan untuk melampirkan APK/AAB ke GitHub Release saat build dari tag.
+permissions:
+  contents: write
+
 jobs:
   android:
     runs-on: ubuntu-latest
@@ -69,10 +73,22 @@ jobs:
             -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
 
       - name: Upload Android artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: posmp-android
           if-no-files-found: warn
           path: |
+            android/app/build/outputs/apk/**/*.apk
+            android/app/build/outputs/bundle/**/*.aab
+
+      # Lampirkan APK/AAB ke GitHub Release (draft) yang sama saat build dari tag.
+      - name: Attach APK/AAB to Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: |
             android/app/build/outputs/apk/**/*.apk
             android/app/build/outputs/bundle/**/*.aab
